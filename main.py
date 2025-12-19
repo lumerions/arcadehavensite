@@ -171,14 +171,28 @@ def register(
 
                 row = cur.fetchone()
                 if row is None:
-                    raise ValueError("Username or email already exists")
+                    # FIXED: Return TemplateResponse instead of raising ValueError
+                    return templates.TemplateResponse(
+                        "register.html",
+                        {
+                            "request": request, 
+                            "error": "Username or email already exists",
+                            "username": username  # Keep username in form for user convenience
+                        },
+                        status_code=status.HTTP_400_BAD_REQUEST
+                    )
 
     except psycopg.Error as e:
         return templates.TemplateResponse(
             "register.html",
-            {"request": request, "error": f"Database error: {e}"},
+            {
+                "request": request, 
+                "error": f"Database error: {str(e)}",
+                "username": username 
+            },
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
 
     ten_years = 10 * 365 * 24 * 60 * 60
     ten_years_datetime = datetime.utcnow() + timedelta(days=10*365)
