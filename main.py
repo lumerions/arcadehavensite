@@ -62,22 +62,22 @@ def set_cookie(response: Response):
 @app.get("/cookie/get")
 def get_cookie(mycookie: str | None = Cookie(default=None)):
     if mycookie:
-        return {"mycookie": mycookie}
+        return {"SessionId": mycookie}
     return {"message": "No cookie found"}
 
 @app.get("/cookie/delete")
 def delete_cookie(response: Response):
-    response.delete_cookie(key="mycookie")
+    response.delete_cookie(key="SessionId")
     return {"message": "Cookie has been deleted!"}
 
 @app.post("/register", response_class=HTMLResponse)
 def register(
+    response: Response,  
     request: Request,  
     username: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...)
 ):
-    
     if password != confirm_password:
         return templates.TemplateResponse(
             "register.html",
@@ -85,13 +85,24 @@ def register(
             status_code=status.HTTP_400_BAD_REQUEST
         )
     
-    
-    username, email, hashed_password = 1,2,3
+    if len(password) < 8:
+         return templates.TemplateResponse(
+            "register.html",
+            {"request": request, "error": "Password must be atleast 8 characters long"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+   
+    hashed_password = bcrypt.hashpw(
+        password.encode("utf-8"),
+        bcrypt.gensalt()
+    ).decode("utf-8")
+    email = ""  
+
     try:
-        with psycopg.connect("") as conn:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
 
-                cur.execute("""
+                cur.execute(""" 
                     CREATE TABLE IF NOT EXISTS accounts (
                         id SERIAL PRIMARY KEY,
                         username VARCHAR(50) NOT NULL UNIQUE,
@@ -117,7 +128,22 @@ def register(
                     raise ValueError("Username or email already exists")
 
     except psycopg.Error as e:
-        print("Database error:", e)
+        return templates.TemplateResponse(
+            "register.html",
+            {"request": request, "error": f"Database error: {e}"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    ten_years = 10 * 365 * 24 * 60 * 60  
+    response.set_cookie(
+        key="SessionId", 
+        value="cookie_value",  
+        max_age=ten_years, 
+        expires=ten_years,  
+        httponly=True  
+    )
+
+    return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/login")
 def login_post(username: str = Form(...), password: str = Form(...)):
