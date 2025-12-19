@@ -187,7 +187,7 @@ def register(
         httponly=True  
     )
 
-    return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    return templates.TemplateResponse("home.html", {"request": request})
 
 @app.post("/login")
 def login_post(username: str = Form(...), password: str = Form(...)):
