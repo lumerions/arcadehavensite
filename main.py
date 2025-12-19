@@ -183,6 +183,7 @@ def register(
                     )
 
     except psycopg.Error as e:
+        print(e)
         return templates.TemplateResponse(
             "register.html",
             {
