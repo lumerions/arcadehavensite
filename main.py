@@ -137,10 +137,8 @@ def register(
 
 
     email = ""  
-
-    characters = string.ascii_letters + string.digits + string.punctuation
-    sessionId = ''.join(random.choice(characters) for _ in range(10))
-
+    sessionId = secrets.token_urlsafe(32)
+    
     try:
         with psycopg.connect(str(os.environ["POSTGRES_DATABASE_URL"])) as conn:
             with conn.cursor() as cur:
