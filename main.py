@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form, Request, Response, Cookie
+from fastapi import FastAPI, Form, Request, Response, Cookie,status
 from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
 from upstash_redis import Redis
@@ -70,14 +70,21 @@ def delete_cookie(response: Response):
     response.delete_cookie(key="mycookie")
     return {"message": "Cookie has been deleted!"}
 
-@app.post("/register")
+@app.post("/register", response_class=HTMLResponse)
 def register(
+    request: Request,  
     username: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...)
 ):
     
-    print(username,password,confirm_password)
+    if password != confirm_password:
+        return templates.TemplateResponse(
+            "register.html",
+            {"request": request, "error": "Passwords do not match"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    
     
     username, email, hashed_password = 1,2,3
     try:
