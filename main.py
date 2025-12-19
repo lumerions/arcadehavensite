@@ -82,16 +82,18 @@ def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 @app.get("/cookie/set")
-def set_cookie(response: Response):
+def set_cookie():
     ten_years = 10 * 365 * 24 * 60 * 60
+    response = Response(content="Cookie set!")
     response.set_cookie(
-        key="SessionId", 
-        value="cookie_value", 
-        max_age=ten_years, 
-        expires=ten_years,  
-        httponly=True
+        key="SessionId",
+        value="cookie_value",
+        max_age=ten_years,
+        expires=ten_years,
+        httponly=True,
+        path="/"
     )
-    return {"message": "Cookie has been set to last forever!"}
+    return response  
 
 
 @app.get("/cookie/get")
