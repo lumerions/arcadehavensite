@@ -124,93 +124,73 @@ def register(
         )
     
     if len(password) < 8:
-         return templates.TemplateResponse(
+        return templates.TemplateResponse(
             "register.html",
-            {"request": request, "error": "Password must be atleast 8 characters long"},
+            {"request": request, "error": "Password must be at least 8 characters long"},
             status_code=status.HTTP_400_BAD_REQUEST
         )
-   
-    hashed_password = bcrypt.hashpw(
-        password.encode("utf-8"),
-        bcrypt.gensalt()
-    ).decode("utf-8")
 
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    session_id = secrets.token_urlsafe(32)
 
     email = ""  
-    sessionId = secrets.token_urlsafe(32)
-    
+
     try:
-        with psycopg.connect(str(os.environ["POSTGRES_DATABASE_URL"])) as conn:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
 
                 cur.execute("""
-                        CREATE TABLE IF NOT EXISTS accounts (
+                    CREATE TABLE IF NOT EXISTS accounts (
                         id SERIAL PRIMARY KEY,
-                        sessionid TEXT NOT NULL, 
-                        username VARCHAR(50) UNIQUE NOT NULL,  
+                        sessionid TEXT NOT NULL,
+                        username VARCHAR(50) UNIQUE NOT NULL,
                         email VARCHAR(100) NOT NULL,
                         password VARCHAR(255) NOT NULL,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
                 """)
-            
                 conn.commit()
-            
-                cur.execute(
-                    """
+
+                cur.execute("""
                     INSERT INTO accounts (username, email, password, sessionid)
                     VALUES (%s, %s, %s, %s)
                     ON CONFLICT (username) DO NOTHING
                     RETURNING id;
-                    """,
-                    (username, email, hashed_password, sessionId)
-                )
+                """, (username, email, hashed_password, session_id))
 
                 row = cur.fetchone()
                 if row is None:
                     return templates.TemplateResponse(
                         "register.html",
-                        {
-                            "request": request, 
-                            "error": "Username or email already exists",
-                            "username": username  
-                        },
+                        {"request": request, "error": "Username already exists", "username": username},
                         status_code=status.HTTP_400_BAD_REQUEST
                     )
 
-    except psycopg.Error as e:
+    except Exception as e:
         return templates.TemplateResponse(
             "register.html",
-            {
-                "request": request, 
-                "error": f"Database error: {str(e)}",
-                "username": username 
-            },
+            {"request": request, "error": f"Database error: {str(e)}", "username": username},
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
-    ten_years = 10 * 365 * 24 * 60 * 60
-    ten_years_datetime = datetime.utcnow() + timedelta(days=10*365)
+    ten_years_seconds = 10 * 365 * 24 * 60 * 60
+    ten_years_datetime = datetime.utcnow() + timedelta(seconds=ten_years_seconds)
 
     response = templates.TemplateResponse(
-        "home.html", 
-        {
-            "request": request, 
-            "username": username,
-            "success": "Registration successful!"
-        }
+        "home.html",
+        {"request": request, "username": username, "success": "Registration successful!"}
     )
-    
+
     response.set_cookie(
         key="SessionId",
-        value=sessionId, 
-        max_age=ten_years,
+        value=session_id,
+        max_age=ten_years_seconds,
         expires=ten_years_datetime,
         httponly=True,
         path="/"
     )
-    
+
     return response
 
 @app.post("/login")
