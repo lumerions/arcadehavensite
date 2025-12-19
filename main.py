@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse,RedirectResponse
+from upstash_redis import Redis
 
 
 app = FastAPI(
@@ -646,6 +647,18 @@ def readlogin():
 </body>
 </html>
 """
+
+@app.get("/set")
+def set():
+    redis = Redis(url="https://boss-stud-36213.upstash.io", token="AY11AAIncDE4MmNkNTRkODhhOGY0NGExYTJkODE2MjNkZTYxZDBlMXAxMzYyMTM")
+
+    redis.set("foo", "bar")
+
+@app.get("/get")
+def set():
+    redis = Redis(url="https://boss-stud-36213.upstash.io", token="AY11AAIncDE4MmNkNTRkODhhOGY0NGExYTJkODE2MjNkZTYxZDBlMXAxMzYyMTM")
+    value = redis.get("foo")
+    print(value)
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
