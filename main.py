@@ -1,10 +1,9 @@
-from fastapi import FastAPI,Form
+from fastapi import FastAPI,Form,Request
 from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
 from upstash_redis import Redis
 import os 
 import secrets
-
 
 app = FastAPI(
     title="AH Gambling",
