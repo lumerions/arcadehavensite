@@ -199,7 +199,20 @@ def login_post(
                 result = cursor.fetchone()  
 
                 if result and bcrypt.checkpw(password.encode("utf-8"),    result[0].encode("utf-8")):
-                    return templates.TemplateResponse("home.html", {"request": request})
+
+                    ten_years_seconds = 10 * 365 * 24 * 60 * 60
+
+                    session_id = secrets.token_urlsafe(32)
+
+                    response = RedirectResponse(url="/home", status_code=303)
+                    response.set_cookie(
+                        key="SessionId",
+                        value=session_id,
+                        max_age=ten_years_seconds,
+                        httponly=True,
+                        path="/"
+                    )
+                    return response
                 else:
                     raise ValueError("Incorrect Password or username!")
         
