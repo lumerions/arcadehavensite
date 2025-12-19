@@ -149,11 +149,10 @@ def register(
                         CREATE TABLE IF NOT EXISTS accounts (
                         id SERIAL PRIMARY KEY,
                         sessionid VARCHAR(50) NOT NULL,
-                        username VARCHAR(50) NOT NULL,
+                        username VARCHAR(50) UNIQUE NOT NULL,  
                         email VARCHAR(100) NOT NULL,
                         password VARCHAR(255) NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        CONSTRAINT unique_username_email UNIQUE (username, email)  
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
                 """)
                 
@@ -171,13 +170,12 @@ def register(
 
                 row = cur.fetchone()
                 if row is None:
-                    # FIXED: Return TemplateResponse instead of raising ValueError
                     return templates.TemplateResponse(
                         "register.html",
                         {
                             "request": request, 
                             "error": "Username or email already exists",
-                            "username": username  # Keep username in form for user convenience
+                            "username": username  
                         },
                         status_code=status.HTTP_400_BAD_REQUEST
                     )
