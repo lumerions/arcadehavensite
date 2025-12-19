@@ -2,6 +2,8 @@ from fastapi import FastAPI, Form, Request, Response, Cookie
 from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
 from upstash_redis import Redis
+import psycopg
+import bcrypt
 import os 
 import secrets
 
@@ -19,44 +21,13 @@ redis = Redis(
 
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/api/data")
-def get_sample_data():
-    return {
-        "data": [
-            {"id": 1, "name": "Sample Item 1", "value": 100},
-            {"id": 2, "name": "Sample Item 2", "value": 200},
-            {"id": 3, "name": "Sample Item 3", "value": 300}
-        ],
-        "total": 3,
-        "timestamp": "2024-01-01T00:00:00Z"
-    }
-
-
-@app.get("/api/items/{item_id}")
-def get_item(item_id: int):
-    return {
-        "item": {
-            "id": item_id,
-            "name": "Sample Item " + str(item_id),
-            "value": item_id * 100
-        },
-        "timestamp": "2024-01-01T00:00:00Z"
-    }
-
-
 @app.get("/register",response_class =  HTMLResponse)
 def readregister(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 @app.get("/login",response_class =  HTMLResponse)
-def readlogin(request: Request):
+def readlogin(request: Request, mycookie: str | None = Cookie(default=None)):
     return templates.TemplateResponse("login.html", {"request": request})
-
-
-@app.post("/login")
-def login_post(username: str = Form(...), password: str = Form(...)):
-    code = secrets.token_urlsafe(32)
-    return {"username": username, "password": password,"code": code}
 
 @app.get("/set")
 def set():
@@ -79,10 +50,10 @@ def home(request: Request):
 def set_cookie(response: Response):
     ten_years = 10 * 365 * 24 * 60 * 60
     response.set_cookie(
-        key="mycookie", 
+        key="SessionId", 
         value="cookie_value", 
         max_age=ten_years, 
-        expires=ten_years,  # ensures browser keeps it for a long time
+        expires=ten_years,  
         httponly=True
     )
     return {"message": "Cookie has been set to last forever!"}
@@ -94,16 +65,57 @@ def get_cookie(mycookie: str | None = Cookie(default=None)):
         return {"mycookie": mycookie}
     return {"message": "No cookie found"}
 
-
 @app.get("/cookie/delete")
 def delete_cookie(response: Response):
     response.delete_cookie(key="mycookie")
     return {"message": "Cookie has been deleted!"}
 
+@app.post("/register")
+def register(
+    username2: str = Form(...),
+    email2: str = Form(...),
+    password2: str = Form(...)
+):
+    
+    print(username2,email2,password2)
+    username, email, hashed_password = 1,2,3
+    try:
+        with psycopg.connect("") as conn:
+            with conn.cursor() as cur:
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS accounts (
+                        id SERIAL PRIMARY KEY,
+                        username VARCHAR(50) NOT NULL UNIQUE,
+                        email VARCHAR(100) NOT NULL UNIQUE,
+                        password VARCHAR(255) NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                """)
+                conn.commit()
+            
+                cur.execute(
+                    """
+                    INSERT INTO accounts (username, email, password)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (username, email) DO NOTHING
+                    RETURNING id;
+                    """,
+                    (username, email, hashed_password)
+                )
+
+                row = cur.fetchone()
+                if row is None:
+                    raise ValueError("Username or email already exists")
+
+    except psycopg.Error as e:
+        print("Database error:", e)
+
+@app.post("/login")
+def login_post(username: str = Form(...), password: str = Form(...)):
+    code = secrets.token_urlsafe(32)
+    return {"username": username, "password": password,"code": code}
+
 
 if __name__ == "__main__":
     import uvicorn
