@@ -31,7 +31,7 @@ def readregister(request: Request):
         return templates.TemplateResponse("register.html", {"request": request})
     else:
         try:
-            with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with psycopg.connect(str(os.environ["POSTGRES_DATABASE_URL"])) as conn:
 
                 with conn.cursor() as cursor:
                     cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (SessionId,))
@@ -142,7 +142,7 @@ def register(
     sessionId = ''.join(random.choices(characters, k=50))
 
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+        with psycopg.connect(str(os.environ["POSTGRES_DATABASE_URL"])) as conn:
             with conn.cursor() as cur:
 
                 cur.execute("""
@@ -158,12 +158,11 @@ def register(
                 
                 conn.commit()
             
-               
                 cur.execute(
                     """
                     INSERT INTO accounts (username, email, password, sessionid)
                     VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (username) DO NOTHING 
+                    ON CONFLICT (username) DO NOTHING
                     RETURNING id;
                     """,
                     (username, email, hashed_password, sessionId)
@@ -182,7 +181,6 @@ def register(
                     )
 
     except psycopg.Error as e:
-        print(e)
         return templates.TemplateResponse(
             "register.html",
             {
