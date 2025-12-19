@@ -42,7 +42,7 @@ def read_root():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Vercel + FastAPI</title>
+        <title>AH Gambling</title>
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
         <style>
             * {
@@ -309,17 +309,15 @@ def read_root():
         <main>
             <div class="cards">
                 <div class="card">
-                    <h3>Interactive API Docs</h3>
-                    <p>Explore this API's endpoints with the interactive Swagger UI. Test requests and view response schemas in real-time.</p>
-                    <a href="/docs">Open Swagger UI →</a>
+                    <h3>Towers</h3>
+                    <p>Towers is a fast-paced risk-and-reward game where every move matters. Climb higher by choosing safe blocks while avoiding hidden traps that can end your run instantly. Each successful step increases your multiplier, but the higher you go, the greater the risk. Cash out at any time to secure your winnings, or push your luck and aim for the top. Simple to play, thrilling to master—Towers rewards sharp instincts and smart timing.</p>
+                    <a href="/towers">Open→</a>
                 </div>
-
                 <div class="card">
-                    <h3>Sample Data</h3>
-                    <p>Access sample JSON data through our REST API. Perfect for testing and development purposes.</p>
-                    <a href="/api/data">Get Data →</a>
+                    <h3>Mines</h3>
+                    <p>Mines is a high-risk strategy game where danger is hidden beneath every tile. Start the round by choosing how many mines are on the board, then reveal safe spots to build your multiplier. Each safe click boosts your potential payout—but one wrong move ends the game instantly. Cash out whenever you want, or keep going and test your nerve. With full control over risk and reward, Mines is all about precision, patience, and knowing when to stop.</p>
+                    <a href="/mines">Open→</a>
                 </div>
-
             </div>
         </main>
     </body>
