@@ -323,6 +323,330 @@ def home():
         </html>
         """
 
+@app.get("/register",response_class =  HTMLResponse)
+def readregister():
+    return """
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register • AH Gambling</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            border-bottom: 1px solid #333333;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .card {
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .card h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            color: #888888;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: #aaaaaa;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 1rem;
+            background-color: #0a0a0a;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #555555;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: #222222;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #333333;
+            border-color: #555555;
+        }
+
+        .footer-text {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888888;
+        }
+
+        .footer-text a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <a href="/" class="logo">AH Gambling</a>
+    </nav>
+</header>
+
+<main>
+    <div class="card">
+        <h1>Register</h1>
+        <p>Create a new account</p>
+
+        <form method="post" action="/register">
+            <label>Username</label>
+            <input type="text" name="username" required>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <label>Confirm Password</label>
+            <input type="password" name="confirm_password" required>
+
+            <button type="submit">Create Account</button>
+        </form>
+
+        <div class="footer-text">
+            Already have an account? <a href="/login">Login</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>
+"""
+
+
+@app.get("/login",response_class =  HTMLResponse)
+def readlogin():
+    return """
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login • AH Gambling</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            border-bottom: 1px solid #333333;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .card {
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .card h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            color: #888888;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: #aaaaaa;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 1rem;
+            background-color: #0a0a0a;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #555555;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: #222222;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #333333;
+            border-color: #555555;
+        }
+
+        .footer-text {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888888;
+        }
+
+        .footer-text a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <a href="/" class="logo">AH Gambling</a>
+    </nav>
+</header>
+
+<main>
+    <div class="card">
+        <h1>Login</h1>
+        <p>Access your account</p>
+
+        <form method="post" action="/login">
+            <label>Username</label>
+            <input type="text" name="username" required>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="footer-text">
+            Don’t have an account? <a href="/register">Register</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>
+"""
+
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     return """  
@@ -331,7 +655,7 @@ def read_root():
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Account • AH Gambling</title>
+            <title>AH Gambling</title>
             <link rel="icon" type="image/x-icon" href="/favicon.ico">
             <style>
                 * {
