@@ -19,7 +19,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.mount("/public", StaticFiles(directory="public"), name="public")
+#app.mount("/public", StaticFiles(directory="public"), name="public")
 
 
 redis = Redis(
