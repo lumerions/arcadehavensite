@@ -19,7 +19,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-
+#app.mount("/public", StaticFiles(directory="public"), name="public")
 
 
 redis = Redis(
@@ -76,7 +76,7 @@ def get():
 def read_root():
     return RedirectResponse(url="/register")
 
-@app.get("/test123")
+@app.get("/home")
 def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
@@ -173,7 +173,7 @@ def register(
 
     ten_years_seconds = 10 * 365 * 24 * 60 * 60
 
-    response = RedirectResponse(url="/test123", status_code=303)
+    response = RedirectResponse(url="/home", status_code=303)
     response.set_cookie(
         key="SessionId",
         value=session_id,
@@ -184,9 +184,32 @@ def register(
     return response
 
 @app.post("/login")
-def login_post(username: str = Form(...), password: str = Form(...)):
-    code = secrets.token_urlsafe(32)
-    return {"username": username, "password": password,"code": code}
+def login_post(
+    request: Request,  
+    username: str = Form(...),
+    password: str = Form(...),
+):
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT password FROM accounts WHERE username = %s", (username,))
+                
+                result = cursor.fetchone()  
+
+                if result and bcrypt.checkpw(password.encode("utf-8"),    result[0].encode("utf-8")):
+                    return templates.TemplateResponse("home.html", {"request": request})
+                else:
+                    raise ValueError("Incorrect Password or username!")
+        
+    except Exception as error:
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": f"{error}"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
 
 
 if __name__ == "__main__":
