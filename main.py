@@ -303,7 +303,7 @@ def read_root():
     <body>
         <header>
             <nav>
-                <a href="/" class="logo">Vercel + FastAPI</a>
+                <a href="/" class="logo">AH Gambling</a>
                 <div class="nav-links">
                     <a href="/docs">API Docs</a>
                     <a href="/api/data">API</a>
@@ -312,7 +312,7 @@ def read_root():
         </header>
         <main>
             <div class="hero">
-                <h1>Vercel + FastAPI</h1>
+                <h1>AH Gambling</h1>
                 <div class="hero-code">
                     <pre><code><span class="keyword">from</span> <span class="module">fastapi</span> <span class="keyword">import</span> <span class="class">FastAPI</span>
 
