@@ -44,20 +44,12 @@ def readregister(request: Request):
                     
                     result = cursor.fetchone()  
                     
-                    if result:
-                        if str(result[0] == str(SessionId)):
-                            return templates.TemplateResponse("home.html", {"request": request})
-                        else:
-                            response = HTMLResponse(content="Register Page")
-                            if SessionId and response:
-                                response.delete_cookie(key="SessionId")
-
-                            raise ValueError("SessionId not found!")
+                    if result and result[0] == SessionId:
+                        return templates.TemplateResponse("home.html", {"request": request})
                     else:
-                        if SessionId and response:
-                            response.delete_cookie(key="SessionId")
-
-                        raise ValueError("SessionId not found!")
+                        response = templates.TemplateResponse("register.html", {"request": request})
+                        response.delete_cookie("SessionId")
+                        return response
         
         except Exception as error:
             return templates.TemplateResponse(
@@ -202,4 +194,3 @@ if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
 #cd C:\Users\Admin\Desktop\cra\arcadehavengamble
 #python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
-
