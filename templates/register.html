@@ -132,27 +132,31 @@
 </header>
 
 <main>
-    <div class="card">
-        <h1>Register</h1>
-        <p>Create a new account</p>
+   <div class="card">
+    <h1>Register</h1>
+    <p>Create a new account</p>
 
-        <form method="post" action="/register">
-            <label>Username</label>
-            <input type="text" name="username" required>
+    {% if error %}
+        <p style="color: #ff5555; font-weight: bold; margin-bottom: 1rem;">{{ error }}</p>
+    {% endif %}
 
-            <label>Password</label>
-            <input type="password" name="password" required>
+    <form method="post" action="/register">
+        <label>Username</label>
+        <input type="text" name="username" required>
 
-            <label>Confirm Password</label>
-            <input type="password" name="confirm_password" required>
+        <label>Password</label>
+        <input type="password" name="password" required>
 
-            <button type="submit">Create Account</button>
-        </form>
+        <label>Confirm Password</label>
+        <input type="password" name="confirm_password" required>
 
-        <div class="footer-text">
-            Already have an account? <a href="/login">Login</a>
-        </div>
+        <button type="submit">Create Account</button>
+    </form>
+
+    <div class="footer-text">
+        Already have an account? <a href="/login">Login</a>
     </div>
+</div>
 </main>
 </body>
 </html>
