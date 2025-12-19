@@ -11,7 +11,7 @@ import random
 
 app = FastAPI(
     title="AH Gambling",
-    description="AH Gamblin",
+    description="AH Gambling",
     version="1.0.0",
 )
 
