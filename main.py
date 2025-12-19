@@ -22,6 +22,8 @@ redis = Redis(
 
 templates = Jinja2Templates(directory="templates")
 
+@app.get("/register", response_class=HTMLResponse)
+
 def readregister(request: Request):
     SessionId = request.cookies.get('SessionId')  
     if not SessionId:
