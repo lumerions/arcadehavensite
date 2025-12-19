@@ -11,7 +11,7 @@ import random
 
 app = FastAPI(
     title="AH Gambling",
-    description="AH Gambling",
+    description="AH Gamblin",
     version="1.0.0",
 )
 
@@ -159,7 +159,7 @@ def register(
                 cur.execute(
                     """
                     INSERT INTO accounts (username, email, password,sessionid)
-                    VALUES (%s, %s, %s)
+                    VALUES (%s, %s, %s,%s)
                     ON CONFLICT (username, email) DO NOTHING
                     RETURNING id;
                     """,
