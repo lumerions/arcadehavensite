@@ -23,7 +23,6 @@ redis = Redis(
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/register", response_class=HTMLResponse)
-
 def readregister(request: Request):
     SessionId = request.cookies.get('SessionId')  
     if not SessionId:
@@ -159,12 +158,12 @@ def register(
             
                 cur.execute(
                     """
-                    INSERT INTO accounts (username, email, password)
+                    INSERT INTO accounts (username, email, password,sessionid)
                     VALUES (%s, %s, %s)
                     ON CONFLICT (username, email) DO NOTHING
                     RETURNING id;
                     """,
-                    (username, email, hashed_password)
+                    (username, email, hashed_password,sessionId)
                 )
 
                 row = cur.fetchone()
