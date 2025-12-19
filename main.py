@@ -163,7 +163,7 @@ def register(
                     """
                     INSERT INTO accounts (username, email, password, sessionid)
                     VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (username) DO NOTHING  # Changed to (username) only
+                    ON CONFLICT (username) DO NOTHING 
                     RETURNING id;
                     """,
                     (username, email, hashed_password, sessionId)
