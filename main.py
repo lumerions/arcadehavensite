@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse,RedirectResponse
 
 
 app = FastAPI(
@@ -649,140 +649,8 @@ def readlogin():
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    return """  
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>AH Gambling</title>
-            <link rel="icon" type="image/x-icon" href="/favicon.ico">
-            <style>
-                * {
-                    margin: 0;
-                    padding: 0;
-                    box-sizing: border-box;
-                }
+    return RedirectResponse(url="/register")
 
-                body {
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    background-color: #000000;
-                    color: #ffffff;
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                header {
-                    border-bottom: 1px solid #333333;
-                }
-
-                nav {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 1rem 2rem;
-                }
-
-                .logo {
-                    color: #ffffff;
-                    text-decoration: none;
-                    font-size: 1.25rem;
-                    font-weight: 600;
-                }
-
-                main {
-                    flex: 1;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 4rem 2rem;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-
-                .cards {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                    gap: 1.5rem;
-                    width: 100%;
-                    max-width: 600px;
-                }
-
-                .card {
-                    background-color: #111111;
-                    border: 1px solid #333333;
-                    border-radius: 8px;
-                    padding: 2rem;
-                    text-align: center;
-                    transition: all 0.2s ease;
-                }
-
-                .card:hover {
-                    border-color: #555555;
-                    transform: translateY(-2px);
-                }
-
-                .card h3 {
-                    font-size: 1.25rem;
-                    margin-bottom: 0.5rem;
-                }
-
-                .card p {
-                    font-size: 0.85rem;
-                    color: #888888;
-                    margin-bottom: 1.5rem;
-                }
-
-                .card a {
-                    display: inline-block;
-                    padding: 0.6rem 1.5rem;
-                    background-color: #222222;
-                    border: 1px solid #333333;
-                    border-radius: 6px;
-                    color: #ffffff;
-                    font-size: 0.9rem;
-                    font-weight: 500;
-                    text-decoration: none;
-                    transition: all 0.2s ease;
-                }
-
-                .card a:hover {
-                    background-color: #333333;
-                    border-color: #555555;
-                }
-
-                @media (max-width: 600px) {
-                    main {
-                        padding: 2rem 1rem;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-        <header>
-            <nav>
-                <a href="/" class="logo">AH Gambling</a>
-            </nav>
-        </header>
-
-        <main>
-            <div class="cards">
-                <div class="card">
-                    <h3>Login</h3>
-                    <p>Access your existing account</p>
-                    <a href="/login">Login</a>
-                </div>
-
-                <div class="card">
-                    <h3>Register</h3>
-                    <p>Create a new account and start playing</p>
-                    <a href="/register">Register</a>
-                </div>
-            </div>
-        </main>
-        </body>
-        </html>
-    """
 
 
 if __name__ == "__main__":
