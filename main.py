@@ -304,10 +304,6 @@ def read_root():
         <header>
             <nav>
                 <a href="/" class="logo">AH Gambling</a>
-                <div class="nav-links">
-                    <a href="/docs">API Docs</a>
-                    <a href="/api/data">API</a>
-                </div>
             </nav>
         </header>
         <main>
