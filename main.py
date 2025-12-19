@@ -139,7 +139,7 @@ def register(
     email = ""  
 
     characters = string.ascii_letters + string.digits + string.punctuation
-    sessionId = ''.join(random.choices(characters, k=50))
+    sessionId = ''.join(random.choice(characters) for _ in range(10))
 
     try:
         with psycopg.connect(str(os.environ["POSTGRES_DATABASE_URL"])) as conn:
@@ -148,14 +148,14 @@ def register(
                 cur.execute("""
                         CREATE TABLE IF NOT EXISTS accounts (
                         id SERIAL PRIMARY KEY,
-                        sessionid VARCHAR(50) NOT NULL,
+                        sessionid TEXT NOT NULL, 
                         username VARCHAR(50) UNIQUE NOT NULL,  
                         email VARCHAR(100) NOT NULL,
                         password VARCHAR(255) NOT NULL,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
                 """)
-                
+            
                 conn.commit()
             
                 cur.execute(
