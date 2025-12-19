@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Form,Request
+from fastapi import FastAPI,Form,Request, Cookie
 from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
 from upstash_redis import Redis
@@ -75,6 +75,35 @@ def read_root():
 def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
+@app.get("/cookie/set")
+def set_cookie(response: Response):
+    ten_years = 10 * 365 * 24 * 60 * 60
+    response.set_cookie(
+        key="mycookie", 
+        value="cookie_value", 
+        max_age=ten_years, 
+        expires=ten_years,  # ensures browser keeps it for a long time
+        httponly=True
+    )
+    return {"message": "Cookie has been set to last forever!"}
+
+
+@app.get("/cookie/get")
+def get_cookie(mycookie: str | None = Cookie(default=None)):
+    if mycookie:
+        return {"mycookie": mycookie}
+    return {"message": "No cookie found"}
+
+
+@app.get("/cookie/delete")
+def delete_cookie(response: Response):
+    response.delete_cookie(key="mycookie")
+    return {"message": "Cookie has been deleted!"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
 
 if __name__ == "__main__":
     import uvicorn
