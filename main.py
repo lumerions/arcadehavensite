@@ -11,7 +11,7 @@ import random
 
 app = FastAPI(
     title="AH Gambling",
-    description="AH Gamblin",
+    description="AH Gambling",
     version="1.0.0",
 )
 
@@ -180,11 +180,12 @@ def register(
     ten_years = 10 * 365 * 24 * 60 * 60  
 
     response.set_cookie(
-        key="SessionId", 
-        value=sessionId,  
-        max_age=ten_years, 
-        expires=ten_years,  
-        httponly=True  
+        key="SessionId",
+        value=sessionId,
+        max_age=ten_years,  
+        expires=ten_years, 
+        httponly=True,  
+        path="/", 
     )
 
     return templates.TemplateResponse("home.html", {"request": request})
