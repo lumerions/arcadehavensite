@@ -26,40 +26,8 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/register", response_class=HTMLResponse)
 def readregister(request: Request):
-    SessionId = request.cookies.get('SessionId')  
-    if not SessionId:
-        return templates.TemplateResponse("register.html", {"request": request})
-    else:
-        try:
-            with psycopg.connect(str(os.environ["POSTGRES_DATABASE_URL"])) as conn:
+    return templates.TemplateResponse("register.html", {"request": request})
 
-                with conn.cursor() as cursor:
-                    cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (SessionId,))
-                    
-                    result = cursor.fetchone()  
-                    
-                    if result:
-                        if str(result[0] == str(SessionId)):
-                            return templates.TemplateResponse("home.html", {"request": request})
-                        else:
-                            response = HTMLResponse(content="Register Page")
-                            if SessionId and response:
-                                response.delete_cookie(key="SessionId")
-
-                            raise ValueError("SessionId not found!")
-                    else:
-
-                        if SessionId and response:
-                            response.delete_cookie(key="SessionId")
-
-                        raise ValueError("SessionId not found!")
-        
-        except Exception as error:
-            return templates.TemplateResponse(
-                "register.html",
-                {"request": request, "error": f"Database error: {error}"},
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
 
 @app.get("/login",response_class =  HTMLResponse)
