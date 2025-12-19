@@ -10,12 +10,17 @@ import string
 import random
 from datetime import datetime, timedelta
 
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI(
     title="AH Gambling",
     description="AH Gambling",
     version="1.0.0",
 )
+
+app.mount("/public", StaticFiles(directory="public"), name="public")
+
 
 redis = Redis(
     url=os.environ["REDIS_URL"],
@@ -24,10 +29,42 @@ redis = Redis(
 
 templates = Jinja2Templates(directory="templates")
 
+
 @app.get("/register", response_class=HTMLResponse)
 def readregister(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+    SessionId = request.cookies.get('SessionId')  
+    if not SessionId:
+        return templates.TemplateResponse("register.html", {"request": request})
+    else:
+        try:
+            with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
 
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (SessionId,))
+                    
+                    result = cursor.fetchone()  
+                    
+                    if result:
+                        if str(result[0] == str(SessionId)):
+                            return templates.TemplateResponse("home.html", {"request": request})
+                        else:
+                            response = HTMLResponse(content="Register Page")
+                            if SessionId and response:
+                                response.delete_cookie(key="SessionId")
+
+                            raise ValueError("SessionId not found!")
+                    else:
+                        if SessionId and response:
+                            response.delete_cookie(key="SessionId")
+
+                        raise ValueError("SessionId not found!")
+        
+        except Exception as error:
+            return templates.TemplateResponse(
+                "register.html",
+                {"request": request, "error": f"Database error: {error}"},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 @app.get("/login",response_class =  HTMLResponse)
@@ -143,22 +180,15 @@ def register(
         )
 
     ten_years_seconds = 10 * 365 * 24 * 60 * 60
-    ten_years_datetime = datetime.utcnow() + timedelta(seconds=ten_years_seconds)
 
-    response = templates.TemplateResponse(
-        "home.html",
-        {"request": request, "username": username, "success": "Registration successful!"}
-    )
-
+    response = RedirectResponse(url="/test123", status_code=303)
     response.set_cookie(
         key="SessionId",
         value=session_id,
         max_age=ten_years_seconds,
-        expires=ten_years_datetime,
         httponly=True,
         path="/"
     )
-
     return response
 
 @app.post("/login")
@@ -170,3 +200,6 @@ def login_post(username: str = Form(...), password: str = Form(...)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+#cd C:\Users\Admin\Desktop\cra\arcadehavengamble
+#python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
+
