@@ -662,7 +662,7 @@ def set():
     redis.set("foo", "bar")
 
 @app.get("/get")
-def set():
+def get():
     value = redis.get("foo")
     print(value)
 
