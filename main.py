@@ -8,6 +8,8 @@ import os
 import secrets
 import string
 import random
+from datetime import datetime, timedelta
+
 
 app = FastAPI(
     title="AH Gambling",
@@ -109,7 +111,6 @@ def delete_cookie(response: Response):
 
 @app.post("/register", response_class=HTMLResponse)
 def register(
-    response: Response,  
     request: Request,  
     username: str = Form(...),
     password: str = Form(...),
@@ -179,18 +180,28 @@ def register(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-    ten_years = 10 * 365 * 24 * 60 * 60  
+    ten_years = 10 * 365 * 24 * 60 * 60
+    ten_years_datetime = datetime.utcnow() + timedelta(days=10*365)
 
+    response = templates.TemplateResponse(
+        "home.html", 
+        {
+            "request": request, 
+            "username": username,
+            "success": "Registration successful!"
+        }
+    )
+    
     response.set_cookie(
         key="SessionId",
-        value=sessionId,
-        max_age=ten_years,  
-        expires=ten_years, 
-        httponly=True,  
-        path="/", 
+        value=sessionId, 
+        max_age=ten_years,
+        expires=ten_years_datetime,
+        httponly=True,
+        path="/"
     )
-
-    return templates.TemplateResponse("home.html", {"request": request})
+    
+    return response
 
 @app.post("/login")
 def login_post(username: str = Form(...), password: str = Form(...)):
