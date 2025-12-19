@@ -97,9 +97,9 @@ def set_cookie():
 
 
 @app.get("/cookie/get")
-def get_cookie(mycookie: str | None = Cookie(default=None)):
-    if mycookie:
-        return {"SessionId": mycookie}
+def get_cookie(SessionId: str | None = Cookie(default=None)):
+    if SessionId:
+        return {"SessionId": SessionId}
     return {"message": "No cookie found"}
 
 @app.get("/cookie/delete")
