@@ -72,12 +72,13 @@ def delete_cookie(response: Response):
 
 @app.post("/register")
 def register(
-    username2: str = Form(...),
-    email2: str = Form(...),
-    password2: str = Form(...)
+    username: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...)
 ):
     
-    print(username2,email2,password2)
+    print(username,password,confirm_password)
+    
     username, email, hashed_password = 1,2,3
     try:
         with psycopg.connect("") as conn:
