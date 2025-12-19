@@ -6,7 +6,8 @@ import psycopg
 import bcrypt
 import os 
 import secrets
-
+import string
+import random
 
 app = FastAPI(
     title="AH Gambling",
@@ -21,9 +22,42 @@ redis = Redis(
 
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/register",response_class =  HTMLResponse)
 def readregister(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+    SessionId = request.cookies.get('SessionId')  
+    if not SessionId:
+        return templates.TemplateResponse("register.html", {"request": request})
+    else:
+        try:
+            with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (SessionId,))
+                    
+                    result = cursor.fetchone()  
+                    
+                    if result:
+                        if str(result[0] == str(SessionId)):
+                            return templates.TemplateResponse("home.html", {"request": request})
+                        else:
+                            response = HTMLResponse(content="Register Page")
+                            if SessionId and response:
+                                response.delete_cookie(key="SessionId")
+
+                            raise ValueError("SessionId not found!")
+                    else:
+
+                        if SessionId and response:
+                            response.delete_cookie(key="SessionId")
+
+                        raise ValueError("SessionId not found!")
+        
+        except Exception as error:
+            return templates.TemplateResponse(
+                "register.html",
+                {"request": request, "error": f"Database error: {error}"},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 @app.get("/login",response_class =  HTMLResponse)
 def readlogin(request: Request, mycookie: str | None = Cookie(default=None)):
@@ -96,16 +130,21 @@ def register(
         password.encode("utf-8"),
         bcrypt.gensalt()
     ).decode("utf-8")
+
+
     email = ""  
+
+    characters = string.ascii_letters + string.digits + string.punctuation
+    sessionId = ''.join(random.choices(characters, k=50))
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
 
-               
                 cur.execute("""
                         CREATE TABLE IF NOT EXISTS accounts (
                         id SERIAL PRIMARY KEY,
+                        sessionid VARCHAR(50) NOT NULL,
                         username VARCHAR(50) NOT NULL,
                         email VARCHAR(100) NOT NULL,
                         password VARCHAR(255) NOT NULL,
@@ -113,7 +152,6 @@ def register(
                         CONSTRAINT unique_username_email UNIQUE (username, email)  
                     );
                 """)
-                
                 
                 conn.commit()
             
@@ -139,9 +177,10 @@ def register(
         )
 
     ten_years = 10 * 365 * 24 * 60 * 60  
+
     response.set_cookie(
         key="SessionId", 
-        value="cookie_value",  
+        value=sessionId,  
         max_age=ten_years, 
         expires=ten_years,  
         httponly=True  
