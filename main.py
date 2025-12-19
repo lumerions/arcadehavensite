@@ -102,15 +102,18 @@ def register(
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
 
+               
                 cur.execute("""
-                    CREATE TABLE IF NOT EXISTS accounts (
+                        CREATE TABLE IF NOT EXISTS accounts (
                         id SERIAL PRIMARY KEY,
-                        username VARCHAR(50) NOT NULL UNIQUE,
-                        email VARCHAR(100) NOT NULL UNIQUE,
+                        username VARCHAR(50) NOT NULL,
+                        email VARCHAR(100) NOT NULL,
                         password VARCHAR(255) NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        CONSTRAINT unique_username_email UNIQUE (username, email)  
                     );
                 """)
+                
                 
                 conn.commit()
             
