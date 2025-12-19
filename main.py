@@ -158,14 +158,15 @@ def register(
                 
                 conn.commit()
             
+               
                 cur.execute(
                     """
-                    INSERT INTO accounts (username, email, password,sessionid)
-                    VALUES (%s, %s, %s,%s)
-                    ON CONFLICT (username, email) DO NOTHING
+                    INSERT INTO accounts (username, email, password, sessionid)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (username) DO NOTHING  # Changed to (username) only
                     RETURNING id;
                     """,
-                    (username, email, hashed_password,sessionId)
+                    (username, email, hashed_password, sessionId)
                 )
 
                 row = cur.fetchone()
