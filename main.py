@@ -1,12 +1,17 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse,RedirectResponse
 from upstash_redis import Redis
-
+import os 
 
 app = FastAPI(
     title="AH Gambling",
     description="AH Gamblin",
     version="1.0.0",
+)
+
+redis = Redis(
+    url=os.environ["REDIS_URL"],
+    token=os.environ["REDIS_TOKEN"]
 )
 
 
@@ -648,15 +653,16 @@ def readlogin():
 </html>
 """
 
+@app.post("/login")
+def login_post(username: str = Form(...), password: str = Form(...)):
+    return {"username": username, "password": password}
+
 @app.get("/set")
 def set():
-    redis = Redis(url="https://boss-stud-36213.upstash.io", token="AY11AAIncDE4MmNkNTRkODhhOGY0NGExYTJkODE2MjNkZTYxZDBlMXAxMzYyMTM")
-
     redis.set("foo", "bar")
 
 @app.get("/get")
 def set():
-    redis = Redis(url="https://boss-stud-36213.upstash.io", token="AY11AAIncDE4MmNkNTRkODhhOGY0NGExYTJkODE2MjNkZTYxZDBlMXAxMzYyMTM")
     value = redis.get("foo")
     print(value)
 
