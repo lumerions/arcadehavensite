@@ -194,20 +194,18 @@ def login_post(
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
 
             with conn.cursor() as cursor:
-                cursor.execute("SELECT password FROM accounts WHERE username = %s", (username,))
-                
+                cursor.execute("SELECT password, sessionid FROM accounts WHERE username = %s", (username,))
+
                 result = cursor.fetchone()  
 
-                if result and bcrypt.checkpw(password.encode("utf-8"),    result[0].encode("utf-8")):
+                if result and bcrypt.checkpw(password.encode("utf-8"), result[0].encode("utf-8")):
 
                     ten_years_seconds = 10 * 365 * 24 * 60 * 60
-
-                    session_id = secrets.token_urlsafe(32)
 
                     response = RedirectResponse(url="/home", status_code=303)
                     response.set_cookie(
                         key="SessionId",
-                        value=session_id,
+                        value=result[1],
                         max_age=ten_years_seconds,
                         httponly=True,
                         path="/"
