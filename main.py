@@ -3,8 +3,8 @@ from fastapi.responses import HTMLResponse
 
 
 app = FastAPI(
-    title="Vercel + FastAPI",
-    description="Vercel + FastAPI",
+    title="AH Gambling",
+    description="AH Gamblin",
     version="1.0.0",
 )
 
