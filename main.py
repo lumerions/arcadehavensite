@@ -2,6 +2,8 @@ from fastapi import FastAPI,Form
 from fastapi.responses import HTMLResponse,RedirectResponse
 from upstash_redis import Redis
 import os 
+import secrets
+
 
 app = FastAPI(
     title="AH Gambling",
@@ -655,7 +657,8 @@ def readlogin():
 
 @app.post("/login")
 def login_post(username: str = Form(...), password: str = Form(...)):
-    return {"username": username, "password": password}
+    code = secrets.token_urlsafe(32)
+    return {"username": username, "password": password,"code": code}
 
 @app.get("/set")
 def set():
