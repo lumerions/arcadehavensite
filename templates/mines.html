@@ -101,8 +101,11 @@
 <body>
     <h1>Mines Game</h1>
 
+    {% if error %}
+        <p class="error-message">{{ error }}</p>
+    {% endif %}
+
     <div class="grid">
-        <!-- Mines (Red) -->
         <div class="cell mine"></div>
         <div class="cell empty"></div>
         <div class="cell empty"></div>
@@ -168,6 +171,5 @@
     </form>
 </body>
 </html>
-
 
 
