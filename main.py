@@ -60,8 +60,33 @@ def readregister(request: Request):
 
 
 @app.get("/login",response_class =  HTMLResponse)
-def readlogin(request: Request, mycookie: str | None = Cookie(default=None)):
-    return templates.TemplateResponse("login.html", {"request": request})
+def readlogin(request: Request):
+    SessionId = request.cookies.get('SessionId')  
+    if not SessionId:
+        return templates.TemplateResponse("login.html", {"request": request})
+    else:
+        try:
+            with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (SessionId,))
+                    
+                    result = cursor.fetchone()  
+                    
+                    if result and result[0] == SessionId:
+                        return templates.TemplateResponse("login.html", {"request": request})
+                    else:
+                        response = templates.TemplateResponse("login.html", {"request": request})
+                        response.delete_cookie("SessionId")
+                        return response
+        
+        except Exception as error:
+            return templates.TemplateResponse(
+                "login.html",
+                {"request": request, "error": f"Database error: {error}"},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 @app.get("/set")
 def set():
