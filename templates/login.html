@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -122,6 +122,7 @@
         .footer-text a:hover {
             text-decoration: underline;
         }
+
         .error-message {
             color: #ff5555;
             font-weight: bold;
@@ -140,7 +141,7 @@
     <div class="card">
         <h1>Login</h1>
         <p>Access your account</p>
-        
+
         {% if error %}
             <p class="error-message">{{ error }}</p>
         {% endif %}
@@ -162,4 +163,4 @@
 </main>
 </body>
 </html>
-"""
+
