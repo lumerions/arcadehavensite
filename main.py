@@ -9,7 +9,6 @@ import secrets
 import string
 import random
 from datetime import datetime, timedelta
-import webbrowser
 from fastapi.staticfiles import StaticFiles
 import urllib.parse  
 
@@ -127,10 +126,10 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
     place_id = 87078646939220 
     encoded_data = urllib.parse.quote(launch_data)
     deep_link = f"roblox://placeId={place_id}&launchData={encoded_data}"
-    webbrowser.open(deep_link)
+    
     if SessionId:
-        return {"SessionId": SessionId}
-    return {"message": "No cookie found"}
+        return {"SessionId": SessionId, "deep_link": deep_link}
+    return {"message": "No cookie found", "deep_link": deep_link}
 
 @app.get("/cookie/delete")
 def delete_cookie(response: Response):
