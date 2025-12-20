@@ -143,15 +143,35 @@ def delete_cookie(response: Response):
 @app.post("/mines",response_class=HTMLResponse)
 def startMines(request: Request,username: str = Form(...)):
     cookies = request.cookies
-    session_id = cookies.get("SessionId")  
+    session_id = cookies.get("SessionId")
 
-    if session_id:
-        print(f"SessionId: {session_id}")
+    if not session_id:
+        return templates.TemplateResponse("mines.html", {"request": request})
     else:
-        print("SessionId cookie not found!")
+        try:
+            with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
 
-    response = RedirectResponse(url="/home", status_code=303)
-    return response
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (session_id,))
+                    
+                    result = cursor.fetchone()  
+                    
+                    if result and result[0] != session_id:
+                        raise ValueError("Session Id is expired or invalid.")
+        
+        except Exception as error:
+            return templates.TemplateResponse(
+                "mines.html",
+                {"request": request, "error": f"Error: {error}"},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    if redis.get(str(session_id)):
+        return templates.TemplateResponse("mines.html", {"request": request, "username": username, "session_id": session_id})
+
+    
+    redis.set(str(session_id),True)
+
+    return templates.TemplateResponse("mines.html", {"request": request, "username": username, "session_id": session_id})
 
 @app.post("/register", response_class=HTMLResponse)
 def register(
