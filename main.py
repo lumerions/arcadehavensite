@@ -19,8 +19,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-#app.mount("/public", StaticFiles(directory="public"), name="public")
-
 
 redis = Redis(
     url=os.environ["REDIS_URL"],
@@ -29,12 +27,10 @@ redis = Redis(
 
 templates = Jinja2Templates(directory="templates")
 
-
-@app.get("/register", response_class=HTMLResponse)
-def readregister(request: Request):
+def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2):
     SessionId = request.cookies.get('SessionId')  
     if not SessionId:
-        return templates.TemplateResponse("register.html", {"request": request})
+        return templates.TemplateResponse(htmlfile, {"request": request})
     else:
         try:
             with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -45,18 +41,23 @@ def readregister(request: Request):
                     result = cursor.fetchone()  
                     
                     if result and result[0] == SessionId:
-                        return templates.TemplateResponse("home.html", {"request": request})
+                        return templates.TemplateResponse(htmlfile2, {"request": request})
                     else:
-                        response = templates.TemplateResponse("register.html", {"request": request})
+                        response = templates.TemplateResponse(htmlfile, {"request": request})
                         response.delete_cookie("SessionId")
                         return response
         
         except Exception as error:
             return templates.TemplateResponse(
-                "register.html",
+                htmlfile,
                 {"request": request, "error": f"Database error: {error}"},
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+@app.get("/register", response_class=HTMLResponse)
+def readregister(request: Request):
+    return CheckIfUserIsLoggedIn(request,"register.html","home.html")
 
 
 @app.get("/login",response_class =  HTMLResponse)
@@ -86,7 +87,15 @@ def readlogin(request: Request):
                 {"request": request, "error": f"Database error: {error}"},
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+@app.get("/mines",response_class =  HTMLResponse)
+def loadmines(request: Request):
+    return CheckIfUserIsLoggedIn(request,"register.html","mines.html")
 
+
+@app.get("/towers",response_class =  HTMLResponse)
+def towers(request: Request):
+    return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
 @app.get("/set")
 def set():
