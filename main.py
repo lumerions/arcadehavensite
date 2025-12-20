@@ -141,7 +141,7 @@ def delete_cookie(response: Response):
     return {"message": "Cookie has been deleted!"}
 
 @app.post("/mines",response_class=HTMLResponse)
-def startMines(request: Request,username: str = Form(...)):
+def startMines(request: Request):
     cookies = request.cookies
     session_id = cookies.get("SessionId")
 
