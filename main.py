@@ -74,7 +74,7 @@ def readlogin(request: Request):
                     result = cursor.fetchone()  
                     
                     if result and result[0] == SessionId:
-                        return templates.TemplateResponse("login.html", {"request": request})
+                        return templates.TemplateResponse("home.html", {"request": request})
                     else:
                         response = templates.TemplateResponse("login.html", {"request": request})
                         response.delete_cookie("SessionId")
