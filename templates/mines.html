@@ -73,6 +73,29 @@
         .footer-text a:hover {
             text-decoration: underline;
         }
+
+        .error-message {
+            color: #ff5555;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #666;
+        }
     </style>
 </head>
 <body>
@@ -138,6 +161,14 @@
     <div class="message" id="message">
         <!-- Game state message can be added here -->
     </div>
+
+    <!-- POST request button -->
+    <form method="POST" action="/submit-mines">
+        <button type="submit">Submit Mines</button>
+    </form>
+
+    <div class="footer-text">
+        Don’t have an account? <a href="/register">Register</a>
+    </div>
 </body>
 </html>
-
