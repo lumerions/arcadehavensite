@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mines Game</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 5px;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cell.mine {
+            background-color: red;
+        }
+
+        .cell.empty {
+            background-color: #666;
+        }
+
+        .message {
+            font-size: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .footer-text {
+            font-size: 0.8rem;
+            color: #888888;
+            margin-top: 1rem;
+        }
+
+        .footer-text a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mines Game</h1>
+
+    <div class="grid">
+        <!-- Mines (Red) -->
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell empty"></div>
+        <div class="cell mine"></div>
+        <div class="cell empty"></div>
+    </div>
+
+    <div class="message" id="message">
+        <!-- Game state message can be added here -->
+    </div>
+
+    <div class="footer-text">
+        Don’t have an account? <a href="/register">Register</a>
+    </div>
+</body>
+</html>
