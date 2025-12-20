@@ -140,6 +140,19 @@ def delete_cookie(response: Response):
     response.delete_cookie(key="SessionId")
     return {"message": "Cookie has been deleted!"}
 
+@app.post("/mines",response_class=HTMLResponse)
+def startMines(request: Request,username: str = Form(...)):
+    cookies = request.cookies
+    session_id = cookies.get("SessionId")  
+
+    if session_id:
+        print(f"SessionId: {session_id}")
+    else:
+        print("SessionId cookie not found!")
+
+    response = RedirectResponse(url="/home", status_code=303)
+    return response
+
 @app.post("/register", response_class=HTMLResponse)
 def register(
     request: Request,  
