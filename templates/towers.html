@@ -7,7 +7,11 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -18,7 +22,9 @@
             flex-direction: column;
         }
 
-        header { border-bottom: 1px solid #333; }
+        header {
+            border-bottom: 1px solid #333;
+        }
 
         nav {
             max-width: 1200px;
@@ -35,7 +41,6 @@
             font-size: 1.25rem;
         }
 
-        /* Balance dropdown */
         .balance-wrapper {
             margin-left: auto;
             position: relative;
@@ -101,7 +106,7 @@
         .card {
             background: #111;
             border: 1px solid #333;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 2rem;
             text-align: center;
             max-width: 520px;
@@ -116,24 +121,34 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .grid {
+        /* ===== GRID MATCHING SCREENSHOT ===== */
+
+        .payout-grid {
             display: grid;
-            grid-template-columns: repeat(8, 50px);
-            gap: 8px;
-            justify-content: center;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px 60px;
+            background: #1c1c1c;
+            border: 1px solid #2e2e2e;
+            border-radius: 14px;
+            padding: 24px 32px;
             margin: 1.5rem 0;
         }
 
-        .cell {
-            width: 50px;
-            height: 50px;
-            border-radius: 6px;
-            background: #222;
-            border: 1px solid #333;
+        .payout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #d1d5db;
+            user-select: none;
         }
 
-        .cell.tower { background: #15803d; }
-        .cell.empty { background: #555; }
+        .payout span {
+            color: #60a5fa;
+            font-size: 1.1rem;
+        }
 
         button {
             padding: 0.6rem 1.25rem;
@@ -142,6 +157,7 @@
             color: #fff;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 0.95rem;
         }
 
         button:hover {
@@ -157,7 +173,7 @@
         <a href="/" class="logo">AH Gambling</a>
 
         <div class="balance-wrapper">
-            <button class="balance-btn">$1000</button>
+            <button class="balance-btn">$1,000</button>
             <div class="balance-menu">
                 <a href="/deposit">Deposit</a>
                 <a href="/withdraw">Withdraw</a>
@@ -172,51 +188,38 @@
     <div class="card">
         <h1>Towers</h1>
 
-        <div class="grid">
-            <div class="cell tower"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell tower"></div>
-            <div class="cell empty"></div>
+        <div class="payout-grid">
+            <div class="payout"><span>❄</span>1,046</div>
+            <div class="payout"><span>❄</span>1,046</div>
+            <div class="payout"><span>❄</span>1,046</div>
 
-            <div class="cell empty"></div>
-            <div class="cell tower"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell tower"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
+            <div class="payout"><span>❄</span>762</div>
+            <div class="payout"><span>❄</span>762</div>
+            <div class="payout"><span>❄</span>762</div>
 
-            <div class="cell tower"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell tower"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
+            <div class="payout"><span>❄</span>621</div>
+            <div class="payout"><span>❄</span>621</div>
+            <div class="payout"><span>❄</span>621</div>
 
-            <div class="cell empty"></div>
-            <div class="cell tower"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell tower"></div>
+            <div class="payout"><span>❄</span>461</div>
+            <div class="payout"><span>❄</span>461</div>
+            <div class="payout"><span>❄</span>461</div>
 
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell tower"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell tower"></div>
-            <div class="cell empty"></div>
+            <div class="payout"><span>❄</span>306</div>
+            <div class="payout"><span>❄</span>306</div>
+            <div class="payout"><span>❄</span>306</div>
+
+            <div class="payout"><span>❄</span>232</div>
+            <div class="payout"><span>❄</span>232</div>
+            <div class="payout"><span>❄</span>232</div>
+
+            <div class="payout"><span>❄</span>177</div>
+            <div class="payout"><span>❄</span>177</div>
+            <div class="payout"><span>❄</span>177</div>
+
+            <div class="payout"><span>❄</span>151</div>
+            <div class="payout"><span>❄</span>151</div>
+            <div class="payout"><span>❄</span>151</div>
         </div>
 
         <form method="POST" action="/towers">
@@ -226,6 +229,7 @@
 </main>
 </body>
 </html>
+
 
 
 
