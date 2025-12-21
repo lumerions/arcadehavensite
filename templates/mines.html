@@ -230,10 +230,15 @@
                             }
                 
                             const result = await response.json();
-                            if (result.ismine) {
-                                cell.className = 'cell mine';
+                            const mines = result.mines
+                            
+                            if (result.ismine && mines) {
                                 document.querySelectorAll('.cell').forEach(cell => {
-                                    cell.className = 'cell reveal';
+                                    if (mines.includes(Number(c.dataset.index))) {
+                                        cell.className = 'cell mine';
+                                    } else {
+                                        cell.className = 'cell reveal';
+                                    }
                                 });
                             } else {
                                 cell.className = 'cell clicked';
@@ -256,6 +261,7 @@
 </main>
 </body>
 </html>
+
 
 
 
