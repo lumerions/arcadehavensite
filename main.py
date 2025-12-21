@@ -210,24 +210,23 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     tile_index = data.tileIndex
     mines = redis.get(SessionId + "minesdata")
     if not mines:
-        return
+        return JSONResponse(content={"error": "No mines found"}, status_code=400)
+
+    mines = json.loads(mines) 
     is_mine = tile_index in mines
 
     return JSONResponse(content={"ismine": is_mine})
 
 @app.post("/startmines")
 def print_endpoint(SessionId: str = Cookie(None)):
-    if redis.get("Debounce" + SessionId):
+    if redis.get("Debounce_" + SessionId):
         return
     
-    redis.set("Debounce" + SessionId,True)
+    redis.set("Debounce_" + SessionId,True)
 
-    mines = []
-    for i in range(48):
-        if random.randint(1,2) == 2:
-            mines.append(i)
+    mines = [i for i in range(48) if random.randint(1,2) == 2]
 
-    redis.set(SessionId + "minesdata",mines)
+    redis.set(SessionId + "minesdata",json.dumps(mines))
 
 
 
