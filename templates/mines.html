@@ -234,21 +234,15 @@
                             const result = await response.json();
                             const mines = result.mines
                             
-                            if (result.ismine && mines) {
-                                document.querySelectorAll('.cell').forEach(cell => {
-                                    if (mines.includes(Number(cell.dataset.index))) {
-                                        cell.className = 'cell mine';
-                                    } else {
-                                        if (cell.className !== 'cell clicked') {
-                                            cell.className = 'cell reveal';
-                                        }
-                                    }
-                                });
-
-                                grid.classList.add('gamedone');
-                            } else {
-                                cell.className = 'cell clicked';
-                            }
+                            document.querySelectorAll('.cell').forEach(cell => {
+                                const index = Number(cell.dataset.index);
+                            
+                                if (mines.includes(index)) {
+                                    cell.classList.add('mine');
+                                } else if (!cell.classList.contains('clicked')) {
+                                    cell.classList.add('reveal');
+                                }
+                            });
 
                             console.log('Server response:', result);
 
@@ -267,6 +261,7 @@
 </main>
 </body>
 </html>
+
 
 
 
