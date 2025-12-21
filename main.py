@@ -16,7 +16,6 @@ import json
 import requests
 from pydantic import BaseModel
 import time
-import httpx
 
 app = FastAPI(
     title="AH Gambling",
@@ -24,12 +23,11 @@ app = FastAPI(
     version="1.0.0",
 )
 
-class UpdateUsernameRequest(BaseModel):
-    SessionId: str 
 
 class UpdateRobloxUsernameRedis(BaseModel):
     robloxusername: str
     siteusername : str
+    sessionid : str
 
 
 
@@ -171,6 +169,7 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     launch_data = {
         "sitename": str(sitename),
+        "sessionid": SessionId,
     }
 
     encoded_data = urllib.parse.quote(json.dumps(launch_data))
@@ -178,50 +177,29 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     return RedirectResponse(url)
 
-@app.get("/getrobloxusername")
-def re(SessionId: str | None = Cookie(default=None)):
-    try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT robloxusername FROM accounts WHERE sessionid = %s", (SessionId,))
-                
-                result = cursor.fetchone()  
-                robloxusername = result[0]
-                
-    except Exception as error:
-        return error
-    
-    return  robloxusername
-
-
 @app.post("/setrobloxusername")
 def print_endpoint(data: UpdateRobloxUsernameRedis):
     if data.robloxusername == "":
         return "Username can't be empty!"
     if data.siteusername == "":
         return "Site username can't be empty!"
-    
+    if data.sessionid == "":
+        return "Site sessionid can't be empty!"
+
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT sessionid FROM accounts WHERE username = %s", (data.siteusername,))
-                result = cursor.fetchone()  
-                SessionId = result[0]
+            with conn.cursor() as cur:
 
+                cur.execute("""
+                    UPDATE accounts
+                    SET robloxusername = %s
+                    WHERE username = %s
+                    WHERE sessionid = %s;
+                """, (data.robloxusername, data.siteusername,data.sessionid))
+
+                conn.commit()
     except Exception as error:
         return error
-
-    with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-        with conn.cursor() as cur:
-
-            cur.execute("""
-                UPDATE accounts
-                SET robloxusername = %s
-                WHERE username = %s;
-            """, (data.robloxusername, data.siteusername))
-
-            conn.commit()
 
 
 @app.post("/mines",response_class=HTMLResponse)
