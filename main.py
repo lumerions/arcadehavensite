@@ -28,7 +28,8 @@ class UpdateUsernameRequest(BaseModel):
     cookie: str
 
 class UpdateRobloxUsernameRedis(BaseModel):
-    siteusername: str
+    robloxusername: str
+    siteusername : str
 
 
 
@@ -144,6 +145,13 @@ def set_cookie():
     return response  
 
 
+@app.get("/logout")
+def logout():
+    response = RedirectResponse(url="/", status_code=303)
+    response.delete_cookie(key="SessionId")
+    return response
+
+
 @app.get("/cookie/get")
 def get_cookie(SessionId: str | None = Cookie(default=None)):
     if not SessionId:
@@ -151,10 +159,18 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
     
     place_id = 87078646939220
 
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                result = cursor.fetchone()  
+                sitename = result[0]
+
+    except Exception as error:
+        return error
+
     launch_data = {
-        "source": "site",
-        "reward": "coins",
-        "amount": 100
+        "sitename": str(sitename),
     }
 
     encoded_data = urllib.parse.quote(json.dumps(launch_data))
@@ -167,28 +183,71 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
     return RedirectResponse(url)
 
 
-@app.get("/logout")
-def logout():
-    response = RedirectResponse(url="/", status_code=303)
-    response.delete_cookie(key="SessionId")
-    return response
 
 @app.post("/setrobloxusername")
 def print_endpoint(data: UpdateRobloxUsernameRedis):
-    if data.siteusername == "":
-        return
+    if data.robloxusername == "":
+        return "Username can't be empty!"
     
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT sessionid FROM accounts WHERE username = %s", (data.siteusername,))
+                cursor.execute("SELECT sessionid FROM accounts WHERE username = %s", (data.robloxusername,))
                 result = cursor.fetchone()  
                 SessionId = result[0]
 
     except Exception as error:
         return error
 
-    redis.set(SessionId + "?",data.siteusername)
+    redis.set(SessionId + "?",data.robloxusername)
+
+
+@app.post("/updaterobloxusername")
+def updateRobloxUsername(request: Request, data: UpdateUsernameRequest):
+    SessionId = data.SessionId
+    cookies = request.cookies
+    session_id = cookies.get("SessionId")
+
+    if SessionId != session_id:
+        response = templates.TemplateResponse("home.html", {"request": request})
+        return response
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT sessionid,username FROM accounts WHERE sessionid = %s", (SessionId,))
+                
+                result = cursor.fetchone()  
+                
+                if not result:
+                    response = templates.TemplateResponse("login.html", {"request": request})
+                    response.delete_cookie("SessionId")
+                    return response
+                username = result[1]
+
+        
+    except Exception as error:
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": f"Database error: {error}"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+    time.sleep(10)
+    
+    new_roblox_username = redis.get(SessionId + "?")
+
+    with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+        with conn.cursor() as cur:
+
+            cur.execute("""
+                UPDATE accounts
+                SET robloxusername = %s
+                WHERE username = %s;
+            """, (new_roblox_username, username))
+
+            conn.commit()
 
 
 @app.post("/mines",response_class=HTMLResponse)
@@ -342,52 +401,6 @@ def login_post(
         )
     
 
-@app.post("/updaterobloxusername")
-def updateRobloxUsername(request: Request, data: UpdateUsernameRequest):
-    SessionId = data.SessionId
-    cookies = request.cookies
-    session_id = cookies.get("SessionId")
-
-    if SessionId != session_id:
-        response = templates.TemplateResponse("home.html", {"request": request})
-        return response
-
-    try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT sessionid,username FROM accounts WHERE sessionid = %s", (SessionId,))
-                
-                result = cursor.fetchone()  
-                
-                if not result:
-                    response = templates.TemplateResponse("login.html", {"request": request})
-                    response.delete_cookie("SessionId")
-                    return response
-                username = result[1]
-
-        
-    except Exception as error:
-        return templates.TemplateResponse(
-            "login.html",
-            {"request": request, "error": f"Database error: {error}"},
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    
-    time.sleep(10)
-    
-    new_roblox_username = redis.get(SessionId + "?")
-
-    with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-        with conn.cursor() as cur:
-
-            cur.execute("""
-                UPDATE accounts
-                SET robloxusername = %s
-                WHERE username = %s;
-            """, (new_roblox_username, username))
-
-            conn.commit()
 
 
 if __name__ == "__main__":
