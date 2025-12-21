@@ -16,7 +16,7 @@ import json
 import requests
 from pydantic import BaseModel
 import time
-
+import httpx
 
 app = FastAPI(
     title="AH Gambling",
@@ -153,7 +153,7 @@ def logout():
 
 
 @app.get("/cookie/get")
-def get_cookie(SessionId: str | None = Cookie(default=None)):
+async def get_cookie(SessionId: str | None = Cookie(default=None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
@@ -175,8 +175,14 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     encoded_data = urllib.parse.quote(json.dumps(launch_data))
     url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
+    cookies = {"SessionId": SessionId}
 
-    requests.post("https://arcadehavengamble.vercel.app/updaterobloxusername", json={"SessionId": SessionId})
+    async with httpx.AsyncClient() as client:
+        await client.post(
+            "https://arcadehavengamble.vercel.app/updaterobloxusername",
+            json={"SessionId": SessionId},
+            cookies=cookies
+        )
 
     return RedirectResponse(url)
 
