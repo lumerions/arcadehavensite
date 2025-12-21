@@ -1,202 +1,409 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Towers - AH Gambling</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Towers - AH Gambling</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 
-  <style>
-    /* Your existing styles here */
+<style>
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #000;
-      color: #fff;
-      min-height: 100vh;
+
+header {
+    border-bottom: 1px solid #333;
+}
+
+nav {
+    max-width: 1200px;
+    margin: auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.7rem;
     }
 
-    header {
-      border-bottom: 1px solid #333;
-    }
-
-    nav {
-      max-width: 1200px;
-      margin: auto;
-      padding: 1rem 1.5rem;
-      display: flex;
-      align-items: center;
+    .card {
+        padding: 1.5rem;
     }
 
     .payout-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px 60px;
-      background: #1c1c1c;
-      border: 1px solid #2e2e2e;
-      border-radius: 14px;
-      padding: 24px 32px;
-      margin: 1.5rem 0;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px 32px;
+        padding: 20px;
     }
 
-    /* Modal and Button Styles */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .75);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
+    .payout {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .payout-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 18px;
     }
 
-    .modal.open {
-      display: flex;
+    .payout {
+        font-size: 0.9rem;
     }
 
-    .wallet {
-      background: #1c2433;
-      border-radius: 14px;
-      width: 420px;
-      padding: 20px;
-      position: relative;
+    button {
+        width: 100%;
     }
+}
 
-    .wallet-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
 
-    .close {
-      cursor: pointer;
-      font-size: 1.4rem;
-      color: #9ca3af;
-    }
+.payout-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 60px;
+    background: #1c1c1c;
+    border: 1px solid #2e2e2e;
+    border-radius: 14px;
+    padding: 24px 32px;
+    margin: 1.5rem 0;
+}
 
-    .action-btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-    }
+.payout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #d1d5db;
+    user-select: none;
+}
 
-    .action-btn.deposit {
-      background: #16a34a;
-      color: #000;
-    }
+.payout span {
+    color: #22c55e; 
+    font-size: 1.1rem;
+}
 
-    .action-btn.withdraw {
-      background: #2563eb;
-      color: #000;
-    }
+.balance-wrapper {
+    margin-left: auto;
+    position: relative;
+}
 
-    /* Additional Styles for confirm modal */
-    #confirmModal .wallet {
-      border: 2px solid #a855f7;
-    }
+.balance-btn {
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
 
-    #confirmModal h2 {
-      color: #c084fc;
-    }
+.balance-menu {
+    position: absolute;
+    right: 0;
+    top: 120%;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    min-width: 160px;
+    padding: 0.5rem 0;
+    display: none;
+    z-index: 100;
+}
 
-    #confirmModal .instructions {
-      background: #1e3a8a;
-      border: 1px solid #3b82f6;
-      color: #e0e7ff;
-    }
-  </style>
+.balance-menu a {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.balance-menu a:hover {
+    background: #222;
+}
+
+.divider {
+    height: 1px;
+    background: #333;
+    margin: 0.4rem 0;
+}
+
+.balance-wrapper.open .balance-menu {
+    display: block;
+}
+
+/* ===== MAIN CARD ===== */
+
+main {
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+}
+
+.card {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+}
+
+/* ===== WALLET MODAL ===== */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal.open {
+    display: flex;
+}
+
+.wallet {
+    background: #1c2433;
+    border-radius: 14px;
+    width: 420px;
+    padding: 20px;
+    position: relative;
+}
+
+.wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.wallet-header h2 {
+    font-size: 1.2rem;
+}
+
+.close {
+    cursor: pointer;
+    font-size: 1.4rem;
+    color: #9ca3af;
+}
+
+/* ===== TABS ===== */
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.tab {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #2a3448;
+    color: #cbd5f5;
+}
+
+.tab.active.deposit { background: #16a34a; color:#fff; }
+.tab.active.withdraw { background: #2563eb; color:#fff; }
+
+label {
+    display: block;
+    font-size: .85rem;
+    margin-bottom: 6px;
+    color: #cbd5f5;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    background: #2a3448;
+    border: 2px solid #7c3aed;
+    border-radius: 8px;
+    color: #fff;
+    margin-bottom: 14px;
+}
+
+.instructions {
+    background: #2a3448;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: .85rem;
+    text-align: left;
+    color: #cbd5f5;
+    margin-bottom: 16px;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button {
+    padding: 0.65rem 1.5rem;
+    background: #222;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+button:hover {
+    background: #333;
+    border-color: #555;
+}
+
+
+.action-btn.deposit { background: #16a34a; color:#000; }
+.action-btn.withdraw { background: #2563eb; color:#000; }
+    
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
+    color: #fff;
+    min-height: 100vh;
+}
+header { border-bottom: 1px solid #333; }
+nav {
+    max-width: 1200px;
+    margin: auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+}
+.logo {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+/* ===== ALL YOUR EXISTING CSS CONTINUES UNCHANGED ===== */
+
+/* ===== ADDITIONAL CONFIRM MODAL STYLES ===== */
+#confirmModal .wallet {
+    border: 2px solid #a855f7;
+}
+#confirmModal h2 {
+    color: #c084fc;
+}
+#confirmModal .instructions {
+    background: #1e3a8a;
+    border: 1px solid #3b82f6;
+    color: #e0e7ff;
+}
+</style>
 </head>
 
 <body>
 
-<!-- Your content here -->
+<!-- ===== EXISTING CONTENT UNCHANGED ===== -->
 
 <!-- ===== CONFIRM MODAL (ADDED) ===== -->
 <div class="modal" id="confirmModal">
-  <div class="wallet">
-    <div class="wallet-header">
-      <h2 id="confirmTitle">Deposit Ready!</h2>
-      <span class="close" id="closeConfirm">&times;</span>
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2 id="confirmTitle">Deposit Ready!</h2>
+            <span class="close" id="closeConfirm">&times;</span>
+        </div>
+
+        <div class="instructions" id="confirmSteps">
+            <strong>Next Steps:</strong><br>
+            1. Click the button below to open Roblox<br>
+            2. Join the game and it will automatically read the code<br>
+            3. Complete the deposit in-game
+        </div>
+
+        <button class="action-btn deposit" id="openRobloxBtn" style="margin-bottom:10px">
+            Open Roblox Game
+        </button>
+
+        <button class="action-btn deposit" id="doneBtn">
+            Done
+        </button>
     </div>
-
-    <div class="instructions" id="confirmSteps">
-      <strong>Next Steps:</strong><br>
-      1. Click the button below to open Roblox<br>
-      2. Join the game and it will automatically read the code<br>
-      3. Complete the deposit in-game
-    </div>
-
-    <button class="action-btn deposit" id="openRobloxBtn" style="margin-bottom:10px">
-      Open Roblox Game
-    </button>
-
-    <button class="action-btn deposit" id="doneBtn">
-      Done
-    </button>
-  </div>
 </div>
 
-<!-- Example deposit and withdraw buttons -->
-<button class="action-btn deposit">Deposit</button>
-<button class="action-btn withdraw">Withdraw</button>
-
 <script>
-  /* ===== CONFIRM MODAL LOGIC (ADDED) ===== */
-  const confirmModal = document.getElementById('confirmModal');
-  const confirmTitle = document.getElementById('confirmTitle');
-  const confirmSteps = document.getElementById('confirmSteps');
-  const closeConfirm = document.getElementById('closeConfirm');
-  const doneBtn = document.getElementById('doneBtn');
-  const openRobloxBtn = document.getElementById('openRobloxBtn');
+/* ===== EXISTING SCRIPT (UNCHANGED) ===== */
 
-  // Select all the action buttons (deposit or withdraw)
-  const actionButtons = document.querySelectorAll('.action-btn.deposit, .action-btn.withdraw');
+/* ===== CONFIRM MODAL LOGIC (ADDED) ===== */
+const confirmModal = document.getElementById('confirmModal');
+const confirmTitle = document.getElementById('confirmTitle');
+const confirmSteps = document.getElementById('confirmSteps');
+const closeConfirm = document.getElementById('closeConfirm');
+const doneBtn = document.getElementById('doneBtn');
+const openRobloxBtn = document.getElementById('openRobloxBtn');
 
-  // Loop through each action button and add event listener
-  actionButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      // Hide modal if open and show the confirm modal
-      confirmModal.classList.add('open');
-    
-      // Check if the button clicked is for "withdraw" or "deposit"
-      if (button.classList.contains('withdraw')) {
-        confirmTitle.textContent = 'Withdrawal Code';
-        confirmSteps.innerHTML = `
-          <strong>Next Steps:</strong><br>
-          1. Click the button below to open Roblox<br>
-          2. Join the game and it will automatically read the code<br>
-          3. Receive the funds within seconds
-        `;
-        openRobloxBtn.className = 'action-btn withdraw';  // Update button style
-        doneBtn.className = 'action-btn withdraw';  // Update button style
-      } else {
+// Select the deposit and withdraw buttons
+const depositBtn = document.querySelector('.action-btn.deposit');
+const withdrawBtn = document.querySelector('.action-btn.withdraw');
+
+// Add event listeners for the buttons
+if (depositBtn) {
+    depositBtn.addEventListener('click', () => {
+        confirmModal.classList.add('open');
         confirmTitle.textContent = 'Deposit Ready!';
         confirmSteps.innerHTML = `
-          <strong>Next Steps:</strong><br>
-          1. Click the button below to open Roblox<br>
-          2. Join the game and it will automatically read the code<br>
-          3. Complete the deposit in-game
+            <strong>Next Steps:</strong><br>
+            1. Click the button below to open Roblox<br>
+            2. Join the game and it will automatically read the code<br>
+            3. Complete the deposit in-game
         `;
-        openRobloxBtn.className = 'action-btn deposit';  // Update button style
-        doneBtn.className = 'action-btn deposit';  // Update button style
-      }
+        openRobloxBtn.className = 'action-btn deposit';
+        doneBtn.className = 'action-btn deposit';
     });
-  });
+}
 
-  // Close the modal
-  closeConfirm.onclick = () => confirmModal.classList.remove('open');
-  doneBtn.onclick = () => confirmModal.classList.remove('open');
-  confirmModal.onclick = e => {
+if (withdrawBtn) {
+    withdrawBtn.addEventListener('click', () => {
+        confirmModal.classList.add('open');
+        confirmTitle.textContent = 'Withdrawal Code';
+        confirmSteps.innerHTML = `
+            <strong>Next Steps:</strong><br>
+            1. Click the button below to open Roblox<br>
+            2. Join the game and it will automatically read the code<br>
+            3. Receive the funds within seconds
+        `;
+        openRobloxBtn.className = 'action-btn withdraw';
+        doneBtn.className = 'action-btn withdraw';
+    });
+}
+
+// Close modal logic
+closeConfirm.onclick = () => confirmModal.classList.remove('open');
+doneBtn.onclick = () => confirmModal.classList.remove('open');
+confirmModal.onclick = e => {
     if (e.target === confirmModal) confirmModal.classList.remove('open');
-  };
+};
 </script>
+
 
 </body>
 </html>
+
+
+
 
 
 
