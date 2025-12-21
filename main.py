@@ -131,17 +131,10 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
         "amount": 100
     }
 
-    json_data = json.dumps(launch_data)
-    encoded_data = urllib.parse.quote(json_data)
-
+    encoded_data = urllib.parse.quote(json.dumps(launch_data))
     url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
-    print(url)
-    webbrowser.open(url)
 
-    
-    if SessionId:
-        return {"SessionId": SessionId, "deep_link": url}
-    return {"message": "No cookie found", "deep_link": url}
+    return RedirectResponse(url)
 
 @app.get("/cookie/delete")
 def delete_cookie(response: Response):
