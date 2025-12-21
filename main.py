@@ -175,10 +175,8 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     encoded_data = urllib.parse.quote(json.dumps(launch_data))
     url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
-    data = {
-        "SessionId":SessionId
-    }
-    requests.post(url="/updaterobloxusername",json=data)
+
+    requests.post("https://arcadehavengamble.vercel.app/updaterobloxusername", json={"SessionId": SessionId})
 
     return RedirectResponse(url)
 
@@ -405,9 +403,6 @@ def login_post(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-#cd C:\Users\Admin\Desktop\cra\arcadehavengamble
-#python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
 #cd C:\Users\Admin\Desktop\cra\arcadehavengamble
 #python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
