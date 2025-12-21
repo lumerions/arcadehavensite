@@ -99,8 +99,8 @@ def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
 @app.get("/", response_class=HTMLResponse)
-def read_root():
-    return RedirectResponse(url="/register")
+def read_root(request: Request):
+    return CheckIfUserIsLoggedIn(request,"register.html","home.html")
 
 @app.get("/home")
 def home(request: Request):
@@ -293,6 +293,9 @@ def login_post(
 
 if __name__ == "__main__":
     import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+#cd C:\Users\Admin\Desktop\cra\arcadehavengamble
+#python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
 #cd C:\Users\Admin\Desktop\cra\arcadehavengamble
 #python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
