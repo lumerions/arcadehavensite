@@ -188,6 +188,9 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
 def re(SessionId: str | None = Cookie(default=None)):
     return  redis.get(SessionId + "?")
 
+@app.set("/redisset")
+def re(SessionId: str | None = Cookie(default=None)):
+    return  redis.set(SessionId + "?",True)
 
 @app.post("/setrobloxusername")
 def print_endpoint(data: UpdateRobloxUsernameRedis):
