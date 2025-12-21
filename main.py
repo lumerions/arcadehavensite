@@ -9,9 +9,10 @@ import secrets
 import string
 import random
 from datetime import datetime, timedelta
+import webbrowser
 from fastapi.staticfiles import StaticFiles
 import urllib.parse  
-
+import json
 
 app = FastAPI(
     title="AH Gambling",
@@ -122,14 +123,25 @@ def set_cookie():
 
 @app.get("/cookie/get")
 def get_cookie(SessionId: str | None = Cookie(default=None)):
-    launch_data = "HELLO123"  
-    place_id = 87078646939220 
-    encoded_data = urllib.parse.quote(launch_data)
-    deep_link = f"roblox://placeId={place_id}&launchData={encoded_data}"
+    place_id = 87078646939220
+
+    launch_data = {
+        "source": "site",
+        "reward": "coins",
+        "amount": 100
+    }
+
+    json_data = json.dumps(launch_data)
+    encoded_data = urllib.parse.quote(json_data)
+
+    url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
+    print(url)
+    webbrowser.open(url)
+
     
     if SessionId:
-        return {"SessionId": SessionId, "deep_link": deep_link}
-    return {"message": "No cookie found", "deep_link": deep_link}
+        return {"SessionId": SessionId, "deep_link": url}
+    return {"message": "No cookie found", "deep_link": url}
 
 @app.get("/cookie/delete")
 def delete_cookie(response: Response):
