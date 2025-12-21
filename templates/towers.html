@@ -35,6 +35,7 @@
             font-size: 1.25rem;
         }
 
+        /* Balance dropdown */
         .balance-wrapper {
             margin-left: auto;
             position: relative;
@@ -47,6 +48,12 @@
             padding: 0.5rem 1.25rem;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .balance-btn:hover {
+            background: #222;
+            border-color: #555;
         }
 
         .balance-menu {
@@ -59,10 +66,7 @@
             min-width: 160px;
             padding: 0.5rem 0;
             display: none;
-        }
-
-        .balance-wrapper:focus-within .balance-menu {
-            display: block;
+            z-index: 100;
         }
 
         .balance-menu a {
@@ -70,9 +74,22 @@
             padding: 0.5rem 1rem;
             color: #fff;
             text-decoration: none;
+            font-size: 0.875rem;
         }
 
-        .balance-menu a:hover { background: #222; }
+        .balance-menu a:hover {
+            background: #222;
+        }
+
+        .divider {
+            height: 1px;
+            background: #333;
+            margin: 0.4rem 0;
+        }
+
+        .balance-wrapper:focus-within .balance-menu {
+            display: block;
+        }
 
         main {
             flex: 1;
@@ -144,6 +161,7 @@
             <div class="balance-menu">
                 <a href="/deposit">Deposit</a>
                 <a href="/withdraw">Withdraw</a>
+                <div class="divider"></div>
                 <a href="/logout">Log out</a>
             </div>
         </div>
@@ -154,7 +172,6 @@
     <div class="card">
         <h1>Towers</h1>
 
-       
         <div class="grid">
             <div class="cell tower"></div>
             <div class="cell empty"></div>
@@ -209,4 +226,6 @@
 </main>
 </body>
 </html>
+
+
 
