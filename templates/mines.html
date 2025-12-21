@@ -134,7 +134,8 @@
         .cell.mine { background: #b91c1c; }
         .cell.empty { background: #555; }
         .cell.clicked {  background: #22c55e; }
-
+        .cell.reveal {  background: #16a34a; }
+        
         button {
             padding: 0.6rem 1.25rem;
             background: #222;
@@ -231,6 +232,9 @@
                             const result = await response.json();
                             if (result.ismine) {
                                 cell.className = 'cell mine';
+                                document.querySelectorAll('.cell').forEach(cell => {
+                                    cell.className = 'cell reveal';
+                                }
                             } else {
                                 cell.className = 'cell clicked';
                             }
@@ -252,6 +256,7 @@
 </main>
 </body>
 </html>
+
 
 
 
