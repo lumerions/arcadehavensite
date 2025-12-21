@@ -335,7 +335,7 @@ def register(
                     VALUES (%s, %s, %s, %s,%s)
                     ON CONFLICT (username) DO NOTHING
                     RETURNING id;
-                """, (username, email, hashed_password, session_id))
+                """, (username, email, hashed_password, session_id,robloxusername))
 
                 row = cur.fetchone()
                 if row is None:
