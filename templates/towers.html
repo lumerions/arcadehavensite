@@ -92,7 +92,8 @@
             margin: 0.4rem 0;
         }
 
-        .balance-wrapper:focus-within .balance-menu {
+        .balance-wrapper:focus-within .balance-menu,
+        .balance-wrapper.open .balance-menu {
             display: block;
         }
 
@@ -144,7 +145,7 @@
             color: #d1d5db;
             user-select: none;
         }
-        
+
         .payout span {
             color: #22c55e; 
             font-size: 1.1rem;
@@ -263,12 +264,18 @@
         </form>
     </div>
 </main>
+
+<script>
+    const balanceWrapper = document.querySelector('.balance-wrapper');
+    const balanceBtn = document.querySelector('.balance-btn');
+    
+    balanceBtn.addEventListener('click', function() {
+        balanceWrapper.classList.toggle('open');
+    });
+</script>
+
 </body>
 </html>
-
-
-
-
 
 
 
