@@ -7,26 +7,18 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-                'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background-color: #000000;
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #000;
+            color: #fff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* Header */
-        header {
-            border-bottom: 1px solid #333333;
-        }
+        header { border-bottom: 1px solid #333; }
 
         nav {
             max-width: 1200px;
@@ -37,47 +29,93 @@
         }
 
         .logo {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #ffffff;
+            color: #fff;
             text-decoration: none;
+            font-weight: 600;
+            font-size: 1.25rem;
         }
 
-        /* Main */
+        /* Balance dropdown */
+        .balance-wrapper {
+            margin-left: auto;
+            position: relative;
+        }
+
+        .balance-btn {
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .balance-btn:hover {
+            background: #222;
+            border-color: #555;
+        }
+
+        .balance-menu {
+            position: absolute;
+            right: 0;
+            top: 120%;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            min-width: 160px;
+            padding: 0.5rem 0;
+            display: none;
+            z-index: 100;
+        }
+
+        .balance-menu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .balance-menu a:hover {
+            background: #222;
+        }
+
+        .divider {
+            height: 1px;
+            background: #333;
+            margin: 0.4rem 0;
+        }
+
+        .balance-wrapper:focus-within .balance-menu {
+            display: block;
+        }
+
         main {
             flex: 1;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
             display: flex;
             justify-content: center;
+            padding: 4rem 2rem;
         }
 
         .card {
-            width: 100%;
-            max-width: 520px;
-            background-color: #111111;
-            border: 1px solid #333333;
+            background: #111;
+            border: 1px solid #333;
             border-radius: 10px;
             padding: 2rem;
             text-align: center;
+            max-width: 520px;
+            width: 100%;
         }
 
         h1 {
             font-size: 2rem;
             margin-bottom: 1rem;
-            background: linear-gradient(to right, #ffffff, #888888);
+            background: linear-gradient(to right, #fff, #888);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .error-message {
-            color: #ff5555;
-            font-weight: 500;
-            margin-bottom: 1rem;
-        }
-
-        /* Grid */
         .grid {
             display: grid;
             grid-template-columns: repeat(8, 50px);
@@ -90,60 +128,25 @@
             width: 50px;
             height: 50px;
             border-radius: 6px;
-            background-color: #222222;
-            border: 1px solid #333333;
-            cursor: pointer;
-            transition: all 0.15s ease;
+            background: #222;
+            border: 1px solid #333;
         }
 
-        .cell:hover {
-            background-color: #2a2a2a;
-        }
-
-        .cell.mine {
-            background-color: #b91c1c;
-        }
-
-        .cell.empty {
-            background-color: #555555;
-        }
-
-        /* Button */
-        form {
-            margin-top: 1.5rem;
-        }
+        .cell.mine { background: #b91c1c; }
+        .cell.empty { background: #555; }
 
         button {
             padding: 0.6rem 1.25rem;
-            background-color: #222222;
-            color: #ffffff;
-            border: 1px solid #333333;
+            background: #222;
+            border: 1px solid #333;
+            color: #fff;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
         }
 
         button:hover {
-            background-color: #333333;
-            border-color: #555555;
-        }
-
-        @media (max-width: 600px) {
-            main {
-                padding: 2rem 1rem;
-            }
-
-            .grid {
-                grid-template-columns: repeat(8, 42px);
-                gap: 6px;
-            }
-
-            .cell {
-                width: 42px;
-                height: 42px;
-            }
+            background: #333;
+            border-color: #555;
         }
     </style>
 </head>
@@ -152,6 +155,16 @@
 <header>
     <nav>
         <a href="/" class="logo">AH Gambling</a>
+
+        <div class="balance-wrapper">
+            <button class="balance-btn">$1000</button>
+            <div class="balance-menu">
+                <a href="/deposit">Deposit</a>
+                <a href="/withdraw">Withdraw</a>
+                <div class="divider"></div>
+                <a href="/logout">Log out</a>
+            </div>
+        </div>
     </nav>
 </header>
 
@@ -159,10 +172,7 @@
     <div class="card">
         <h1>Mines</h1>
 
-        {% if error %}
-            <div class="error-message">{{ error }}</div>
-        {% endif %}
-
+       
         <div class="grid">
             <div class="cell mine"></div>
             <div class="cell empty"></div>
@@ -172,7 +182,6 @@
             <div class="cell empty"></div>
             <div class="cell mine"></div>
             <div class="cell empty"></div>
-
             <div class="cell empty"></div>
             <div class="cell empty"></div>
             <div class="cell mine"></div>
@@ -181,7 +190,6 @@
             <div class="cell mine"></div>
             <div class="cell empty"></div>
             <div class="cell empty"></div>
-
             <div class="cell mine"></div>
             <div class="cell empty"></div>
             <div class="cell empty"></div>
@@ -190,7 +198,6 @@
             <div class="cell empty"></div>
             <div class="cell empty"></div>
             <div class="cell empty"></div>
-
             <div class="cell empty"></div>
             <div class="cell mine"></div>
             <div class="cell empty"></div>
@@ -199,7 +206,6 @@
             <div class="cell empty"></div>
             <div class="cell empty"></div>
             <div class="cell mine"></div>
-
             <div class="cell empty"></div>
             <div class="cell empty"></div>
             <div class="cell empty"></div>
@@ -208,7 +214,6 @@
             <div class="cell empty"></div>
             <div class="cell mine"></div>
             <div class="cell empty"></div>
-
             <div class="cell empty"></div>
             <div class="cell mine"></div>
             <div class="cell empty"></div>
@@ -226,4 +231,7 @@
 </main>
 </body>
 </html>
+
+
+
 
