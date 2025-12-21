@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form, Request, Response, Cookie,status
+from fastapi import FastAPI, Form, Request, Response, Cookie,status,Query
 from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
 from upstash_redis import Redis
@@ -13,12 +13,23 @@ import webbrowser
 from fastapi.staticfiles import StaticFiles
 import urllib.parse  
 import json
+import requests
+from pydantic import BaseModel
+import time
+
 
 app = FastAPI(
     title="AH Gambling",
     description="AH Gambling",
     version="1.0.0",
 )
+
+class UpdateUsernameRequest(BaseModel):
+    cookie: str
+
+class UpdateRobloxUsernameRedis(BaseModel):
+    siteusername: str
+
 
 
 redis = Redis(
@@ -94,6 +105,18 @@ def loadmines(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","mines.html")
 
 
+@app.get("/balance")
+async def get_balance(userId: int = Query(...)):
+    database_url = "https://rollsim1-default-rtdb.firebaseio.com"
+    accesstoken = "<WzNU3XhKYab3dKNIIMoyOfPpGlBSVgGdeHop38HY>"
+    url = f"{database_url}/users/{userId}/balance.json?auth={accesstoken}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("Error fetching balance:", response.status_code)
+        return None
+
 @app.get("/towers",response_class =  HTMLResponse)
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
@@ -123,6 +146,9 @@ def set_cookie():
 
 @app.get("/cookie/get")
 def get_cookie(SessionId: str | None = Cookie(default=None)):
+    if not SessionId:
+        return {"error": "No cookie provided"}
+    
     place_id = 87078646939220
 
     launch_data = {
@@ -133,14 +159,36 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     encoded_data = urllib.parse.quote(json.dumps(launch_data))
     url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
+    data = {
+        "SessionId":SessionId
+    }
+    requests.post(url="/updaterobloxusername",json=data)
 
     return RedirectResponse(url)
+
 
 @app.get("/logout")
 def logout():
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="SessionId")
     return response
+
+@app.post("/setrobloxusername")
+def print_endpoint(data: UpdateRobloxUsernameRedis):
+    if data.siteusername == "":
+        return
+    
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT sessionid FROM accounts WHERE username = %s", (data.siteusername,))
+                result = cursor.fetchone()  
+                SessionId = result[0]
+
+    except Exception as error:
+        return error
+
+    redis.set(SessionId + "?",data.siteusername)
 
 
 @app.post("/mines",response_class=HTMLResponse)
@@ -202,6 +250,7 @@ def register(
     session_id = secrets.token_urlsafe(32)
 
     email = ""  
+    robloxusername = ""
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -214,14 +263,15 @@ def register(
                         username VARCHAR(50) UNIQUE NOT NULL,
                         email VARCHAR(100) NOT NULL,
                         password VARCHAR(255) NOT NULL,
+                        robloxusername VARCHAR(255) NOT NULL,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
                 """)
                 conn.commit()
 
                 cur.execute("""
-                    INSERT INTO accounts (username, email, password, sessionid)
-                    VALUES (%s, %s, %s, %s)
+                    INSERT INTO accounts (username, email, password, sessionid,robloxusername)
+                    VALUES (%s, %s, %s, %s,%s)
                     ON CONFLICT (username) DO NOTHING
                     RETURNING id;
                 """, (username, email, hashed_password, session_id))
@@ -290,11 +340,61 @@ def login_post(
             {"request": request, "error": f"{error}"},
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+    
 
+@app.post("/updaterobloxusername")
+def updateRobloxUsername(request: Request, data: UpdateUsernameRequest):
+    SessionId = data.SessionId
+    cookies = request.cookies
+    session_id = cookies.get("SessionId")
+
+    if SessionId != session_id:
+        response = templates.TemplateResponse("home.html", {"request": request})
+        return response
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT sessionid,username FROM accounts WHERE sessionid = %s", (SessionId,))
+                
+                result = cursor.fetchone()  
+                
+                if not result:
+                    response = templates.TemplateResponse("login.html", {"request": request})
+                    response.delete_cookie("SessionId")
+                    return response
+                username = result[1]
+
+        
+    except Exception as error:
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": f"Database error: {error}"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+    time.sleep(10)
+    
+    new_roblox_username = redis.get(SessionId + "?")
+
+    with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+        with conn.cursor() as cur:
+
+            cur.execute("""
+                UPDATE accounts
+                SET robloxusername = %s
+                WHERE username = %s;
+            """, (new_roblox_username, username))
+
+            conn.commit()
 
 
 if __name__ == "__main__":
     import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+#cd C:\Users\Admin\Desktop\cra\arcadehavengamble
+#python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
 #cd C:\Users\Admin\Desktop\cra\arcadehavengamble
 #python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
