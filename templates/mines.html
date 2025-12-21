@@ -86,7 +86,7 @@
             margin: 0.4rem 0;
         }
 
-        .balance-wrapper:focus-within .balance-menu {
+        .balance-wrapper.open .balance-menu {
             display: block;
         }
 
@@ -209,6 +209,10 @@
         </div>
 
         <script>
+            document.querySelector('.balance-btn').addEventListener('click', () => {
+                document.querySelector('.balance-wrapper').classList.toggle('open');
+            });
+
             async function updateBalance(userId) {
                 try {
                     const response = await fetch(`/balance?userId=${userId}`);
@@ -273,9 +277,6 @@
 </main>
 </body>
 </html>
-
-
-
 
 
 
