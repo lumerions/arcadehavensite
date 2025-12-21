@@ -140,6 +140,7 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
 def logout(response: Response):
     response.delete_cookie(key="SessionId")
     response = RedirectResponse(url="/register", status_code=303)
+    return response
 
 
 @app.post("/mines",response_class=HTMLResponse)
