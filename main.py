@@ -203,6 +203,9 @@ def print_endpoint(data: UpdateRobloxUsernameRedis):
 
     except Exception as error:
         return error
+    
+    print(data)
+    print(SessionId)
 
     redis.set(SessionId + "?",data.robloxusername)
 
