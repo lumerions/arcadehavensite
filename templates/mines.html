@@ -233,17 +233,28 @@
                 
                             const result = await response.json();
                             const mines = result.mines
-                            
-                            document.querySelectorAll('.cell').forEach(cell => {
-                                const index = Number(cell.dataset.index);
-                            
-                                if (mines.includes(index)) {
-                                    cell.classList.add('mine');
-                                } else if (!cell.classList.contains('clicked')) {
-                                    cell.classList.add('reveal');
-                                }
-                            });
 
+                            if (result.ismine && Array.isArray(mines)) {
+                        
+                                document.querySelectorAll('.cell').forEach(cellEl => {
+                                    const index = Number(cellEl.dataset.index);
+                            
+                                    if (mines.includes(index)) {
+                                        cellEl.classList.add('mine');
+                                    } else {
+                                        if (!cellEl.classList.contains('clicked')) {
+                                            cellEl.classList.add('reveal');
+                                        }
+                                    }
+                                });
+                            
+                                grid.classList.add('gamedone');
+                            
+                            } else {
+                                cell.classList.add('clicked');
+                            }
+
+                            
                             console.log('Server response:', result);
 
                             cell.classList.add('revealed');
@@ -261,6 +272,7 @@
 </main>
 </body>
 </html>
+
 
 
 
