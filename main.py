@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form, Request, Response, Cookie,status,Query
-from fastapi.responses import HTMLResponse,RedirectResponse
+from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse
 from fastapi.templating import Jinja2Templates
 from upstash_redis import Redis
 import psycopg
@@ -28,6 +28,10 @@ class UpdateRobloxUsernameRedis(BaseModel):
     robloxusername: str
     siteusername : str
     sessionid : str
+
+class MinesClick(BaseModel):
+    tileIndex: int
+
 
 
 
@@ -149,7 +153,6 @@ def logout():
     response.delete_cookie(key="SessionId")
     return response
 
-
 @app.get("/robloxdeeplink")
 async def get_cookie(SessionId: str | None = Cookie(default=None)):
     if not SessionId:
@@ -200,41 +203,33 @@ def print_endpoint(data: UpdateRobloxUsernameRedis):
                 conn.commit()
     except Exception as error:
         return error
-
-
-@app.post("/mines",response_class=HTMLResponse)
-def startMines(request: Request):
-    cookies = request.cookies
-    session_id = cookies.get("SessionId")
-
-    if not session_id:
-        return templates.TemplateResponse("mines.html", {"request": request})
-    else:
-        try:
-            with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-
-                with conn.cursor() as cursor:
-                    cursor.execute("SELECT sessionid,username FROM accounts WHERE sessionid = %s", (session_id,))
-                    
-                    result = cursor.fetchone()  
-                    username = result[1]
-                    
-                    if result and result[0] != session_id:
-                        raise ValueError("Session Id is expired or invalid.")
-        
-        except Exception as error:
-            return templates.TemplateResponse(
-                "mines.html",
-                {"request": request, "error": f"Error: {error}"},
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-    if redis.get(str(session_id)):
-        return templates.TemplateResponse("mines.html", {"request": request, "username": username, "session_id": session_id})
-
     
-    redis.set(str(session_id),True)
 
-    return templates.TemplateResponse("mines.html", {"request": request, "username": username, "session_id": session_id})
+@app.post("/mines/click")
+def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
+    tile_index = data.tileIndex
+    mines = redis.get(SessionId + "minesdata")
+    if not mines:
+        return
+    is_mine = tile_index in mines
+
+    return JSONResponse(content={"ismine": is_mine})
+
+@app.post("/startmines")
+def print_endpoint(SessionId: str = Cookie(None)):
+    if redis.get("Debounce" + SessionId):
+        return
+    
+    redis.set("Debounce" + SessionId,True)
+
+    mines = []
+    for i in range(48):
+        if random.randint(1,2) == 2:
+            mines.append(i)
+
+    redis.set(SessionId + "minesdata",mines)
+
+
 
 @app.post("/register", response_class=HTMLResponse)
 def register(
