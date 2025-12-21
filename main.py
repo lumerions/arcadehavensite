@@ -188,19 +188,18 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
 def re(SessionId: str | None = Cookie(default=None)):
     return  redis.get(SessionId + "?")
 
-@app.get("/redisset")
-def re(SessionId: str | None = Cookie(default=None)):
-    return  redis.set(SessionId + "?",True)
 
 @app.post("/setrobloxusername")
 def print_endpoint(data: UpdateRobloxUsernameRedis):
     if data.robloxusername == "":
         return "Username can't be empty!"
+    if data.siteusername == "":
+        return "Site username can't be empty!"
     
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT sessionid FROM accounts WHERE username = %s", (data.robloxusername,))
+                cursor.execute("SELECT sessionid FROM accounts WHERE username = %s", (data.siteusername,))
                 result = cursor.fetchone()  
                 SessionId = result[0]
 
