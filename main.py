@@ -193,7 +193,7 @@ def re(SessionId: str | None = Cookie(default=None)):
                 cursor.execute("SELECT robloxusername FROM accounts WHERE sessionid = %s", (SessionId,))
                 
                 result = cursor.fetchone()  
-                robloxusername = result[1]
+                robloxusername = result[0]
                 
     except Exception as error:
         return error
