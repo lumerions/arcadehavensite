@@ -150,7 +150,7 @@ def logout():
     return response
 
 
-@app.get("/cookie/get")
+@app.get("/robloxdeeplink")
 async def get_cookie(SessionId: str | None = Cookie(default=None)):
     if not SessionId:
         return {"error": "No cookie provided"}
@@ -214,9 +214,10 @@ def startMines(request: Request):
             with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
 
                 with conn.cursor() as cursor:
-                    cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (session_id,))
+                    cursor.execute("SELECT sessionid,username FROM accounts WHERE sessionid = %s", (session_id,))
                     
                     result = cursor.fetchone()  
+                    username = result[1]
                     
                     if result and result[0] != session_id:
                         raise ValueError("Session Id is expired or invalid.")
