@@ -217,7 +217,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     return JSONResponse(content={"ismine": is_mine})
 
-@app.post("/startmines",response_class = HTMLResponse)
+@app.post("/startmines")
 def print_endpoint(SessionId: str = Cookie(None)):
     if redis.get("Debounce_" + SessionId):
         return
