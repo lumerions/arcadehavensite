@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mines • AH Gambling</title>
+    <title>Mines - AH Gambling</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <style>
@@ -23,7 +23,7 @@
         nav {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 1rem 2rem;
+            padding: 1rem 1.25rem;
             display: flex;
             align-items: center;
         }
@@ -94,72 +94,85 @@
             flex: 1;
             display: flex;
             justify-content: center;
-            padding: 4rem 2rem;
+            padding: 3rem 1rem;
         }
 
         .card {
             background: #111;
             border: 1px solid #333;
             border-radius: 10px;
-            padding: 2rem;
+            padding: 1.5rem;
             text-align: center;
             max-width: 520px;
             width: 100%;
         }
 
         h1 {
-            font-size: 2rem;
+            font-size: clamp(1.6rem, 4vw, 2rem);
             margin-bottom: 1rem;
             background: linear-gradient(to right, #fff, #888);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
+        /* 🔹 RESPONSIVE GRID */
         .grid {
             display: grid;
-            grid-template-columns: repeat(8, 50px);
-            gap: 8px;
+            grid-template-columns: repeat(8, clamp(34px, 8vw, 50px));
+            gap: clamp(6px, 2vw, 8px);
             justify-content: center;
-            margin: 1.5rem 0;
+            margin: 1.25rem 0;
         }
 
         .cell {
-            width: 50px;
-            height: 50px;
+            width: clamp(34px, 8vw, 50px);
+            height: clamp(34px, 8vw, 50px);
             border-radius: 6px;
             background: #222;
             border: 1px solid #333;
+            touch-action: manipulation;
         }
 
         .cell.mine { background: #b91c1c; }
         .cell.empty { background: #555; }
+
         .cell.clicked {
             background: #22c55e;
         }
-        
+
         .cell.reveal {
             background: #22c55e;
             filter: brightness(0.4);
         }
-        
+
         button {
-            padding: 0.6rem 1.25rem;
+            padding: 0.7rem 1.5rem;
             background: #222;
             border: 1px solid #333;
             color: #fff;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 0.95rem;
+            width: 100%;
+            max-width: 260px;
+            margin-top: 0.5rem;
         }
 
         button:hover {
             background: #333;
             border-color: #555;
         }
-        
+
         .error-message {
             color: #ff5555;
             font-weight: bold;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        @media (max-width: 420px) {
+            .card {
+                padding: 1.25rem 1rem;
+            }
         }
     </style>
 </head>
@@ -186,9 +199,9 @@
         {% if error %}
             <p class="error-message">{{ error }}</p>
         {% endif %}
+
         <h1>Mines</h1>
 
-       
         <div class="grid">
             {% for i in range(48) %}
                 <div class="cell" data-index="{{ i }}"></div>
@@ -196,79 +209,61 @@
         </div>
 
         <script>
-                async function updateBalance(userId) {
-                    try {
-                        const response = await fetch(`/balance?userId=${userId}`);
-                        if (!response.ok) throw new Error('Network response was not ok');
-                
-                        const data = await response.json();
-                        const balance = data.balance;
-                
-                        const balanceBtn = document.querySelector('.balance-btn');
-                        balanceBtn.textContent = `$${balance}`;
-                    } catch (error) {
-                        console.error('Error fetching balance:', error);
-                    }
+            async function updateBalance(userId) {
+                try {
+                    const response = await fetch(`/balance?userId=${userId}`);
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const data = await response.json();
+                    document.querySelector('.balance-btn').textContent = `$${data.balance}`;
+                } catch (error) {
+                    console.error('Error fetching balance:', error);
                 }
-                
-                updateBalance(123); 
-                
-                document.querySelectorAll('.cell').forEach(cell => {
-                    cell.addEventListener('click', async () => {
-                        if (cell.classList.contains('revealed')) return;
-                        const grid = document.querySelector('.grid'); 
-                        if (grid.classList.contains('gamedone')) return;
-                        
-                        const tileIndex = cell.dataset.index;
-                
-                        try {
-                            const response = await fetch('/mines/click', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                credentials: 'include', 
-                                body: JSON.stringify({
-                                    tileIndex: tileIndex
-                                })
+            }
+
+            updateBalance(123);
+
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.addEventListener('click', async () => {
+                    if (cell.classList.contains('revealed')) return;
+                    const grid = document.querySelector('.grid');
+                    if (grid.classList.contains('gamedone')) return;
+
+                    const tileIndex = cell.dataset.index;
+
+                    try {
+                        const response = await fetch('/mines/click', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ tileIndex })
+                        });
+
+                        if (!response.ok) throw new Error('Request failed');
+
+                        const result = await response.json();
+                        const mines = result.mines;
+
+                        if (result.ismine && Array.isArray(mines)) {
+                            document.querySelectorAll('.cell').forEach(cellEl => {
+                                const index = Number(cellEl.dataset.index);
+                                if (mines.includes(index)) {
+                                    cellEl.classList.add('mine');
+                                } else if (!cellEl.classList.contains('clicked')) {
+                                    cellEl.classList.add('reveal');
+                                }
                             });
-                
-                            if (!response.ok) {
-                                throw new Error('Request failed');
-                            }
-                
-                            const result = await response.json();
-                            const mines = result.mines
-
-                            if (result.ismine && Array.isArray(mines)) {
-                        
-                                document.querySelectorAll('.cell').forEach(cellEl => {
-                                    const index = Number(cellEl.dataset.index);
-                            
-                                    if (mines.includes(index)) {
-                                        cellEl.classList.add('mine');
-                                    } else {
-                                        if (!cellEl.classList.contains('clicked')) {
-                                            cellEl.classList.add('reveal');
-                                        }
-                                    }
-                                });
-                            
-                                grid.classList.add('gamedone');
-                            
-                            } else {
-                                cell.classList.add('clicked');
-                            }
-
-                            
-                            console.log('Server response:', result);
-
-                            cell.classList.add('revealed');
-                        } catch (err) {
-                            console.error('Error sending tile click:', err);
+                            grid.classList.add('gamedone');
+                        } else {
+                            cell.classList.add('clicked');
                         }
-                    });
+
+                        cell.classList.add('revealed');
+                    } catch (err) {
+                        console.error('Error sending tile click:', err);
+                    }
                 });
+            });
         </script>
 
         <form method="POST" action="/startmines">
@@ -278,17 +273,6 @@
 </main>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
