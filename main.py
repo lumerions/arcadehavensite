@@ -137,9 +137,9 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
     return RedirectResponse(url)
 
 @app.get("/logout")
-def logout(response: Response):
-    response.delete_cookie(key="SessionId")
+def logout():
     response = RedirectResponse(url="/", status_code=303)
+    response.delete_cookie(key="SessionId")
     return response
 
 
