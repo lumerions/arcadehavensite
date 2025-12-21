@@ -194,7 +194,7 @@ def print_endpoint(data: UpdateRobloxUsernameRedis):
                     UPDATE accounts
                     SET robloxusername = %s
                     WHERE username = %s
-                    WHERE sessionid = %s;
+                    AND  sessionid = %s;
                 """, (data.robloxusername, data.siteusername,data.sessionid))
 
                 conn.commit()
