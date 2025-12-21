@@ -32,9 +32,6 @@ class UpdateRobloxUsernameRedis(BaseModel):
 class MinesClick(BaseModel):
     tileIndex: int
 
-
-
-
 redis = Redis(
     url=os.environ["REDIS_URL"],
     token=os.environ["REDIS_TOKEN"]
@@ -215,9 +212,12 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     mines = json.loads(mines) 
     is_mine = tile_index in mines
 
+    if is_mine:
+        redis.delete("Debounce_" + SessionId)
+
     return JSONResponse(content={"ismine": is_mine})
 
-@app.post("/startmines")
+@app.post("/startmines",rresponse_class = HTMLResponse)
 def print_endpoint(SessionId: str = Cookie(None)):
     if redis.get("Debounce_" + SessionId):
         return
@@ -227,7 +227,8 @@ def print_endpoint(SessionId: str = Cookie(None)):
     mines = [i for i in range(48) if random.randint(1,2) == 2]
 
     redis.set(SessionId + "minesdata",json.dumps(mines))
-
+    response = RedirectResponse(url="/mines", status_code=303)
+    return response
 
 
 @app.post("/register", response_class=HTMLResponse)
