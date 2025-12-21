@@ -213,22 +213,21 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     is_mine = tile_index in mines
 
     if is_mine:
-        redis.delete("Debounce_" + SessionId)
+        redis.delete("Debounce__" + SessionId)
 
     return JSONResponse(content={"ismine": is_mine})
 
 @app.post("/startmines")
 def print_endpoint(SessionId: str = Cookie(None)):
-    if redis.get("Debounce_" + SessionId):
+    if redis.get("Debounce__" + SessionId):
         return
     
-    redis.set("Debounce_" + SessionId,True)
+    redis.set("Debounce__" + SessionId,True)
 
     mines = [i for i in range(48) if random.randint(1,2) == 2]
 
     redis.set(SessionId + "minesdata",json.dumps(mines))
-    response = RedirectResponse(url="/mines", status_code=303)
-    return response
+    return RedirectResponse(url="/mines", status_code=303)
 
 
 @app.post("/register", response_class=HTMLResponse)
