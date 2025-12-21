@@ -234,7 +234,7 @@
                             
                             if (result.ismine && mines) {
                                 document.querySelectorAll('.cell').forEach(cell => {
-                                    if (mines.includes(Number(c.dataset.index))) {
+                                    if (mines.includes(Number(cell.dataset.index))) {
                                         cell.className = 'cell mine';
                                     } else {
                                         cell.className = 'cell reveal';
@@ -261,6 +261,7 @@
 </main>
 </body>
 </html>
+
 
 
 
