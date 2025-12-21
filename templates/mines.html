@@ -35,7 +35,6 @@
             font-size: 1.25rem;
         }
 
-        /* Balance dropdown */
         .balance-wrapper {
             margin-left: auto;
             position: relative;
@@ -134,6 +133,7 @@
 
         .cell.mine { background: #b91c1c; }
         .cell.empty { background: #555; }
+        .cell.clicked {  background: #22c55e; }
 
         button {
             padding: 0.6rem 1.25rem;
@@ -183,54 +183,9 @@
 
        
         <div class="grid">
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell empty"></div>
-            <div class="cell mine"></div>
-            <div class="cell empty"></div>
+            {% for i in range(48) %}
+                <div class="cell" data-index="{{ i }}"></div>
+            {% endfor %}
         </div>
 
         <script>
@@ -250,6 +205,43 @@
                 }
                 
                 updateBalance(123); 
+                
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.addEventListener('click', async () => {
+                        if (cell.classList.contains('revealed')) return;
+                
+                        const tileIndex = cell.dataset.index;
+                
+                        try {
+                            const response = await fetch('/mines/click', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    tileIndex: tileIndex
+                                })
+                            });
+                
+                            if (!response.ok) {
+                                throw new Error('Request failed');
+                            }
+                
+                            const result = await response.json();
+                            if (result.ismine) {
+                                cell.className = 'cell mine';
+                            } else {
+                                cell.className = 'cell clicked';
+                            }
+
+                            console.log('Server response:', result);
+
+                            cell.classList.add('revealed');
+                        } catch (err) {
+                            console.error('Error sending tile click:', err);
+                        }
+                    });
+                });
         </script>
 
         <form method="POST" action="/mines">
@@ -259,6 +251,7 @@
 </main>
 </body>
 </html>
+
 
 
 
