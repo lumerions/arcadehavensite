@@ -221,8 +221,8 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
 @app.post("/startmines")
 def print_endpoint(SessionId: str = Cookie(None)):
-    if redis.get("Debounce." + SessionId):
-        return
+    if not SessionId or redis.get("Debounce." + SessionId):
+        return RedirectResponse(url="/mines", status_code=303)
     
     redis.set("Debounce." + SessionId,True)
 
