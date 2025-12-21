@@ -39,6 +39,42 @@ nav {
     font-size: 1.25rem;
 }
 
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.7rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+
+    .payout-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px 32px;
+        padding: 20px;
+    }
+
+    .payout {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .payout-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 18px;
+    }
+
+    .payout {
+        font-size: 0.9rem;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+
 .balance-wrapper {
     margin-left: auto;
     position: relative;
@@ -169,8 +205,6 @@ main {
 .tab.active.deposit { background: #16a34a; color:#fff; }
 .tab.active.withdraw { background: #2563eb; color:#fff; }
 
-/* ===== FORM ===== */
-
 label {
     display: block;
     font-size: .85rem;
@@ -230,47 +264,47 @@ input {
 </nav>
 </header>
 <main>
-  <div class="card">
-    <h1>Towers</h1>
+    <div class="card">
+        <h1>Towers</h1>
 
-    <div class="payout-grid">
-      <div class="payout"><span>$</span>1,046</div>
-      <div class="payout"><span>$</span>1,046</div>
-      <div class="payout"><span>$</span>1,046</div>
+        <div class="payout-grid">
+            <div class="payout"><span>$</span>1,046</div>
+            <div class="payout"><span>$</span>1,046</div>
+            <div class="payout"><span>$</span>1,046</div>
 
-      <div class="payout"><span>$</span>762</div>
-      <div class="payout"><span>$</span>762</div>
-      <div class="payout"><span>$</span>762</div>
+            <div class="payout"><span>$</span>762</div>
+            <div class="payout"><span>$</span>762</div>
+            <div class="payout"><span>$</span>762</div>
 
-      <div class="payout"><span>$</span>621</div>
-      <div class="payout"><span>$</span>621</div>
-      <div class="payout"><span>$</span>621</div>
+            <div class="payout"><span>$</span>621</div>
+            <div class="payout"><span>$</span>621</div>
+            <div class="payout"><span>$</span>621</div>
 
-      <div class="payout"><span>$</span>461</div>
-      <div class="payout"><span>$</span>461</div>
-      <div class="payout"><span>$</span>461</div>
+            <div class="payout"><span>$</span>461</div>
+            <div class="payout"><span>$</span>461</div>
+            <div class="payout"><span>$</span>461</div>
 
-      <div class="payout"><span>$</span>306</div>
-      <div class="payout"><span>$</span>306</div>
-      <div class="payout"><span>$</span>306</div>
+            <div class="payout"><span>$</span>306</div>
+            <div class="payout"><span>$</span>306</div>
+            <div class="payout"><span>$</span>306</div>
 
-      <div class="payout"><span>$</span>232</div>
-      <div class="payout"><span>$</span>232</div>
-      <div class="payout"><span>$</span>232</div>
+            <div class="payout"><span>$</span>232</div>
+            <div class="payout"><span>$</span>232</div>
+            <div class="payout"><span>$</span>232</div>
 
-      <div class="payout"><span>$</span>177</div>
-      <div class="payout"><span>$</span>177</div>
-      <div class="payout"><span>$</span>177</div>
+            <div class="payout"><span>$</span>177</div>
+            <div class="payout"><span>$</span>177</div>
+            <div class="payout"><span>$</span>177</div>
 
-      <div class="payout"><span>$</span>151</div>
-      <div class="payout"><span>$</span>151</div>
-      <div class="payout"><span>$</span>151</div>
+            <div class="payout"><span>$</span>151</div>
+            <div class="payout"><span>$</span>151</div>
+            <div class="payout"><span>$</span>151</div>
+        </div>
+
+        <form method="POST" action="/towers">
+            <button type="submit">Play Towers</button>
+        </form>
     </div>
-
-    <form method="POST" action="/towers">
-      <button type="submit">Play Towers</button>
-    </form>
-  </div>
 </main>
 
 
@@ -361,6 +395,7 @@ tabs.forEach(tab => {
 
 </body>
 </html>
+
 
 
 
