@@ -25,7 +25,7 @@ app = FastAPI(
 )
 
 class UpdateUsernameRequest(BaseModel):
-    cookie: str
+    SessionId: str 
 
 class UpdateRobloxUsernameRedis(BaseModel):
     robloxusername: str
@@ -175,13 +175,11 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     encoded_data = urllib.parse.quote(json.dumps(launch_data))
     url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
-    cookies = {"SessionId": SessionId}
 
     async with httpx.AsyncClient() as client:
         await client.post(
             "https://arcadehavengamble.vercel.app/updaterobloxusername",
             json={"SessionId": SessionId},
-            cookies=cookies
         )
 
     return RedirectResponse(url)
