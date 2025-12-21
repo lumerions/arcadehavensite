@@ -184,6 +184,9 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     return RedirectResponse(url)
 
+@app.get("/redis")
+def re(SessionId: str | None = Cookie(default=None)):
+    return  redis.get(SessionId + "?")
 
 
 @app.post("/setrobloxusername")
@@ -202,7 +205,6 @@ def print_endpoint(data: UpdateRobloxUsernameRedis):
         return error
 
     redis.set(SessionId + "?",data.robloxusername)
-
 
 @app.post("/updaterobloxusername")
 def updateRobloxUsername(request: Request, data: UpdateUsernameRequest):
