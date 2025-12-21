@@ -184,9 +184,21 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     return RedirectResponse(url)
 
-@app.get("/redis")
+@app.get("/getrobloxusername")
 def re(SessionId: str | None = Cookie(default=None)):
-    return  redis.get(SessionId + "?")
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT robloxusername FROM accounts WHERE sessionid = %s", (SessionId,))
+                
+                result = cursor.fetchone()  
+                robloxusername = result[1]
+                
+    except Exception as error:
+        return error
+    
+    return  robloxusername
 
 
 @app.post("/setrobloxusername")
