@@ -176,12 +176,6 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
     encoded_data = urllib.parse.quote(json.dumps(launch_data))
     url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
 
-    async with httpx.AsyncClient() as client:
-        await client.post(
-            "https://arcadehavengamble.vercel.app/updaterobloxusername",
-            json={"SessionId": SessionId},
-        )
-
     return RedirectResponse(url)
 
 @app.get("/getrobloxusername")
@@ -217,47 +211,6 @@ def print_endpoint(data: UpdateRobloxUsernameRedis):
 
     except Exception as error:
         return error
-    
-    print(data)
-    print(SessionId)
-
-    redis.set(SessionId + "?",data.robloxusername)
-
-@app.post("/updaterobloxusername")
-def updateRobloxUsername(request: Request, data: UpdateUsernameRequest):
-    SessionId = data.SessionId
-    cookies = request.cookies
-    session_id = cookies.get("SessionId")
-
-    if SessionId != session_id:
-        response = templates.TemplateResponse("home.html", {"request": request})
-        return response
-
-    try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT sessionid,username FROM accounts WHERE sessionid = %s", (SessionId,))
-                
-                result = cursor.fetchone()  
-                
-                if not result:
-                    response = templates.TemplateResponse("login.html", {"request": request})
-                    response.delete_cookie("SessionId")
-                    return response
-                username = result[1]
-
-        
-    except Exception as error:
-        return templates.TemplateResponse(
-            "login.html",
-            {"request": request, "error": f"Database error: {error}"},
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    
-    time.sleep(10)
-    
-    new_roblox_username = redis.get(SessionId + "?")
 
     with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
         with conn.cursor() as cur:
@@ -266,7 +219,7 @@ def updateRobloxUsername(request: Request, data: UpdateUsernameRequest):
                 UPDATE accounts
                 SET robloxusername = %s
                 WHERE username = %s;
-            """, (new_roblox_username, username))
+            """, (data.robloxusername, data.siteusername))
 
             conn.commit()
 
