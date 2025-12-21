@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mines Game</title>
+    <title>Mines • AH Gambling</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
     <style>
         * {
             margin: 0;
@@ -13,163 +14,216 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #222;
-            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+                'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid #333333;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        /* Main */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            overflow: hidden;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 520px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
         }
 
         h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #ffffff, #888888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .error-message {
+            color: #ff5555;
+            font-weight: 500;
             margin-bottom: 1rem;
         }
 
+        /* Grid */
         .grid {
             display: grid;
             grid-template-columns: repeat(8, 50px);
-            grid-template-rows: repeat(8, 50px);
-            gap: 5px;
+            gap: 8px;
+            justify-content: center;
+            margin: 1.5rem 0;
         }
 
         .cell {
             width: 50px;
             height: 50px;
-            background-color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 5px;
+            border-radius: 6px;
+            background-color: #222222;
+            border: 1px solid #333333;
             cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .cell:hover {
+            background-color: #2a2a2a;
         }
 
         .cell.mine {
-            background-color: red;
+            background-color: #b91c1c;
         }
 
         .cell.empty {
-            background-color: #666;
+            background-color: #555555;
         }
 
-        .message {
-            font-size: 1.25rem;
-            margin-top: 1rem;
-        }
-
-        .footer-text {
-            font-size: 0.8rem;
-            color: #888888;
-            margin-top: 1rem;
-        }
-
-        .footer-text a {
-            color: #ffffff;
-            text-decoration: none;
-        }
-
-        .footer-text a:hover {
-            text-decoration: underline;
-        }
-
-        .error-message {
-            color: #ff5555;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
+        /* Button */
         form {
-            margin-top: 20px;
+            margin-top: 1.5rem;
         }
 
         button {
-            padding: 0.5rem 1rem;
-            background-color: #444;
-            color: white;
-            border: none;
-            border-radius: 5px;
+            padding: 0.6rem 1.25rem;
+            background-color: #222222;
+            color: #ffffff;
+            border: 1px solid #333333;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
         button:hover {
-            background-color: #666;
+            background-color: #333333;
+            border-color: #555555;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 2rem 1rem;
+            }
+
+            .grid {
+                grid-template-columns: repeat(8, 42px);
+                gap: 6px;
+            }
+
+            .cell {
+                width: 42px;
+                height: 42px;
+            }
         }
     </style>
 </head>
+
 <body>
-    <h1>Mines Game</h1>
+<header>
+    <nav>
+        <a href="/" class="logo">AH Gambling</a>
+    </nav>
+</header>
 
-    {% if error %}
-        <p class="error-message">{{ error }}</p>
-    {% endif %}
+<main>
+    <div class="card">
+        <h1>Mines</h1>
 
-    <div class="grid">
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
 
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
+        <div class="grid">
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
 
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
 
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
 
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
 
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell empty"></div>
-        <div class="cell mine"></div>
-        <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell empty"></div>
+            <div class="cell mine"></div>
+            <div class="cell empty"></div>
+        </div>
+
+        <form method="POST" action="/mines">
+            <button type="submit">Play Mines</button>
+        </form>
     </div>
-
-    <div class="message" id="message">
-        <!-- Game state message can be added here -->
-    </div>
-
-    <!-- POST request button -->
-    <form method="POST" action="/mines">
-        <button type="submit">Play Mines</button>
-    </form>
+</main>
 </body>
 </html>
-
 
