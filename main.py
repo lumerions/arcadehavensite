@@ -136,10 +136,10 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     return RedirectResponse(url)
 
-@app.get("/cookie/delete")
+@app.get("/logout")
 def delete_cookie(response: Response):
     response.delete_cookie(key="SessionId")
-    return {"message": "Cookie has been deleted!"}
+    return RedirectResponse("/")
 
 @app.post("/mines",response_class=HTMLResponse)
 def startMines(request: Request):
@@ -293,9 +293,6 @@ def login_post(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-#cd C:\Users\Admin\Desktop\cra\arcadehavengamble
-#python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
 #cd C:\Users\Admin\Desktop\cra\arcadehavengamble
 #python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
