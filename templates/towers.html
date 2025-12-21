@@ -75,6 +75,34 @@ nav {
     }
 }
 
+
+.payout-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 60px;
+    background: #1c1c1c;
+    border: 1px solid #2e2e2e;
+    border-radius: 14px;
+    padding: 24px 32px;
+    margin: 1.5rem 0;
+}
+
+.payout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #d1d5db;
+    user-select: none;
+}
+
+.payout span {
+    color: #22c55e; 
+    font-size: 1.1rem;
+}
+
 .balance-wrapper {
     margin-left: auto;
     position: relative;
@@ -395,6 +423,7 @@ tabs.forEach(tab => {
 
 </body>
 </html>
+
 
 
 
