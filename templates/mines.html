@@ -134,7 +134,7 @@
         .cell.mine { background: #b91c1c; }
         .cell.empty { background: #555; }
         .cell.clicked {  background: #22c55e; }
-        .cell.reveal {  background: #bbf7d0; }
+        .cell.reveal {  background:   #4ade80; }
         
         button {
             padding: 0.6rem 1.25rem;
@@ -210,7 +210,9 @@
                 document.querySelectorAll('.cell').forEach(cell => {
                     cell.addEventListener('click', async () => {
                         if (cell.classList.contains('revealed')) return;
-                
+                        const grid = document.querySelector('.grid'); 
+                        if (grid.classList.contains('gamedone')) return;
+                        
                         const tileIndex = cell.dataset.index;
                 
                         try {
@@ -237,9 +239,13 @@
                                     if (mines.includes(Number(cell.dataset.index))) {
                                         cell.className = 'cell mine';
                                     } else {
-                                        cell.className = 'cell reveal';
+                                        if (cell.className !== 'cell clicked') {
+                                            cell.className = 'cell reveal';
+                                        }
                                     }
                                 });
+
+                                grid.classList.add('gamedone');
                             } else {
                                 cell.className = 'cell clicked';
                             }
@@ -261,6 +267,7 @@
 </main>
 </body>
 </html>
+
 
 
 
