@@ -137,9 +137,10 @@ def get_cookie(SessionId: str | None = Cookie(default=None)):
     return RedirectResponse(url)
 
 @app.get("/logout")
-def delete_cookie(response: Response):
+def logout(response: Response):
     response.delete_cookie(key="SessionId")
-    return RedirectResponse("/")
+    response = RedirectResponse(url="/register", status_code=303)
+
 
 @app.post("/mines",response_class=HTMLResponse)
 def startMines(request: Request):
