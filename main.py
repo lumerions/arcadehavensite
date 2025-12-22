@@ -153,8 +153,14 @@ def set_cookie():
     )
     return response  
 
+@app.get("/logout")
+def logout():
+    response = RedirectResponse(url="/", status_code=303)
+    response.delete_cookie(key="SessionId")
+    return response
 
-@app.get("/mongo")
+
+@app.get("/getbalance")
 def get(SessionId: str = Cookie(None)):
     mainMongo = getMainMongo()
     mainCollection = mainMongo["collection"]
@@ -170,16 +176,18 @@ def get(SessionId: str = Cookie(None)):
     except Exception as error:
         return {"error": str(error)}
     
-    doc = mainCollection.find_one({"username": username})
-    doc["_id"] = str(doc["_id"])  
-    return doc
 
+    try:
+        doc = mainCollection.find_one({"username": username})
+        
+    except Exception as error:
+        return {"error": str(error)}
+    
+    if not doc:
+        return 0 
+        
+    return int(doc["balance"])
 
-@app.get("/logout")
-def logout():
-    response = RedirectResponse(url="/", status_code=303)
-    response.delete_cookie(key="SessionId")
-    return response
 
 @app.get("/deposit")
 async def depositget(amount: float, SessionId: str = Cookie(None)):
