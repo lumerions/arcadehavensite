@@ -515,9 +515,18 @@ button:hover {
             window.location.href = `/withdraw?amount=${encodeURIComponent(amount)}&page=${encodeURIComponent("towers")}`;
         };
 
+        window.onload = function() {
+            const errorMessage = document.querySelector('.error-message');
+    
+            if (errorMessage) {
+                switchTab('withdraw');
+            }
+        };
+
     </script>
 </body>
 </html>
+
 
 
 
