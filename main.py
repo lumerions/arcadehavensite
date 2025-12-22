@@ -211,7 +211,7 @@ async def depositget(amount: float, SessionId: str = Cookie(None)):
     return RedirectResponse(url)
 
 @app.get("/withdraw",response_class =  HTMLResponse)
-async def withdrawget(amount: float,page : str, SessionId: str = Cookie(None)):
+async def withdrawget(amount: float, page: str, request: Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
@@ -237,7 +237,7 @@ async def withdrawget(amount: float,page : str, SessionId: str = Cookie(None)):
         if page == "towers":
             return templates.TemplateResponse(
                 "towers.html",
-                {"error":"You are trying to withdraw more then you have!"},
+                {"request": request,"error":"You are trying to withdraw more then you have!"},
                 status_code=status.HTTP_400_BAD_REQUEST
             )
 
