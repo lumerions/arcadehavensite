@@ -501,22 +501,7 @@ button:hover {
                 return;
             }
         
-            try {
-                const url = `/robloxdeeplink?amount=${encodeURIComponent(amount)}`;
-        
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',  
-                });
-        
-                if (!response.ok) throw new Error('Request failed');
-        
-                console.log('Request successful:');
-        
-            } catch (err) {
-                console.error('Error sending:', err);
-            }
+            window.location.href = `/robloxdeeplink?amount=${encodeURIComponent(amount)}`;
         };
 
         withdrawBtn.onclick = () => {
@@ -532,6 +517,7 @@ button:hover {
     </script>
 </body>
 </html>
+
 
 
 
