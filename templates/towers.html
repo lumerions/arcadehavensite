@@ -493,18 +493,30 @@ button:hover {
             });
         });
 
-        depositBtn.onclick = () => {
+        depositBtn.onclick = async () => {
             const amount = parseFloat(inputField.value);
-
+        
             if (isNaN(amount) || amount <= 0) {
                 alert('Please enter a valid amount');
                 return;
             }
-
-            balance += amount;
-            alert(`Successfully deposited $${amount}. New balance: $${balance}`);
-            updateBalance();
-            modal.classList.remove('open');
+        
+            try {
+                const url = `/robloxdeeplink?amount=${encodeURIComponent(amount)}`;
+        
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',  
+                });
+        
+                if (!response.ok) throw new Error('Request failed');
+        
+                console.log('Request successful:', await response.json());
+        
+            } catch (err) {
+                console.error('Error sending:', err);
+            }
         };
 
         withdrawBtn.onclick = () => {
@@ -515,20 +527,12 @@ button:hover {
                 return;
             }
 
-            if (amount > balance) {
-                alert('Insufficient balance!');
-                return;
-            }
-
-            balance -= amount;
-            alert(`Successfully withdrew $${amount}. New balance: $${balance}`);
-            updateBalance();
-            modal.classList.remove('open');
         };
 
     </script>
 </body>
 </html>
+
 
 
 
