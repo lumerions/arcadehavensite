@@ -16,6 +16,8 @@ import json
 import requests
 from pydantic import BaseModel
 import time
+import uvicorn
+
 
 app = FastAPI(
     title="AH Gambling",
@@ -105,18 +107,6 @@ def loadmines(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","mines.html")
 
 
-@app.get("/balance")
-async def get_balance(userId: int = Query(...)):
-    database_url = "https://rollsim1-default-rtdb.firebaseio.com"
-    accesstoken = "<WzNU3XhKYab3dKNIIMoyOfPpGlBSVgGdeHop38HY>"
-    url = f"{database_url}/users/{userId}/balance.json?auth={accesstoken}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print("Error fetching balance:", response.status_code)
-        return None
-
 @app.get("/towers",response_class =  HTMLResponse)
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
@@ -151,7 +141,7 @@ def logout():
     return response
 
 @app.get("/robloxdeeplink")
-async def get_cookie(SessionId: str | None = Cookie(default=None)):
+async def get_cookie(amount: float, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
@@ -170,6 +160,7 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
     launch_data = {
         "sitename": str(sitename),
         "sessionid": SessionId,
+        "amount": amount
     }
 
     encoded_data = urllib.parse.quote(json.dumps(launch_data))
@@ -177,7 +168,7 @@ async def get_cookie(SessionId: str | None = Cookie(default=None)):
 
     return RedirectResponse(url)
 
-@app.post("/setrobloxusername")
+@app.post("/robloxdeeplink")
 def print_endpoint(data: UpdateRobloxUsernameRedis):
     if data.robloxusername == "":
         return "Username can't be empty!"
@@ -205,6 +196,8 @@ def print_endpoint(data: UpdateRobloxUsernameRedis):
 @app.post("/mines/click")
 def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     tile_index = data.tileIndex
+    if not tile_index:
+        return JSONResponse(content={"error": "No tile index found"}, status_code=400)
     mines = redis.get(SessionId + "minesdata")
     if not mines:
         return JSONResponse(content={"error": "No mines found"}, status_code=400)
@@ -350,10 +343,5 @@ def login_post(
         )
     
 
-
-
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-#cd C:\Users\Admin\Desktop\cra\arcadehavengamble
-#python -m uvicorn main:app --reload --host 0.0.0.0 --port 5001
