@@ -17,8 +17,14 @@ from pydantic import BaseModel
 import time
 import uvicorn
 from pymongo import MongoClient
+import certifi
+from bson import ObjectId
 
-
+def serialize_mongo_doc(doc):
+    if not doc:
+        return None
+    doc["_id"] = str(doc["_id"])  
+    return doc
 
 app = FastAPI(
     title="AH Gambling",
@@ -30,7 +36,10 @@ def getMongoClient(ConnectionURI = None):
     if not ConnectionURI:
         ConnectionURI = "mongodb+srv://gamblesite_db_user:VQKwxemda7DhocAi@gamblesite.ttpjfpf.mongodb.net/gamblesite?retryWrites=true&w=majority&appName=gamblesite"
     client = MongoClient(
-        ConnectionURI
+        ConnectionURI,
+        serverSelectionTimeoutMS=5000, 
+        tls=True,
+        tlsCAFile=certifi.where()
     )
     return client
 
@@ -260,22 +269,21 @@ def depositearnings(data: deposit):
 @app.get("/mongo")
 def get(SessionId: str = Cookie(None)):
     mainMongo = getMainMongo()
-    MainDatabase, mainCollection = mainMongo["db"], mainMongo["collection"]
+    mainCollection = mainMongo["collection"]
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-
             with conn.cursor() as cursor:
                 cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                
                 result = cursor.fetchone()  
+                if not result:
+                    return {"error": "Session not found"}
                 username = result[0]
-    
     except Exception as error:
-        return error
+        return {"error": str(error)}
     
     user = mainCollection.find_one({"username": username})
-    return user
+    return serialize_mongo_doc(user)
 
 @app.post("/withdrawearnings")
 def withdrawearnings(data: deposit):
@@ -471,4 +479,5 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
