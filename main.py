@@ -1,6 +1,14 @@
+from fastapi import FastAPI, Form, Request, Response, Cookie,status,Query
+from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse
+from fastapi.templating import Jinja2Templates
+from upstash_redis import Redis
+import psycopg
+import bcrypt
+import os 
+import secrets
+import string
 import random
 from datetime import datetime, timedelta
-import webbrowser
 from fastapi.staticfiles import StaticFiles
 import urllib.parse  
 import json
@@ -150,7 +158,7 @@ def logout():
     return response
 
 @app.get("/deposit")
-async def deposit(amount: float, SessionId: str = Cookie(None)):
+async def depositget(amount: float, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
@@ -179,7 +187,7 @@ async def deposit(amount: float, SessionId: str = Cookie(None)):
     return RedirectResponse(url)
 
 @app.get("/withdraw")
-async def withdraw(amount: float, SessionId: str = Cookie(None)):
+async def withdrawget(amount: float, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
@@ -208,7 +216,7 @@ async def withdraw(amount: float, SessionId: str = Cookie(None)):
     return RedirectResponse(url)
 
 @app.post("/depositearnings")
-def deeplink(data: deposit):
+def depositearnings(data: deposit):
     if data.robloxusername == "":
         return "Username can't be empty!"
     if data.siteusername == "":
@@ -268,7 +276,7 @@ def get(SessionId: str = Cookie(None)):
     return user
 
 @app.post("/withdrawearnings")
-def deeplink(data: deposit):
+def withdrawearnings(data: deposit):
     if data.robloxusername == "":
         return "Username can't be empty!"
     if data.siteusername == "":
