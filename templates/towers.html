@@ -409,13 +409,12 @@ button:hover {
             <button class="tab withdraw">Withdraw</button>
         </div>
 
-      <!--  {% if error %} -->
-        
+        {% if error %}
             <p class="error-message">
-                <!-- <strong>Error:</strong> {{ error }} -->
-                <strong>Error:</strong> {{ "database issue" }}
+                <strong>Error:</strong> {{ error }}
             </p>
-    <!-- {% endif %} -->
+        {% endif %}
+
 
 
         <label>Amount</label>
@@ -530,6 +529,7 @@ button:hover {
     </script>
 </body>
 </html>
+
 
 
 
