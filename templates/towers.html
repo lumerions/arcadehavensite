@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,18 @@
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
 <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
+    color: #fff;
+    min-height: 100vh;
+}
 
 header {
     border-bottom: 1px solid #333;
@@ -22,6 +32,12 @@ nav {
     align-items: center;
 }
 
+.logo {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
 
 @media (max-width: 768px) {
     h1 {
@@ -137,7 +153,10 @@ nav {
     display: block;
 }
 
-/* ===== MAIN CARD ===== */
+.tab.active {
+    background-color: #2a3448; 
+    color: #fff; 
+}
 
 main {
     display: flex;
@@ -155,7 +174,6 @@ main {
     text-align: center;
 }
 
-/* ===== WALLET MODAL ===== */
 
 .modal {
     position: fixed;
@@ -195,8 +213,6 @@ main {
     font-size: 1.4rem;
     color: #9ca3af;
 }
-
-/* ===== TABS ===== */
 
 .tabs {
     display: flex;
@@ -269,139 +285,226 @@ button:hover {
 }
 
 
-.action-btn.deposit { background: #16a34a; color:#000; }
-.action-btn.withdraw { background: #2563eb; color:#000; }
-    
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #000;
-    color: #fff;
-    min-height: 100vh;
-}
-header { border-bottom: 1px solid #333; }
-nav {
-    max-width: 1200px;
-    margin: auto;
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-}
-.logo {
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1.25rem;
+.action-btn {
+    position: relative;  
+    padding: 0.65rem 1.5rem;
+    border: 1px solid #333;
+    color: transparent;  
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
 }
 
-/* ===== ALL YOUR EXISTING CSS CONTINUES UNCHANGED ===== */
+.action-btn.deposit {
+    background: #16a34a;
+}
 
-/* ===== ADDITIONAL CONFIRM MODAL STYLES ===== */
-#confirmModal .wallet {
-    border: 2px solid #a855f7;
+.action-btn.deposit::after {
+    content: "Initiate Deposit"; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);  
+    color: #000;  
+    font-size: 1rem;
 }
-#confirmModal h2 {
-    color: #c084fc;
+
+.action-btn.withdraw {
+    background: #2563eb;
 }
-#confirmModal .instructions {
-    background: #1e3a8a;
-    border: 1px solid #3b82f6;
-    color: #e0e7ff;
+
+.action-btn.withdraw::after {
+    content: "Initiate Withdrawal";  
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);  
+    color: #000;  
+    font-size: 1rem;
 }
+
+
 </style>
 </head>
 
 <body>
 
-<!-- ===== EXISTING CONTENT UNCHANGED ===== -->
+<header>
+<nav>
+    <a href="/" class="logo">AH Gambling</a>
 
-<!-- ===== CONFIRM MODAL (ADDED) ===== -->
-<div class="modal" id="confirmModal">
+    <div class="balance-wrapper">
+        <button class="balance-btn">$1,000</button>
+        <div class="balance-menu">
+            <a id="openDeposit">Deposit</a>
+            <a id="openWithdraw">Withdraw</a>
+            <div class="divider"></div>
+            <a href="/logout">Log out</a>
+        </div>
+    </div>
+</nav>
+</header>
+<main>
+    <div class="card">
+        <h1>Towers</h1>
+
+        <div class="payout-grid">
+            <div class="payout"><span>$</span>1,046</div>
+            <div class="payout"><span>$</span>1,046</div>
+            <div class="payout"><span>$</span>1,046</div>
+            <div class="payout"><span>$</span>762</div>
+            <div class="payout"><span>$</span>762</div>
+            <div class="payout"><span>$</span>762</div>
+            <div class="payout"><span>$</span>621</div>
+            <div class="payout"><span>$</span>621</div>
+            <div class="payout"><span>$</span>621</div>
+            <div class="payout"><span>$</span>461</div>
+            <div class="payout"><span>$</span>461</div>
+            <div class="payout"><span>$</span>461</div>
+            <div class="payout"><span>$</span>306</div>
+            <div class="payout"><span>$</span>306</div>
+            <div class="payout"><span>$</span>306</div>
+            <div class="payout"><span>$</span>232</div>
+            <div class="payout"><span>$</span>232</div>
+            <div class="payout"><span>$</span>232</div>
+            <div class="payout"><span>$</span>177</div>
+            <div class="payout"><span>$</span>177</div>
+            <div class="payout"><span>$</span>177</div>
+            <div class="payout"><span>$</span>151</div>
+            <div class="payout"><span>$</span>151</div>
+            <div class="payout"><span>$</span>151</div>
+        </div>
+
+        <form method="POST" action="/towers">
+            <button type="submit">Play Towers</button>
+        </form>
+    </div>
+</main>
+
+<div class="modal" id="walletModal">
     <div class="wallet">
         <div class="wallet-header">
-            <h2 id="confirmTitle">Deposit Ready!</h2>
-            <span class="close" id="closeConfirm">&times;</span>
+            <h2>Wallet</h2>
+            <span class="close">&times;</span>
         </div>
 
-        <div class="instructions" id="confirmSteps">
-            <strong>Next Steps:</strong><br>
-            1. Click the button below to open Roblox<br>
-            2. Join the game and it will automatically read the code<br>
-            3. Complete the deposit in-game
+        <div class="tabs">
+            <button class="tab deposit active">Deposit</button>
+            <button class="tab withdraw">Withdraw</button>
         </div>
 
-        <button class="action-btn deposit" id="openRobloxBtn" style="margin-bottom:10px">
-            Open Roblox Game
+        <label>Amount</label>
+        <input type="text" id="amount" value="">
+        <div class="instructions" id="instructions"></div>
+
+        <button class="action-btn deposit" id="depositBtn">
+            Initiate Deposit
         </button>
-
-        <button class="action-btn deposit" id="doneBtn">
-            Done
+        <button class="action-btn withdraw" id="withdrawBtn">
+            Initiate Withdrawal
         </button>
     </div>
 </div>
 
-<script>
-/* ===== EXISTING SCRIPT (UNCHANGED) ===== */
+    <script>
+        const wrapper = document.querySelector('.balance-wrapper');
+        const modal = document.getElementById('walletModal');
+        const closeBtn = document.querySelector('.close');
+        const tabs = document.querySelectorAll('.tab');
+        const depositBtn = document.getElementById('depositBtn');
+        const withdrawBtn = document.getElementById('withdrawBtn');
+        const instructions = document.getElementById('instructions');
+        const inputField = document.getElementById('amount');
 
-/* ===== CONFIRM MODAL LOGIC (ADDED) ===== */
-const confirmModal = document.getElementById('confirmModal');
-const confirmTitle = document.getElementById('confirmTitle');
-const confirmSteps = document.getElementById('confirmSteps');
-const closeConfirm = document.getElementById('closeConfirm');
-const doneBtn = document.getElementById('doneBtn');
-const openRobloxBtn = document.getElementById('openRobloxBtn');
+        let balance = 1000;
 
-// Select the deposit and withdraw buttons
-const depositBtn = document.querySelector('.action-btn.deposit');
-const withdrawBtn = document.querySelector('.action-btn.withdraw');
+        function updateBalance() {
+            document.querySelector('.balance-btn').textContent = `$${balance}`;
+        }
 
-// Add event listeners for the buttons
-if (depositBtn) {
-    depositBtn.addEventListener('click', () => {
-        confirmModal.classList.add('open');
-        confirmTitle.textContent = 'Deposit Ready!';
-        confirmSteps.innerHTML = `
-            <strong>Next Steps:</strong><br>
-            1. Click the button below to open Roblox<br>
-            2. Join the game and it will automatically read the code<br>
-            3. Complete the deposit in-game
-        `;
-        openRobloxBtn.className = 'action-btn deposit';
-        doneBtn.className = 'action-btn deposit';
-    });
-}
+        document.querySelector('.balance-btn').onclick = () => {
+            wrapper.classList.toggle('open');
+        };
 
-if (withdrawBtn) {
-    withdrawBtn.addEventListener('click', () => {
-        confirmModal.classList.add('open');
-        confirmTitle.textContent = 'Withdrawal Code';
-        confirmSteps.innerHTML = `
-            <strong>Next Steps:</strong><br>
-            1. Click the button below to open Roblox<br>
-            2. Join the game and it will automatically read the code<br>
-            3. Receive the funds within seconds
-        `;
-        openRobloxBtn.className = 'action-btn withdraw';
-        doneBtn.className = 'action-btn withdraw';
-    });
-}
+        document.getElementById('openDeposit').onclick = () => openWallet('deposit');
+        document.getElementById('openWithdraw').onclick = () => openWallet('withdraw');
 
-// Close modal logic
-closeConfirm.onclick = () => confirmModal.classList.remove('open');
-doneBtn.onclick = () => confirmModal.classList.remove('open');
-confirmModal.onclick = e => {
-    if (e.target === confirmModal) confirmModal.classList.remove('open');
-};
-</script>
+        closeBtn.onclick = () => modal.classList.remove('open');
+        modal.onclick = e => e.target === modal && modal.classList.remove('open');
 
+        function openWallet(type) {
+            modal.classList.add('open');
+            switchTab(type);
+        }
 
+        function switchTab(type) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+
+            const tab = document.querySelector('.tab.' + type);
+            tab.classList.add('active');
+
+            if (type === 'deposit') {
+                depositBtn.style.display = 'inline-block';
+                withdrawBtn.style.display = 'none';
+
+                instructions.innerHTML =
+                    `How to deposit:<br>1. Enter the amount you want to deposit<br>2. Click "Initiate Deposit"<br>3. Complete deposit in-game`;
+                inputField.value = '';
+                inputField.placeholder = 'Enter amount to deposit';
+            } else {
+                withdrawBtn.style.display = 'inline-block';
+                depositBtn.style.display = 'none';
+
+                instructions.innerHTML =
+                    `How to withdraw:<br>1. Enter the amount you want to withdraw<br>2. Click "Initiate Withdrawal"<br>3. Complete withdrawal in-game`;
+                inputField.value = '';
+                inputField.placeholder = 'Enter amount to withdraw';
+            }
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const type = tab.classList.contains('deposit') ? 'deposit' : 'withdraw';
+                switchTab(type);
+            });
+        });
+
+        depositBtn.onclick = () => {
+            const amount = parseFloat(inputField.value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            balance += amount;
+            alert(`Successfully deposited $${amount}. New balance: $${balance}`);
+            updateBalance();
+            modal.classList.remove('open');
+        };
+
+        withdrawBtn.onclick = () => {
+            const amount = parseFloat(inputField.value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            if (amount > balance) {
+                alert('Insufficient balance!');
+                return;
+            }
+
+            balance -= amount;
+            alert(`Successfully withdrew $${amount}. New balance: $${balance}`);
+            updateBalance();
+            modal.classList.remove('open');
+        };
+
+    </script>
 </body>
 </html>
-
 
 
 
