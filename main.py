@@ -154,6 +154,27 @@ def set_cookie():
     return response  
 
 
+@app.get("/mongo")
+def get(SessionId: str = Cookie(None)):
+    mainMongo = getMainMongo()
+    mainCollection = mainMongo["collection"]
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                result = cursor.fetchone()  
+                if not result:
+                    return {"error": "Session not found"}
+                username = result[0]
+    except Exception as error:
+        return {"error": str(error)}
+    
+    doc = mainCollection.find_one({"username": username})
+    doc["_id"] = str(doc["_id"])  
+    return doc
+
+
 @app.get("/logout")
 def logout():
     response = RedirectResponse(url="/", status_code=303)
@@ -189,7 +210,7 @@ async def depositget(amount: float, SessionId: str = Cookie(None)):
 
     return RedirectResponse(url)
 
-@app.get("/withdraw")
+@app.get("/withdraw",response_class =  HTMLResponse)
 async def withdrawget(amount: float,page : str, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
@@ -280,25 +301,6 @@ def depositearnings(data: deposit):
         }
 
 
-@app.get("/mongo")
-def get(SessionId: str = Cookie(None)):
-    mainMongo = getMainMongo()
-    mainCollection = mainMongo["collection"]
-
-    try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                result = cursor.fetchone()  
-                if not result:
-                    return {"error": "Session not found"}
-                username = result[0]
-    except Exception as error:
-        return {"error": str(error)}
-    
-    doc = mainCollection.find_one({"username": username})
-    doc["_id"] = str(doc["_id"])  
-    return doc
 
 @app.post("/withdrawearnings")
 def withdrawearnings(data: deposit):
