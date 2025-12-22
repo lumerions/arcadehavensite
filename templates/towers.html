@@ -439,8 +439,8 @@ button:hover {
         const withdrawBtn = document.getElementById('withdrawBtn');
         const instructions = document.getElementById('instructions');
         const inputField = document.getElementById('amount');
-
         let balance = 1000;
+        let count = 0;
 
         function updateBalance() {
             document.querySelector('.balance-btn').textContent = `$${balance}`;
@@ -476,6 +476,16 @@ button:hover {
                 inputField.value = '';
                 inputField.placeholder = 'Enter amount to deposit';
             } else {
+                const errorMessage = document.querySelector('.error-message');
+
+                if (errorMessage) { 
+                    if (count === 0) {
+                        count = count + 1;  
+                    } else { 
+                        errorMessage.remove();
+                    }
+                }
+
                 withdrawBtn.style.display = 'inline-block';
                 depositBtn.style.display = 'none';
 
@@ -526,6 +536,7 @@ button:hover {
     </script>
 </body>
 </html>
+
 
 
 
