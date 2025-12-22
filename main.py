@@ -19,12 +19,6 @@ import uvicorn
 from pymongo import MongoClient
 import certifi
 
-def serialize_mongo_doc(doc):
-    if not doc:
-        return None
-    doc["_id"] = str(doc["_id"])  
-    return doc
-
 app = FastAPI(
     title="AH Gambling",
     description="AH Gambling",
@@ -42,9 +36,10 @@ def getMongoClient(ConnectionURI = None):
     )
     return client
 
+Mongo_Client = getMongoClient()
+
 def getMainMongo():
-    client = getMongoClient()
-    db = client["main"]
+    db = Mongo_Client["main"]
     collection = db["main"]
     return {"db": db,"collection":collection}
 
@@ -195,7 +190,7 @@ async def depositget(amount: float, SessionId: str = Cookie(None)):
     return RedirectResponse(url)
 
 @app.get("/withdraw")
-async def withdrawget(amount: float, SessionId: str = Cookie(None)):
+async def withdrawget(amount: float,page : str, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
@@ -210,6 +205,20 @@ async def withdrawget(amount: float, SessionId: str = Cookie(None)):
 
     except Exception as error:
         return error
+    
+    mainMongo = getMainMongo()
+    mainCollection = mainMongo["collection"]
+    
+    doc = mainCollection.find_one({"username": sitename})
+
+    if amount > doc["balance"]:
+        if page == "towers":
+            return templates.TemplateResponse(
+                "towers.html",
+                {"error":"You are trying to withdraw more then you have!" "T"},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
 
     launch_data = {
         "sitename": str(sitename),
@@ -255,7 +264,7 @@ def depositearnings(data: deposit):
         return "Something went wrong!"
     else:
         mainMongo = getMainMongo()
-        MainDatabase, mainCollection = mainMongo["db"], mainMongo["collection"]
+        mainCollection = mainMongo["collection"]
 
         result = mainCollection.update_one(
             {"username": data.siteusername, "sessionid": data.sessionid},
@@ -286,8 +295,9 @@ def get(SessionId: str = Cookie(None)):
     except Exception as error:
         return {"error": str(error)}
     
-    user = mainCollection.find_one({"username": username})
-    return serialize_mongo_doc(user)
+    doc = mainCollection.find_one({"username": username})
+    doc["_id"] = str(doc["_id"])  
+    return doc
 
 @app.post("/withdrawearnings")
 def withdrawearnings(data: deposit):
@@ -299,7 +309,7 @@ def withdrawearnings(data: deposit):
         return "Site sessionid can't be empty!"
     if data.success == None:
         return "Data success can't be empty!"
-
+    
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
