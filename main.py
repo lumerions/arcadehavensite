@@ -1,12 +1,3 @@
-from fastapi import FastAPI, Form, Request, Response, Cookie,status,Query
-from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse
-from fastapi.templating import Jinja2Templates
-from upstash_redis import Redis
-import psycopg
-import bcrypt
-import os 
-import secrets
-import string
 import random
 from datetime import datetime, timedelta
 import webbrowser
@@ -17,6 +8,8 @@ import requests
 from pydantic import BaseModel
 import time
 import uvicorn
+from pymongo import MongoClient
+
 
 
 app = FastAPI(
@@ -25,11 +18,27 @@ app = FastAPI(
     version="1.0.0",
 )
 
+def getMongoClient(ConnectionURI):
+    if not ConnectionURI:
+        ConnectionURI = "mongodb+srv://gamblesite_db_user:VQKwxemda7DhocAi@gamblesite.ttpjfpf.mongodb.net/gamblesite?retryWrites=true&w=majority&appName=gamblesite"
+    client = MongoClient(
+        ConnectionURI
+    )
+    return client
 
-class UpdateRobloxUsernameRedis(BaseModel):
+def getMainMongo():
+    client = getMongoClient()
+    db = client["main"]
+    collection = db["main"]
+    return {"db": db,"collection":collection}
+
+
+class deposit(BaseModel):
     robloxusername: str
     siteusername : str
     sessionid : str
+    amount : int
+    success : bool
 
 class MinesClick(BaseModel):
     tileIndex: int
@@ -140,8 +149,8 @@ def logout():
     response.delete_cookie(key="SessionId")
     return response
 
-@app.get("/robloxdeeplink")
-async def get_cookie(amount: float, SessionId: str = Cookie(None)):
+@app.get("/deposit")
+async def deposit(amount: float, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
@@ -160,7 +169,8 @@ async def get_cookie(amount: float, SessionId: str = Cookie(None)):
     launch_data = {
         "sitename": str(sitename),
         "sessionid": SessionId,
-        "amount": amount
+        "amount": amount,
+        "deposit" : True
     }
 
     encoded_data = urllib.parse.quote(json.dumps(launch_data))
@@ -168,14 +178,45 @@ async def get_cookie(amount: float, SessionId: str = Cookie(None)):
 
     return RedirectResponse(url)
 
-@app.post("/robloxdeeplink")
-def print_endpoint(data: UpdateRobloxUsernameRedis):
+@app.get("/withdraw")
+async def withdraw(amount: float, SessionId: str = Cookie(None)):
+    if not SessionId:
+        return {"error": "No cookie provided"}
+    
+    place_id = 87078646939220
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                result = cursor.fetchone()  
+                sitename = result[0]
+
+    except Exception as error:
+        return error
+
+    launch_data = {
+        "sitename": str(sitename),
+        "sessionid": SessionId,
+        "amount": amount,
+        "deposit" : False
+    }
+
+    encoded_data = urllib.parse.quote(json.dumps(launch_data))
+    url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
+
+    return RedirectResponse(url)
+
+@app.post("/depositearnings")
+def deeplink(data: deposit):
     if data.robloxusername == "":
         return "Username can't be empty!"
     if data.siteusername == "":
         return "Site username can't be empty!"
     if data.sessionid == "":
         return "Site sessionid can't be empty!"
+    if data.success == None:
+        return "Data success can't be empty!"
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -185,13 +226,88 @@ def print_endpoint(data: UpdateRobloxUsernameRedis):
                     UPDATE accounts
                     SET robloxusername = %s
                     WHERE username = %s
-                    AND  sessionid = %s;
+                    AND  sessionid = %s
+                    RETURNING robloxusername;
                 """, (data.robloxusername, data.siteusername,data.sessionid))
-
+                row = cur.fetchone()
                 conn.commit()
+
     except Exception as error:
         return error
     
+    if row is None:
+        return "Something went wrong!"
+    else:
+        mainMongo = getMainMongo()
+        MainDatabase, mainCollection = mainMongo["db"], mainMongo["collection"]
+
+        result = mainCollection.update_one(
+            {"username": data.siteusername, "sessionid": data.sessionid},
+            {"$inc": {"balance": data.amount}},
+            upsert=True
+        )
+
+@app.get("/mongo")
+def get(SessionId: str = Cookie(None)):
+    mainMongo = getMainMongo()
+    MainDatabase, mainCollection = mainMongo["db"], mainMongo["collection"]
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                
+                result = cursor.fetchone()  
+                username = result[0]
+    
+    except Exception as error:
+        return error
+    
+    user = mainCollection.find_one({"username": username})
+    return user
+
+@app.post("/withdrawearnings")
+def deeplink(data: deposit):
+    if data.robloxusername == "":
+        return "Username can't be empty!"
+    if data.siteusername == "":
+        return "Site username can't be empty!"
+    if data.sessionid == "":
+        return "Site sessionid can't be empty!"
+    if data.success == None:
+        return "Data success can't be empty!"
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cur:
+
+                cur.execute("""
+                    UPDATE accounts
+                    SET robloxusername = %s
+                    WHERE username = %s
+                    AND  sessionid = %s
+                    RETURNING robloxusername;
+                """, (data.robloxusername, data.siteusername,data.sessionid))
+                row = cur.fetchone()
+                conn.commit()
+
+    except Exception as error:
+        return error
+    
+    if row is None:
+        return "Something went wrong!"
+    else:
+        mainMongo = getMainMongo()
+        MainDatabase, mainCollection = mainMongo["db"], mainMongo["collection"]
+
+        result = mainCollection.update_one(
+            {"username": data.siteusername, "sessionid": data.sessionid},
+            {"$inc": {"balance": data.amount}},
+            upsert=True
+        )
+
+
 
 @app.post("/mines/click")
 def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
