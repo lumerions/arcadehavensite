@@ -390,6 +390,92 @@
                 document.querySelector('.balance-wrapper').classList.toggle('open');
             });
     
+
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.addEventListener('click', async () => {
+                    if (cell.classList.contains('revealed')) return;
+                    const grid = document.querySelector('.grid');
+                    if (grid.classList.contains('gamedone')) return;
+
+                    const tileIndex = cell.dataset.index;
+
+                    try {
+                        const response = await fetch('/mines/click', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ tileIndex })
+                        });
+
+                        if (!response.ok) throw new Error('Request failed');
+
+                        const result = await response.json();
+                        const mines = result.mines;
+
+                        if (result.ismine && Array.isArray(mines)) {
+                            document.querySelectorAll('.cell').forEach(cellEl => {
+                                const index = Number(cellEl.dataset.index);
+                                if (mines.includes(index)) {
+                                    cellEl.classList.add('mine');
+                                } else if (!cellEl.classList.contains('clicked')) {
+                                    cellEl.classList.add('reveal');
+                                }
+                            });
+                            grid.classList.add('gamedone');
+                        } else {
+                            cell.classList.add('clicked');
+                        }
+
+                        cell.classList.add('revealed');
+                    } catch (err) {
+                        console.error('Error sending tile click:', err);
+                    }
+                });
+            });
+        </script>
+
+        <form method="POST" action="/startmines">
+            <button type="submit">Play Mines</button>
+        </form>
+    </div>
+</main>
+
+    <div class="modal" id="walletModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Wallet</h2>
+            <span class="close">&times;</span>
+        </div>
+
+        <div class="tabs">
+            <button class="tab deposit active">Deposit</button>
+            <button class="tab withdraw">Withdraw</button>
+        </div>
+
+        {% if error %}
+            <p class="error-message">
+                <strong>Error:</strong> {{ error }}
+            </p>
+        {% endif %}
+
+
+
+        <label>Amount</label>
+        <input type="text" id="amount" value="">
+        <div class="instructions" id="instructions"></div>
+
+        <button class="action-btn deposit" id="depositBtn">
+            Initiate Deposit
+        </button>
+        <button class="action-btn withdraw" id="withdrawBtn">
+            Initiate Withdrawal
+        </button>
+    </div>
+</div>
+
+
+    <script>
+        
             const wrapper = document.querySelector('.balance-wrapper');
             const modal = document.getElementById('walletModal');
             const closeBtn = document.querySelector('.close');
@@ -522,57 +608,10 @@
                     openWallet('withdraw');
                 }
             };
-
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.addEventListener('click', async () => {
-                    if (cell.classList.contains('revealed')) return;
-                    const grid = document.querySelector('.grid');
-                    if (grid.classList.contains('gamedone')) return;
-
-                    const tileIndex = cell.dataset.index;
-
-                    try {
-                        const response = await fetch('/mines/click', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ tileIndex })
-                        });
-
-                        if (!response.ok) throw new Error('Request failed');
-
-                        const result = await response.json();
-                        const mines = result.mines;
-
-                        if (result.ismine && Array.isArray(mines)) {
-                            document.querySelectorAll('.cell').forEach(cellEl => {
-                                const index = Number(cellEl.dataset.index);
-                                if (mines.includes(index)) {
-                                    cellEl.classList.add('mine');
-                                } else if (!cellEl.classList.contains('clicked')) {
-                                    cellEl.classList.add('reveal');
-                                }
-                            });
-                            grid.classList.add('gamedone');
-                        } else {
-                            cell.classList.add('clicked');
-                        }
-
-                        cell.classList.add('revealed');
-                    } catch (err) {
-                        console.error('Error sending tile click:', err);
-                    }
-                });
-            });
-        </script>
-
-        <form method="POST" action="/startmines">
-            <button type="submit">Play Mines</button>
-        </form>
-    </div>
-</main>
+    </script>
 </body>
 </html>
+
 
 
 
