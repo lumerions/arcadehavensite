@@ -459,7 +459,7 @@ button:hover {
                 console.error('There was a problem with the fetch operation:', error);
             }
         }
-        let balance = getData();
+        let balance = await getData();
         let count = 0;
 
         function formatWithCommas(num) {
@@ -563,6 +563,7 @@ button:hover {
     </script>
 </body>
 </html>
+
 
 
 
