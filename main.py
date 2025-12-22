@@ -26,7 +26,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-def getMongoClient(ConnectionURI):
+def getMongoClient(ConnectionURI = None):
     if not ConnectionURI:
         ConnectionURI = "mongodb+srv://gamblesite_db_user:VQKwxemda7DhocAi@gamblesite.ttpjfpf.mongodb.net/gamblesite?retryWrites=true&w=majority&appName=gamblesite"
     client = MongoClient(
@@ -255,6 +255,8 @@ def depositearnings(data: deposit):
             upsert=True
         )
 
+        return result
+
 @app.get("/mongo")
 def get(SessionId: str = Cookie(None)):
     mainMongo = getMainMongo()
@@ -469,3 +471,4 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
