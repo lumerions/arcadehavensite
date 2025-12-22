@@ -263,7 +263,11 @@ def depositearnings(data: deposit):
             upsert=True
         )
 
-        return serialize_mongo_doc(result)
+        return {
+            "matched_count": result.matched_count,
+            "modified_count": result.modified_count,
+            "upserted_id": str(result.upserted_id) if result.upserted_id else None
+        }
 
 
 @app.get("/mongo")
@@ -479,5 +483,3 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
