@@ -18,7 +18,6 @@ import time
 import uvicorn
 from pymongo import MongoClient
 import certifi
-from bson import ObjectId
 
 def serialize_mongo_doc(doc):
     if not doc:
@@ -264,7 +263,8 @@ def depositearnings(data: deposit):
             upsert=True
         )
 
-        return result
+        return serialize_mongo_doc(result)
+
 
 @app.get("/mongo")
 def get(SessionId: str = Cookie(None)):
