@@ -501,7 +501,7 @@ button:hover {
                 return;
             }
         
-            window.location.href = `/robloxdeeplink?amount=${encodeURIComponent(amount)}`;
+            window.location.href = `/deposit?amount=${encodeURIComponent(amount)}`;
         };
 
         withdrawBtn.onclick = () => {
@@ -512,11 +512,14 @@ button:hover {
                 return;
             }
 
+
+            window.location.href = `/withdraw?amount=${encodeURIComponent(amount)}`;
         };
 
     </script>
 </body>
 </html>
+
 
 
 
