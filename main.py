@@ -37,7 +37,7 @@ def getMongoClient(ConnectionURI = None):
         ConnectionURI = "mongodb+srv://gamblesite_db_user:VQKwxemda7DhocAi@gamblesite.ttpjfpf.mongodb.net/gamblesite?retryWrites=true&w=majority&appName=gamblesite"
     client = MongoClient(
         ConnectionURI,
-        serverSelectionTimeoutMS=5000, 
+        serverSelectionTimeoutMS=10000,
         tls=True,
         tlsCAFile=certifi.where()
     )
