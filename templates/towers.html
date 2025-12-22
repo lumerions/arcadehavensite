@@ -323,6 +323,22 @@ button:hover {
     font-size: 1rem;
 }
 
+.error-message {
+    background: #2a3448; 
+    color: #f87171;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-top: 16px;
+    text-align: left;
+    border: 1px solid #7c3aed; 
+    font-weight: 500;
+}
+
+.error-message strong {
+    font-weight: 600; 
+}
+
 
 </style>
 </head>
@@ -392,6 +408,15 @@ button:hover {
             <button class="tab deposit active">Deposit</button>
             <button class="tab withdraw">Withdraw</button>
         </div>
+
+      <!--  {% if error %} -->
+        
+            <p class="error-message">
+                <!-- <strong>Error:</strong> {{ error }} -->
+                <strong>Error:</strong> {{ "database issue" }}
+            </p>
+    <!-- {% endif %} -->
+
 
         <label>Amount</label>
         <input type="text" id="amount" value="">
