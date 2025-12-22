@@ -204,18 +204,19 @@ async def withdrawget(amount: float,page : str, SessionId: str = Cookie(None)):
                 sitename = result[0]
 
     except Exception as error:
-        return error
-    
+        return {"error": error}
+
     mainMongo = getMainMongo()
     mainCollection = mainMongo["collection"]
     
     doc = mainCollection.find_one({"username": sitename})
+    print(doc)
 
-    if amount > doc["balance"]:
+    if amount > int(doc["balance"]):
         if page == "towers":
             return templates.TemplateResponse(
                 "towers.html",
-                {"error":"You are trying to withdraw more then you have!" "T"},
+                {"error":"You are trying to withdraw more then you have!"},
                 status_code=status.HTTP_400_BAD_REQUEST
             )
 
@@ -493,3 +494,4 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
