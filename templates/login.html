@@ -1,533 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Towers - AH Gambling</title>
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login • AH Gambling</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #000;
-    color: #fff;
-    min-height: 100vh;
-}
+        header {
+            border-bottom: 1px solid #333333;
+        }
 
-header {
-    border-bottom: 1px solid #333;
-}
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
 
-nav {
-    max-width: 1200px;
-    margin: auto;
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-}
+        .logo {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
 
-.logo {
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1.25rem;
-}
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
 
-@media (max-width: 768px) {
-    h1 {
-        font-size: 1.7rem;
-    }
+        .card {
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
 
-    .card {
-        padding: 1.5rem;
-    }
+        .card h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
 
-    .payout-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px 32px;
-        padding: 20px;
-    }
+        .card p {
+            color: #888888;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
 
-    .payout {
-        font-size: 0.95rem;
-    }
-}
+        label {
+            font-size: 0.8rem;
+            color: #aaaaaa;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
 
-@media (max-width: 420px) {
-    .payout-grid {
-        grid-template-columns: 1fr;
-        gap: 14px;
-        padding: 18px;
-    }
+        input {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 1rem;
+            background-color: #0a0a0a;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
 
-    .payout {
-        font-size: 0.9rem;
-    }
+        input:focus {
+            outline: none;
+            border-color: #555555;
+        }
 
-    button {
-        width: 100%;
-    }
-}
+        button {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: #222222;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
+        button:hover {
+            background-color: #333333;
+            border-color: #555555;
+        }
 
-.payout-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px 60px;
-    background: #1c1c1c;
-    border: 1px solid #2e2e2e;
-    border-radius: 14px;
-    padding: 24px 32px;
-    margin: 1.5rem 0;
-}
+        .footer-text {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888888;
+        }
 
-.payout {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 1rem;
-    font-weight: 500;
-    color: #d1d5db;
-    user-select: none;
-}
+        .footer-text a {
+            color: #ffffff;
+            text-decoration: none;
+        }
 
-.payout span {
-    color: #22c55e; 
-    font-size: 1.1rem;
-}
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
 
-.balance-wrapper {
-    margin-left: auto;
-    position: relative;
-}
-
-.balance-btn {
-    background: #111;
-    border: 1px solid #333;
-    color: #fff;
-    padding: 0.5rem 1.25rem;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.balance-menu {
-    position: absolute;
-    right: 0;
-    top: 120%;
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 8px;
-    min-width: 160px;
-    padding: 0.5rem 0;
-    display: none;
-    z-index: 100;
-}
-
-.balance-menu a {
-    display: block;
-    padding: 0.5rem 1rem;
-    color: #fff;
-    text-decoration: none;
-    font-size: 0.875rem;
-    cursor: pointer;
-}
-
-.balance-menu a:hover {
-    background: #222;
-}
-
-.divider {
-    height: 1px;
-    background: #333;
-    margin: 0.4rem 0;
-}
-
-.balance-wrapper.open .balance-menu {
-    display: block;
-}
-
-.tab.active {
-    background-color: #2a3448; 
-    color: #fff; 
-}
-
-main {
-    display: flex;
-    justify-content: center;
-    padding: 3rem 1.5rem;
-}
-
-.card {
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 12px;
-    padding: 2rem;
-    max-width: 520px;
-    width: 100%;
-    text-align: center;
-}
-
-
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.75);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-}
-
-.modal.open {
-    display: flex;
-}
-
-.wallet {
-    background: #1c2433;
-    border-radius: 14px;
-    width: 420px;
-    padding: 20px;
-    position: relative;
-}
-
-.wallet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.wallet-header h2 {
-    font-size: 1.2rem;
-}
-
-.close {
-    cursor: pointer;
-    font-size: 1.4rem;
-    color: #9ca3af;
-}
-
-.tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.tab {
-    flex: 1;
-    padding: 8px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background: #2a3448;
-    color: #cbd5f5;
-}
-
-.tab.active.deposit { background: #16a34a; color:#fff; }
-.tab.active.withdraw { background: #2563eb; color:#fff; }
-
-label {
-    display: block;
-    font-size: .85rem;
-    margin-bottom: 6px;
-    color: #cbd5f5;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    background: #2a3448;
-    border: 2px solid #7c3aed;
-    border-radius: 8px;
-    color: #fff;
-    margin-bottom: 14px;
-}
-
-.instructions {
-    background: #2a3448;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: .85rem;
-    text-align: left;
-    color: #cbd5f5;
-    margin-bottom: 16px;
-}
-
-.action-btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-button {
-    padding: 0.65rem 1.5rem;
-    background: #222;
-    border: 1px solid #333;
-    color: #fff;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.95rem;
-}
-
-button:hover {
-    background: #333;
-    border-color: #555;
-}
-
-
-.action-btn {
-    position: relative;  
-    padding: 0.65rem 1.5rem;
-    border: 1px solid #333;
-    color: transparent;  
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.95rem;
-}
-
-.action-btn.deposit {
-    background: #16a34a;
-}
-
-.action-btn.deposit::after {
-    content: "Initiate Deposit"; 
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);  
-    color: #000;  
-    font-size: 1rem;
-}
-
-.action-btn.withdraw {
-    background: #2563eb;
-}
-
-.action-btn.withdraw::after {
-    content: "Initiate Withdrawal";  
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);  
-    color: #000;  
-    font-size: 1rem;
-}
-
-.error-message {
-    background: #2a3448; 
-    color: #f87171;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    margin-top: 16px;
-    text-align: left;
-    border: 1px solid #7c3aed; 
-    font-weight: 500;
-}
-
-.error-message strong {
-    font-weight: 600; 
-}
-
-
-</style>
+        .error-message {
+            color: #ff5555;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
-
 <body>
-
 <header>
-<nav>
-    <a href="/" class="logo">AH Gambling</a>
-
-    <div class="balance-wrapper">
-        <button class="balance-btn">$1,000</button>
-        <div class="balance-menu">
-            <a id="openDeposit">Deposit</a>
-            <a id="openWithdraw">Withdraw</a>
-            <div class="divider"></div>
-            <a href="/logout">Log out</a>
-        </div>
-    </div>
-</nav>
+    <nav>
+        <a href="/" class="logo">AH Gambling</a>
+    </nav>
 </header>
+
 <main>
     <div class="card">
-        <h1>Towers</h1>
+        <h1>Login</h1>
+        <p>Access your account</p>
 
-        <div class="payout-grid">
-            <div class="payout"><span>$</span>1,046</div>
-            <div class="payout"><span>$</span>1,046</div>
-            <div class="payout"><span>$</span>1,046</div>
-            <div class="payout"><span>$</span>762</div>
-            <div class="payout"><span>$</span>762</div>
-            <div class="payout"><span>$</span>762</div>
-            <div class="payout"><span>$</span>621</div>
-            <div class="payout"><span>$</span>621</div>
-            <div class="payout"><span>$</span>621</div>
-            <div class="payout"><span>$</span>461</div>
-            <div class="payout"><span>$</span>461</div>
-            <div class="payout"><span>$</span>461</div>
-            <div class="payout"><span>$</span>306</div>
-            <div class="payout"><span>$</span>306</div>
-            <div class="payout"><span>$</span>306</div>
-            <div class="payout"><span>$</span>232</div>
-            <div class="payout"><span>$</span>232</div>
-            <div class="payout"><span>$</span>232</div>
-            <div class="payout"><span>$</span>177</div>
-            <div class="payout"><span>$</span>177</div>
-            <div class="payout"><span>$</span>177</div>
-            <div class="payout"><span>$</span>151</div>
-            <div class="payout"><span>$</span>151</div>
-            <div class="payout"><span>$</span>151</div>
-        </div>
+        {% if error %}
+            <p class="error-message">{{ error }}</p>
+        {% endif %}
 
-        <form method="POST" action="/towers">
-            <button type="submit">Play Towers</button>
+        <form method="post" action="/login">
+            <label>Username</label>
+            <input type="text" name="username" required>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <button type="submit">Login</button>
         </form>
+
+        <div class="footer-text">
+            Don’t have an account? <a href="/register">Register</a>
+        </div>
     </div>
 </main>
-
-<div class="modal" id="walletModal">
-    <div class="wallet">
-        <div class="wallet-header">
-            <h2>Wallet</h2>
-            <span class="close">&times;</span>
-        </div>
-
-        <div class="tabs">
-            <button class="tab deposit active">Deposit</button>
-            <button class="tab withdraw">Withdraw</button>
-        </div>
-
-      <!--  {% if error %} -->
-        
-            <p class="error-message">
-                <!-- <strong>Error:</strong> {{ error }} -->
-                <strong>Error:</strong> {{ "database issue" }}
-            </p>
-    <!-- {% endif %} -->
-
-
-        <label>Amount</label>
-        <input type="text" id="amount" value="">
-        <div class="instructions" id="instructions"></div>
-
-        <button class="action-btn deposit" id="depositBtn">
-            Initiate Deposit
-        </button>
-        <button class="action-btn withdraw" id="withdrawBtn">
-            Initiate Withdrawal
-        </button>
-    </div>
-</div>
-
-    <script>
-        const wrapper = document.querySelector('.balance-wrapper');
-        const modal = document.getElementById('walletModal');
-        const closeBtn = document.querySelector('.close');
-        const tabs = document.querySelectorAll('.tab');
-        const depositBtn = document.getElementById('depositBtn');
-        const withdrawBtn = document.getElementById('withdrawBtn');
-        const instructions = document.getElementById('instructions');
-        const inputField = document.getElementById('amount');
-
-        let balance = 1000;
-
-        function updateBalance() {
-            document.querySelector('.balance-btn').textContent = `$${balance}`;
-        }
-
-        document.querySelector('.balance-btn').onclick = () => {
-            wrapper.classList.toggle('open');
-        };
-
-        document.getElementById('openDeposit').onclick = () => openWallet('deposit');
-        document.getElementById('openWithdraw').onclick = () => openWallet('withdraw');
-
-        closeBtn.onclick = () => modal.classList.remove('open');
-        modal.onclick = e => e.target === modal && modal.classList.remove('open');
-
-        function openWallet(type) {
-            modal.classList.add('open');
-            switchTab(type);
-        }
-
-        function switchTab(type) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-
-            const tab = document.querySelector('.tab.' + type);
-            tab.classList.add('active');
-
-            if (type === 'deposit') {
-                depositBtn.style.display = 'inline-block';
-                withdrawBtn.style.display = 'none';
-
-                instructions.innerHTML =
-                    `How to deposit:<br>1. Enter the amount you want to deposit<br>2. Click "Initiate Deposit"<br>3. Complete deposit in-game`;
-                inputField.value = '';
-                inputField.placeholder = 'Enter amount to deposit';
-            } else {
-                withdrawBtn.style.display = 'inline-block';
-                depositBtn.style.display = 'none';
-
-                instructions.innerHTML =
-                    `How to withdraw:<br>1. Enter the amount you want to withdraw<br>2. Click "Initiate Withdrawal"<br>3. Complete withdrawal in-game`;
-                inputField.value = '';
-                inputField.placeholder = 'Enter amount to withdraw';
-            }
-        }
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const type = tab.classList.contains('deposit') ? 'deposit' : 'withdraw';
-                switchTab(type);
-            });
-        });
-
-        depositBtn.onclick = () => {
-            const amount = parseFloat(inputField.value);
-
-            if (isNaN(amount) || amount <= 0) {
-                alert('Please enter a valid amount');
-                return;
-            }
-
-            balance += amount;
-            alert(`Successfully deposited $${amount}. New balance: $${balance}`);
-            updateBalance();
-            modal.classList.remove('open');
-        };
-
-        withdrawBtn.onclick = () => {
-            const amount = parseFloat(inputField.value);
-
-            if (isNaN(amount) || amount <= 0) {
-                alert('Please enter a valid amount');
-                return;
-            }
-
-            if (amount > balance) {
-                alert('Insufficient balance!');
-                return;
-            }
-
-            balance -= amount;
-            alert(`Successfully withdrew $${amount}. New balance: $${balance}`);
-            updateBalance();
-            modal.classList.remove('open');
-        };
-
-    </script>
 </body>
 </html>
 
