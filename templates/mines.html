@@ -694,7 +694,7 @@ function setMaxBet() {
                                     document.getElementById('currentAmount').textContent = "0";
                                     document.getElementById('amountAfter').textContent = "0";
                                 } else if (!cellEl.classList.contains('clicked')) {
-                                    const response = await fetch('/cashoutamount', {
+                                    const response = fetch('/cashoutamount', {
                                         method: 'GET',
                                         headers: { 'Content-Type': 'application/json' },
                                         credentials: 'include',
@@ -934,6 +934,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
