@@ -576,10 +576,38 @@ function setMaxBet() {
                 </div>
             </div>
 
-                
-            <form method="POST" action="/startmines">
-                <button type="submit">Play Mines</button>
-            </form>
+            <button id="playMinesBtn">Play Mines</button>
+           
+            <script>
+            document.getElementById('playMinesBtn').addEventListener('click', async () => {
+                const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
+                const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
+            
+                try {
+                    const response = await fetch('/startmines', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ betAmount, mineCount })
+                    });
+            
+                    if (!response.ok) throw new Error('Request failed');
+            
+                    const result = await response.json();
+                    console.log('Mines started:', result);
+            
+                    if (result.error) {
+                        alert(result.error); 
+                    }
+            
+                } catch (err) {
+                    console.error('Error starting Mines:', err);
+                    alert('Failed to start Mines. Please try again.');
+                }
+            });
+            </script>
         </div>
     </aside>
 
@@ -817,6 +845,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
