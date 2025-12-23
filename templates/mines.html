@@ -582,27 +582,51 @@ function setMaxBet() {
             document.getElementById('playMinesBtn').addEventListener('click', async () => {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
                 const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
-            
-                try {
-                    const response = await fetch('/startmines', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ betAmount, mineCount })
-                    });
-            
-                    if (!response.ok) throw new Error('Request failed');
-            
-                    if (response.redirected) {
-                        window.location.href = response.url;
+
+                if (playBtn.textContent) === 'Cashout' {
+                      try {
+                        const response = await fetch('/cashout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include',
+                        });
+                
+                        if (!response.ok) throw new Error('Request failed');
+                
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        }
+                
+                    } catch (err) {
+                        console.error('Error starting Mines:', err);
+                        alert('Failed to start Mines. Please try again.');
                     }
-            
-                } catch (err) {
-                    console.error('Error starting Mines:', err);
-                    alert('Failed to start Mines. Please try again.');
+                } else {
+                    try {
+                        const response = await fetch('/startmines', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify({ betAmount, mineCount })
+                        });
+                
+                        if (!response.ok) throw new Error('Request failed');
+                
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        }
+                
+                    } catch (err) {
+                        console.error('Error starting Mines:', err);
+                        alert('Failed to start Mines. Please try again.');
+                    }
+
                 }
+               
             });
             </script>
         </div>
@@ -880,6 +904,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
