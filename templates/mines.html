@@ -609,7 +609,8 @@ function setMaxBet() {
                         document.getElementById('multiplier').textContent = "1x";
                         document.getElementById('currentAmount').textContent = "0";
                         document.getElementById('amountAfter').textContent = "0";
-                
+                        playBtn.style.backgroundColor = '';
+                        playBtn.textContent = 'Play Mines';
                     } catch (err) {
                         console.error('Error starting Mines:', err);
                         alert('Failed to start Mines. Please try again.');
@@ -944,6 +945,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
