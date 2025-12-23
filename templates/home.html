@@ -187,6 +187,312 @@
                 grid-template-columns: 1fr;
             }
         }
+    
+            @media (max-width: 768px) {
+        h1 {
+            font-size: 1.7rem;
+        }
+    
+        .card {
+            padding: 1.5rem;
+        }
+    
+        .payout-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px 32px;
+            padding: 20px;
+        }
+    
+        .payout {
+            font-size: 0.95rem;
+        }
+    }
+    
+    @media (max-width: 420px) {
+        .payout-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+            padding: 18px;
+        }
+    
+        .payout {
+            font-size: 0.9rem;
+        }
+    
+        button {
+            width: 100%;
+        }
+    }
+    
+    
+    .payout-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px 60px;
+        background: #1c1c1c;
+        border: 1px solid #2e2e2e;
+        border-radius: 14px;
+        padding: 24px 32px;
+        margin: 1.5rem 0;
+    }
+    
+    .payout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #d1d5db;
+        user-select: none;
+    }
+    
+    .payout span {
+        color: #22c55e; 
+        font-size: 1.1rem;
+    }
+    
+    .balance-wrapper {
+        margin-left: auto;
+        position: relative;
+    }
+    
+    .balance-btn {
+        background: #111;
+        border: 1px solid #333;
+        color: #fff;
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    
+    .balance-menu {
+        position: absolute;
+        right: 0;
+        top: 120%;
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 8px;
+        min-width: 160px;
+        padding: 0.5rem 0;
+        display: none;
+        z-index: 100;
+    }
+    
+    .balance-menu a {
+        display: block;
+        padding: 0.5rem 1rem;
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+    
+    .balance-menu a:hover {
+        background: #222;
+    }
+    
+    .divider {
+        height: 1px;
+        background: #333;
+        margin: 0.4rem 0;
+    }
+    
+    .balance-wrapper.open .balance-menu {
+        display: block;
+    }
+    
+    .tab.active {
+        background-color: #2a3448; 
+        color: #fff; 
+    }
+    
+    main {
+        display: flex;
+        justify-content: center;
+        padding: 3rem 1.5rem;
+    }
+    
+    .card {
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 520px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.75);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+    }
+    
+    .modal.open {
+        display: flex;
+    }
+    
+    .wallet {
+        background: #1c2433;
+        border-radius: 14px;
+        width: 420px;
+        padding: 20px;
+        position: relative;
+    }
+    
+    .wallet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    
+    .wallet-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .close {
+        cursor: pointer;
+        font-size: 1.4rem;
+        color: #9ca3af;
+    }
+    
+    .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .tab {
+        flex: 1;
+        padding: 8px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        background: #2a3448;
+        color: #cbd5f5;
+    }
+    
+    .tab.active.deposit { background: #16a34a; color:#fff; }
+    .tab.active.withdraw { background: #2563eb; color:#fff; }
+    
+    label {
+        display: block;
+        font-size: .85rem;
+        margin-bottom: 6px;
+        color: #cbd5f5;
+    }
+    
+    input {
+        width: 100%;
+        padding: 12px;
+        background: #2a3448;
+        border: 2px solid #7c3aed;
+        border-radius: 8px;
+        color: #fff;
+        margin-bottom: 14px;
+    }
+    
+    .instructions {
+        background: #2a3448;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: .85rem;
+        text-align: left;
+        color: #cbd5f5;
+        margin-bottom: 16px;
+    }
+    
+    .action-btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    
+    button {
+        padding: 0.65rem 1.5rem;
+        background: #222;
+        border: 1px solid #333;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+    
+    button:hover {
+        background: #333;
+        border-color: #555;
+    }
+    
+    
+    .action-btn {
+        position: relative;  
+        padding: 0.65rem 1.5rem;
+        border: 1px solid #333;
+        color: transparent;  
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem; 
+        font-family: Arial, sans-serif; 
+        font-weight: normal; 
+    }
+    
+    .action-btn.deposit {
+        background: #16a34a;
+    }
+    
+    .action-btn.deposit::after {
+        content: "Initiate Deposit"; 
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);  
+        color: #000;  
+        font-size: 1rem;
+        font-family: Arial, sans-serif; 
+        font-weight: normal;
+    }
+    
+    .action-btn.withdraw {
+        background: #2563eb;
+    }
+    
+    .action-btn.withdraw::after {
+        content: "Initiate Withdrawal";  
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);  
+        color: #000;  
+        font-size: 1rem;
+        font-family: Arial, sans-serif; 
+        font-weight: normal; 
+    }
+    
+    .error-message {
+        background: #2a3448; 
+        color: #f87171;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        margin-top: 16px;
+        text-align: left;
+        border: 1px solid #7c3aed; 
+        font-weight: 500;
+    }
+    
+    .error-message strong {
+        font-weight: 600; 
+    }
     </style>
 </head>
 
