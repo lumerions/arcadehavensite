@@ -118,11 +118,9 @@
 
         .grid {
             display: grid;
-        
-            grid-template-rows: repeat(5, clamp(40px, 9vw, 100px));
+            grid-template-rows: repeat(5, clamp(33px, 7.5vw, 83px));
             grid-auto-flow: column;
-        
-            gap: clamp(6px, 2vw, 16px);
+            gap: clamp(5px, 1.7vw, 13px);
             justify-content: center;
             margin: 1.25rem 0;
         }
@@ -130,10 +128,12 @@
         .cell {
             width: 100%;
             aspect-ratio: 1 / 1;
-            border-radius: 10px;
+            border-radius: 8px;
             background: #222;
             border: 1px solid #333;
+            touch-action: manipulation;
         }
+        
 
 
         .cell.mine { background: #b91c1c; }
@@ -789,6 +789,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
