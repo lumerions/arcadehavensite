@@ -513,6 +513,39 @@
     </nav>
 </header>
 
+    <div class="modal" id="walletModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Wallet</h2>
+            <span class="close">&times;</span>
+        </div>
+
+        <div class="tabs">
+            <button class="tab deposit active">Deposit</button>
+            <button class="tab withdraw">Withdraw</button>
+        </div>
+
+        {% if wallet_error %}
+            <p class="error-message">
+                <strong>Error:</strong> {{ wallet_error }}
+            </p>
+        {% endif %}
+
+
+        <label>Amount</label>
+        <input type="text" id="amount" value="">
+        <div class="instructions" id="instructions"></div>
+
+        <button class="action-btn deposit" id="depositBtn">
+            Initiate Deposit
+        </button>
+        <button class="action-btn withdraw" id="withdrawBtn">
+            Initiate Withdrawal
+        </button>
+    </div>
+</div>
+
+
 <main>
     <div class="cards">
          <!-- <div class="card"> -->
