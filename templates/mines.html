@@ -582,6 +582,7 @@ function setMaxBet() {
             document.getElementById('playMinesBtn').addEventListener('click', async () => {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
                 const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
+                const playBtn = document.getElementById('playMinesBtn');
 
                 if (playBtn.textContent === 'Cashout' )  {
                       try {
@@ -904,6 +905,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
