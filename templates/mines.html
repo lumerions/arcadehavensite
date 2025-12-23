@@ -116,7 +116,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* 🔹 RESPONSIVE GRID */
         .grid {
             display: grid;
             grid-template-columns: repeat(8, clamp(34px, 8vw, 50px));
@@ -560,7 +559,7 @@ function setMaxBet() {
         <h1>Mines</h1>
 
         <div class="grid">
-            {% for i in range(48) %}
+            {% for i in range(24) %}
                 <div class="cell" data-index="{{ i }}"></div>
             {% endfor %}
         </div>
@@ -787,6 +786,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
