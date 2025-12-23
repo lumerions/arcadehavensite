@@ -660,15 +660,17 @@ function setMaxBet() {
         {% endif %}
 
         <script>
-
+            
             document.querySelectorAll('.cell').forEach(cell => {
                 cell.addEventListener('click', async () => {
                     if (cell.classList.contains('revealed')) return;
+            
                     const grid = document.querySelector('.grid');
                     if (grid.classList.contains('gamedone')) return;
-
+            
                     const tileIndex = cell.dataset.index;
-
+                    const playBtn = document.getElementById('playMinesBtn');
+            
                     try {
                         const response = await fetch('/mines/click', {
                             method: 'POST',
@@ -676,54 +678,62 @@ function setMaxBet() {
                             credentials: 'include',
                             body: JSON.stringify({ tileIndex })
                         });
-
+            
                         if (!response.ok) throw new Error('Request failed');
-
+            
                         const result = await response.json();
                         const mines = result.mines;
-                        const playBtn = document.getElementById('playMinesBtn');
-
+            
                         if (result.ismine && Array.isArray(mines)) {
                             document.querySelectorAll('.cell').forEach(cellEl => {
                                 const index = Number(cellEl.dataset.index);
                                 if (mines.includes(index)) {
                                     cellEl.classList.add('mine');
-                                    playBtn.style.backgroundColor = ''; 
-                                    playBtn.textContent = 'Play Mines';
-                                    document.getElementById('multiplier').textContent = "1x";
-                                    document.getElementById('currentAmount').textContent = "0";
-                                    document.getElementById('amountAfter').textContent = "0";
                                 } else if (!cellEl.classList.contains('clicked')) {
-                                    const response = fetch('/cashoutamount', {
-                                        method: 'GET',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        credentials: 'include',
-                                    });
-                                    const data = response.json();
-                                    const currentAmount = data.amount;         
-                                    const amountAfterNextTile = data.amountafter;  
-                                    const multiplier = data.multiplier;  
-
-                                    document.getElementById('multiplier').textContent = multiplier.toFixed(2) + "x";
-                                    document.getElementById('currentAmount').textContent = currentAmount;
-                                    document.getElementById('amountAfter').textContent = amountAfterNextTile;
-
-                                    playBtn.style.backgroundColor = '#16a34a';
-                                    playBtn.textContent = 'Cashout';
                                     cellEl.classList.add('reveal');
                                 }
                             });
+            
+                            playBtn.style.backgroundColor = '';
+                            playBtn.textContent = 'Play Mines';
+                            document.getElementById('multiplier').textContent = '1x';
+                            document.getElementById('currentAmount').textContent = '0';
+                            document.getElementById('amountAfter').textContent = '0';
+            
                             grid.classList.add('gamedone');
-                        } else {
+            
+                        } else { // Safe click
                             cell.classList.add('clicked');
+                            cell.classList.add('revealed');
+            
+                            const cashoutResponse = await fetch('/cashoutamount', {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                            });
+            
+                            if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
+            
+                            const data = await cashoutResponse.json();
+            
+                            const currentAmount = data.amount;
+                            const amountAfterNextTile = data.amountafter;
+                            const multiplier = data.multiplier;
+            
+                            document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+                            document.getElementById('currentAmount').textContent = currentAmount;
+                            document.getElementById('amountAfter').textContent = amountAfterNextTile;
+            
+                            playBtn.style.backgroundColor = '#16a34a';
+                            playBtn.textContent = 'Cashout';
                         }
-
-                        cell.classList.add('revealed');
+            
                     } catch (err) {
-                        console.error('Error sending tile click:', err);
+                        console.error('Error handling tile click:', err);
                     }
                 });
             });
+
         </script>
     </div>
 </main>
@@ -934,6 +944,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
