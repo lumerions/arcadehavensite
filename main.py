@@ -373,16 +373,62 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if is_mine:
         redis.delete("Debounce." + SessionId)
         redis.delete("ClickData." + SessionId)
+        redis.delete("Cashout" + SessionId)
         return JSONResponse(content={"ismine": is_mine,"mines": mines})
 
     data_raw = redis.get("ClickData." + SessionId)
     existing_array = json.loads(data_raw) if data_raw else []
     new_entries = [tile_index]
     existing_array.extend(new_entries)  
-
+    tilescleared = redis.incrby(SessionId + "Cleared",1)
+    multiplier_per_click = 25 / (25 - len(mines))
+    total_multiplier = multiplier_per_click ** tilescleared
+    betamount = redis.get(SessionId + "BetAmount")
+    winnings = betamount * total_multiplier
+    redis.incrby("Cashout" + SessionId,winnings)
     redis.set("ClickData." + SessionId, json.dumps(existing_array))
 
     return JSONResponse(content={"ismine": is_mine})
+
+@app.post("/cashout")
+def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
+    mainMongo = getMainMongo()
+    mainCollection = mainMongo["collection"]
+
+    if redis.get(SessionId + "Cash"):
+        return
+    
+    redis.set(SessionId + "Cash",True) 
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                result = cursor.fetchone()  
+                if not result:
+                    return {"error": "Session not found"}
+                username = result[0]
+    except Exception as error:
+        return {"error": str(error)}
+    
+    try:
+        doc = mainCollection.find_one({"username": username})
+        
+    except Exception as error:
+        return {"error": str(error)}
+    
+    bet_amount = redis.get("Cashout" + SessionId)
+
+    result = mainCollection.update_one(
+        {"username": username},
+        {"$inc": {"balance": int(bet_amount)}},
+        upsert=True
+    )
+
+    redis.delete("Cashout" + SessionId)
+    redis.delete(SessionId + "Cash") 
+
+    return JSONResponse(content={"success": True})
 
 @app.post("/startmines",response_class=HTMLResponse)
 async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
@@ -461,6 +507,11 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
         upsert=True
     )
 
+    multiplier_per_click = 25 / (25 - mine_count)
+
+    redis.set(SessionId + "Cleared",0)
+    redis.set(SessionId + "BetAmount",bet_amount)
+    redis.set(SessionId + "Cashout",bet_amount)
     redis.set(SessionId + "minesdata",json.dumps(mines))
     return RedirectResponse(url="/mines", status_code=303)
 
@@ -585,5 +636,6 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
