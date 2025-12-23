@@ -191,6 +191,25 @@ def get(SessionId: str = Cookie(None)):
     existing_array = json.loads(data_raw) if data_raw else []
     return existing_array
 
+@app.get("/cashoutamount")
+def getcashoutAmount(SessionId: str = Cookie(None)):
+
+    mines_raw = redis.get(SessionId + "minesdata")
+    if not mines_raw:
+        return JSONResponse({"error": "No mines found"}, status_code=400)
+
+    if isinstance(mines_raw, bytes):
+        mines_raw = mines_raw.decode()
+
+    mines = json.loads(mines_raw)
+    multiplier_per_click = 25 / (25 - len(mines))
+    tilescleared = redis.incrby(SessionId + "Cleared", 1)
+    total_multiplier = multiplier_per_click ** tilescleared
+    bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
+    winnings = int(bet_amount * total_multiplier)
+    currentamount = redis.get(SessionId + "Cashout")
+    amountafternexttile = currentamount + bet_amount
+    return {"amount":currentamount,"amountafter":amountafternexttile,"multiplier":total_multiplier}
 
 
 @app.get("/deposit")
@@ -409,7 +428,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
 
-    winnings = int(bet_amount * total_multiplier * 100)
+    winnings = int(bet_amount * total_multiplier)
 
     redis.set(SessionId + "Cashout", winnings)
     redis.set("ClickData." + SessionId, json.dumps(existing_array))
@@ -669,4 +688,3 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
