@@ -43,6 +43,13 @@ def getMainMongo():
     collection = db["main"]
     return {"db": db,"collection":collection}
 
+def redis_int(value, default=0):
+    if value is None:
+        return default
+    if isinstance(value, bytes):
+        value = value.decode()
+    return int(value)
+
 
 class deposit(BaseModel):
     robloxusername: str
@@ -361,37 +368,51 @@ def withdrawearnings(data: deposit):
 @app.post("/mines/click")
 def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
+    tile_index = int(data.tileIndex)
 
-    tile_index = data.tileIndex
-    if tile_index is None:
-        return JSONResponse(content={"error": "No tile index found"}, status_code=400)
-    mines = redis.get(SessionId + "minesdata")
-    if mines is None:
-        return JSONResponse(content={"error": "No mines found"}, status_code=400)
+    if not SessionId:
+        return JSONResponse({"error": "No session"}, status_code=400)
 
-    mines = json.loads(mines) 
+    mines_raw = redis.get(SessionId + "minesdata")
+    if not mines_raw:
+        return JSONResponse({"error": "No mines found"}, status_code=400)
+
+    if isinstance(mines_raw, bytes):
+        mines_raw = mines_raw.decode()
+
+    mines = json.loads(mines_raw)
     is_mine = tile_index in mines
 
     if is_mine:
         redis.delete("Debounce." + SessionId)
         redis.delete("ClickData." + SessionId)
         redis.delete(SessionId + "Cashout")
-        return JSONResponse(content={"ismine": is_mine,"mines": mines})
+        return JSONResponse({"ismine": True, "mines": mines})
 
     data_raw = redis.get("ClickData." + SessionId)
-    existing_array = json.loads(data_raw) if data_raw else []
-    new_entries = [tile_index]
-    existing_array.extend(new_entries)  
-    tilescleared = redis.incrby(SessionId + "Cleared",1)
+    if data_raw:
+        if isinstance(data_raw, bytes):
+            data_raw = data_raw.decode()
+        existing_array = json.loads(data_raw)
+    else:
+        existing_array = []
+
+    existing_array.append(tile_index)
+
+    tilescleared = redis.incrby(SessionId + "Cleared", 1)
+
     multiplier_per_click = 25 / (25 - len(mines))
     total_multiplier = multiplier_per_click ** tilescleared
-    bet_amount_raw = redis.get(SessionId + "BetAmount")
-    bet_amount = int(bet_amount_raw.decode()) if bet_amount_raw else 0
+
+    bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
+
     winnings = int(bet_amount * total_multiplier * 100)
-    redis.set(SessionId + "Cashout",winnings)
+
+    redis.set(SessionId + "Cashout", winnings)
     redis.set("ClickData." + SessionId, json.dumps(existing_array))
 
-    return JSONResponse(content={"ismine": is_mine})
+    return JSONResponse({"ismine": False})
+
 
 
 @app.post("/startmines",response_class=HTMLResponse)
@@ -641,4 +662,3 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
