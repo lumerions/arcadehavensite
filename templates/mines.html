@@ -320,8 +320,147 @@
             margin-bottom: 16px;
         }
 
+        .game-layout {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .side-panel {
+            width: 300px;
+        }
+
+        .panel-card {
+            background: linear-gradient(180deg, #1e2140, #15162b);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid #2e2f55;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: #2a2d52;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+
+        .mode {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #c7c9ff;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .mode.active {
+            background: #8b2cff;
+            color: #fff;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: #c7c9ff;
+        }
+
+        .muted {
+            opacity: 0.6;
+        }
+
+        .bet-input {
+            display: flex;
+            align-items: center;
+            background: #2a2d52;
+            border-radius: 10px;
+            padding: 10px 12px;
+            gap: 8px;
+        }
+
+        .bet-input input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .currency,
+        .emoji {
+            opacity: 0.7;
+        }
+
+        .bet-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .bet-actions button {
+            flex: 1;
+            background: #343769;
+            border: none;
+            border-radius: 8px;
+            padding: 6px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .bet-actions button:hover {
+            background: #4a4ee8;
+        }
+
+        .start-btn {
+            width: 100%;
+            margin-top: 12px;
+            background: linear-gradient(90deg, #8b2cff, #b44cff);
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .start-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        @media (max-width: 900px) {
+            .game-layout {
+                flex-direction: column;
+            }
+
+            .side-panel {
+                width: 100%;
+            }
+        }
+
     </style>
 </head>
+
+<script>
+function adjustBet(multiplier) {
+    const input = document.getElementById('betAmount');
+    const value = parseFloat(input.value) || 0;
+    input.value = Math.max(1, Math.floor(value * multiplier));
+}
+
+function setMaxBet() {
+    input = document.getElementById('betAmount');
+    input.value = 1000;
+}
+</script>
 
 <body>
 <header>
@@ -376,7 +515,49 @@
 </div>
 
 <main>
+    <main class="game-layout">
+    <aside class="side-panel">
+        <div class="panel-card">
+            <div class="mode-toggle">
+                <button class="mode active">Manual</button>
+                <button class="mode">Auto</button>
+            </div>
+
+            <div class="field">
+                <div class="field-header">
+                    <span>Bet Amount</span>
+                    <span class="muted">Tokens</span>
+                </div>
+
+                <div class="bet-input">
+                    <span class="currency">$</span>
+                    <input type="number" id="betAmount" value="10" min="1">
+                </div>
+
+                <div class="bet-actions">
+                    <button onclick="adjustBet(0.5)">½</button>
+                    <button onclick="adjustBet(2)">2×</button>
+                    <button onclick="setMaxBet()">MAX</button>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="field-header">
+                    <span>Mines</span>
+                </div>
+
+                <div class="bet-input">
+                    <span class="emoji">💣</span>
+                    <input type="number" id="mineCount" value="3" min="1" max="47">
+                </div>
+            </div>
+
+            <button class="start-btn">Start Game</button>
+        </div>
+    </aside>
+
     <div class="card">
+
         <h1>Mines</h1>
 
         <div class="grid">
@@ -607,27 +788,6 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
