@@ -583,7 +583,7 @@ function setMaxBet() {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
                 const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
 
-                if (playBtn.textContent) === 'Cashout' {
+                if (playBtn.textContent === 'Cashout' )  {
                       try {
                         const response = await fetch('/cashout', {
                             method: 'POST',
@@ -904,6 +904,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
