@@ -318,64 +318,74 @@
             text-align: left;
             color: #cbd5f5;
             margin-bottom: 16px;
-            
+        }
+
         .game-layout {
             display: flex;
             gap: 24px;
             width: 100%;
             max-width: 1200px;
         }
-        
-        /* Left panel now matches mines card */
+
         .side-panel {
             width: 300px;
         }
-        
+
         .panel-card {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 10px;
+            background: linear-gradient(180deg, #1e2140, #15162b);
+            border-radius: 14px;
             padding: 16px;
+            border: 1px solid #2e2f55;
         }
-        
-        .mode-toggle.single {
+
+        .mode-toggle {
+            display: flex;
+            background: #2a2d52;
+            border-radius: 10px;
+            padding: 4px;
             margin-bottom: 16px;
         }
-        
-        .mode.full {
-            width: 100%;
-            background: #7c3aed;
-            border: 1px solid #8b5cf6;
-            color: #fff;
-            padding: 12px;
+
+        .mode {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #c7c9ff;
+            padding: 10px;
             border-radius: 8px;
-            font-size: 0.95rem;
-            cursor: default;
+            cursor: pointer;
         }
-        
-        /* Fields */
+
+        .mode.active {
+            background: #8b2cff;
+            color: #fff;
+        }
+
         .field {
             margin-bottom: 16px;
         }
-        
+
         .field-header {
             display: flex;
             justify-content: space-between;
             font-size: 0.85rem;
             margin-bottom: 6px;
-            color: #9ca3af;
+            color: #c7c9ff;
         }
-        
+
+        .muted {
+            opacity: 0.6;
+        }
+
         .bet-input {
             display: flex;
             align-items: center;
-            background: #222;
-            border: 1px solid #333;
-            border-radius: 8px;
+            background: #2a2d52;
+            border-radius: 10px;
             padding: 10px 12px;
             gap: 8px;
         }
-        
+
         .bet-input input {
             background: transparent;
             border: none;
@@ -384,53 +394,57 @@
             font-size: 1rem;
             width: 100%;
         }
-        
+
+        .currency,
+        .emoji {
+            opacity: 0.7;
+        }
+
         .bet-actions {
             display: flex;
             gap: 8px;
             margin-top: 8px;
         }
-        
+
         .bet-actions button {
             flex: 1;
-            background: #222;
-            border: 1px solid #333;
-            border-radius: 6px;
+            background: #343769;
+            border: none;
+            border-radius: 8px;
             padding: 6px;
             color: #fff;
             cursor: pointer;
         }
-        
+
         .bet-actions button:hover {
-            background: #333;
+            background: #4a4ee8;
         }
-        
+
         .start-btn {
             width: 100%;
             margin-top: 12px;
-            background: #7c3aed;
-            border: 1px solid #8b5cf6;
-            border-radius: 8px;
+            background: linear-gradient(90deg, #8b2cff, #b44cff);
+            border: none;
+            border-radius: 10px;
             padding: 14px;
             color: #fff;
             font-size: 1rem;
             cursor: pointer;
         }
-        
+
         .start-btn:hover {
-            background: #8b5cf6;
+            filter: brightness(1.1);
         }
-        
+
         @media (max-width: 900px) {
             .game-layout {
                 flex-direction: column;
             }
-        
+
             .side-panel {
                 width: 100%;
             }
         }
-
 
     </style>
 </head>
@@ -504,8 +518,9 @@ function setMaxBet() {
     <main class="game-layout">
     <aside class="side-panel">
         <div class="panel-card">
-            <div class="mode-toggle single">
-                <button class="mode active full">Manual</button>
+            <div class="mode-toggle">
+                <button class="mode active">Manual</button>
+                <button class="mode">Auto</button>
             </div>
 
             <div class="field">
@@ -773,6 +788,11 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
