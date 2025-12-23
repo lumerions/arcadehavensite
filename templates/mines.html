@@ -632,7 +632,6 @@ function setMaxBet() {
                     const grid = document.querySelector('.grid');
                     if (grid.classList.contains('gamedone')) return;
 
-                    const playBtn = document.getElementById('playMinesBtn');
                     const tileIndex = cell.dataset.index;
 
                     try {
@@ -647,6 +646,7 @@ function setMaxBet() {
 
                         const result = await response.json();
                         const mines = result.mines;
+                        const playBtn = document.getElementById('playMinesBtn');
 
                         if (result.ismine && Array.isArray(mines)) {
                             document.querySelectorAll('.cell').forEach(cellEl => {
@@ -858,7 +858,9 @@ function setMaxBet() {
                                 cell.classList.add('clicked', 'revealed'); 
                             }
                         });
-                        
+
+                        const playBtn = document.getElementById('playMinesBtn');
+
                         if (revealedIndices.length > 0) {
                             playBtn.style.backgroundColor = '#16a34a';
                             playBtn.textContent = 'Cashout';
@@ -878,6 +880,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
