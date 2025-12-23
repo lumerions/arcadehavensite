@@ -80,7 +80,7 @@ main {
     padding: 3rem 1rem;
 }
 
-/* ============== MINES LAYOUT ============== */
+/* ================= MINES LAYOUT ================= */
 
 .mines-layout {
     display: flex;
@@ -89,46 +89,65 @@ main {
     width: 100%;
 }
 
-/* LEFT MENU (MATCHES CARD STYLE) */
+/* LEFT MENU */
 .mines-menu {
     width: 260px;
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 10px;
-    padding: 1.5rem;
+    background: #1c2433;
+    border-radius: 14px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.menu-group {
-    background: #000;
-    border: 1px solid #333;
-    padding: 12px;
+.mode-toggle {
+    display: flex;
+    background: #2a3448;
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.mode {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #cbd5f5;
+    padding: 8px;
     border-radius: 8px;
+    cursor: pointer;
+}
+
+.mode.active {
+    background: #7c3aed;
+    color: #fff;
+}
+
+.menu-group {
+    background: #2a3448;
+    padding: 12px;
+    border-radius: 10px;
 }
 
 .menu-label {
     display: flex;
     justify-content: space-between;
     font-size: .85rem;
-    color: #a855f7;
+    color: #cbd5f5;
     margin-bottom: 8px;
 }
 
 .bet-input {
     display: flex;
     align-items: center;
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 6px;
+    background: #1c2433;
+    border-radius: 8px;
     padding: 8px;
     margin-bottom: 8px;
 }
 
 .bet-input span {
     margin-right: 6px;
-    color: #a855f7;
+    color: #9ca3af;
 }
 
 .bet-input input,
@@ -147,34 +166,27 @@ main {
 
 .bet-actions button {
     flex: 1;
-    background: #111;
+    background: #1c2433;
     border: 1px solid #333;
-    color: #a855f7;
+    color: #fff;
     padding: 6px;
     border-radius: 6px;
     cursor: pointer;
 }
 
-.bet-actions button:hover {
-    background: #1a1a1a;
-}
-
-/* PURPLE START BUTTON */
 .start-btn {
     margin-top: auto;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    background: #7c3aed;
     border: none;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
 }
 
-.start-btn:hover {
-    filter: brightness(1.1);
-}
+.start-btn:hover { background: #6d28d9; }
 
-/* RIGHT GAME CARD */
+/* RIGHT GAME */
 .card {
     background: #111;
     border: 1px solid #333;
@@ -186,7 +198,7 @@ main {
 
 h1 {
     margin-bottom: 1rem;
-    background: linear-gradient(to right, #a855f7, #7c3aed);
+    background: linear-gradient(to right, #fff, #888);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -203,7 +215,7 @@ h1 {
 .cell {
     width: 48px;
     height: 48px;
-    background: #000;
+    background: #222;
     border: 1px solid #333;
     border-radius: 6px;
     cursor: pointer;
@@ -253,6 +265,10 @@ button:hover { background: #333; }
 
     <!-- LEFT MENU -->
     <div class="mines-menu">
+        <div class="mode-toggle">
+            <button class="mode active">Manual</button>
+            <button class="mode">Auto</button>
+        </div>
 
         <div class="menu-group">
             <div class="menu-label">
@@ -301,7 +317,8 @@ button:hover { background: #333; }
 
 </div>
 </main>
-        
+
+<script>
 
     <script>
         
@@ -438,9 +455,24 @@ button:hover { background: #333; }
                 }
             };
     </script>
+</script>
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
