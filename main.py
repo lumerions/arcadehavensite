@@ -227,7 +227,7 @@ async def depositget(amount: float, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
-    place_id = 97090711812957
+    place_id = 87078646939220
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -256,7 +256,7 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
     if not SessionId:
         return {"error": "No cookie provided"}
     
-    place_id = 97090711812957
+    place_id = 87078646939220
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -419,6 +419,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         redis.delete("Debounce." + SessionId)
         redis.delete("ClickData." + SessionId)
         redis.delete(SessionId + "Cashout")
+        redis.delete(SessionId + "BetAmount")
         return JSONResponse({"ismine": True, "mines": mines})
 
     data_raw = redis.get("ClickData." + SessionId)
@@ -572,6 +573,7 @@ def print_endpoint(SessionId: str = Cookie(None)):
     redis.delete(SessionId + "Cashout")
     redis.delete("Debounce." + SessionId)
     redis.delete("ClickData." + SessionId)
+    redis.delete(SessionId + "BetAmount")
     redis.delete(SessionId + "Cashout")
     redis.delete(SessionId + "Cash.") 
 
