@@ -61,6 +61,9 @@ class deposit(BaseModel):
 class MinesClick(BaseModel):
     tileIndex: int
 
+class Cashout(BaseModel):
+    amount: int
+
 redis = Redis(
     url=os.environ["REDIS_URL"],
     token=os.environ["REDIS_TOKEN"]
@@ -502,14 +505,18 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
 
 @app.post("/cashout")
-def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
+def print_endpoint(SessionId: str = Cookie(None)):
+
     mainMongo = getMainMongo()
     mainCollection = mainMongo["collection"]
 
     if redis.get(SessionId + "Cash."):
-        return
+        return JSONResponse({"error": "Already cashed out"}, status_code=400)
     
     redis.set(SessionId + "Cash.",True) 
+    redis.delete("Debounce." + SessionId)
+    redis.delete("ClickData." + SessionId)
+    redis.delete(SessionId + "Cashout")
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -532,7 +539,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     result = mainCollection.update_one(
         {"username": username},
-        {"$inc": {"balance": int(bet_amount)}},
+        {"$inc": {"balance": int(tocashout)}},
         upsert=True
     )
 
