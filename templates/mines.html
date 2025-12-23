@@ -322,7 +322,14 @@
             color: #fff;
             margin-bottom: 14px;
             position: relative;
-            top: 4px; 
+            top: 4px;
+            -moz-appearance: textfield;
+        }
+        
+        .input2::-webkit-inner-spin-button,
+        .input2::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         
@@ -448,6 +455,16 @@
             .side-panel {
                 width: 100%;
             }
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type=number] {
+            -moz-appearance: textfield;
         }
 
     </style>
@@ -790,6 +807,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
