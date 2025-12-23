@@ -632,6 +632,7 @@ function setMaxBet() {
                     const grid = document.querySelector('.grid');
                     if (grid.classList.contains('gamedone')) return;
 
+                    const playBtn = document.getElementById('playMinesBtn');
                     const tileIndex = cell.dataset.index;
 
                     try {
@@ -652,6 +653,8 @@ function setMaxBet() {
                                 const index = Number(cellEl.dataset.index);
                                 if (mines.includes(index)) {
                                     cellEl.classList.add('mine');
+                                    playBtn.style.backgroundColor = ''; 
+                                    playBtn.textContent = 'Play Mines';
                                 } else if (!cellEl.classList.contains('clicked')) {
                                     cellEl.classList.add('reveal');
                                 }
@@ -855,6 +858,14 @@ function setMaxBet() {
                                 cell.classList.add('clicked', 'revealed'); 
                             }
                         });
+                        
+                        if (revealedIndices.length > 0) {
+                            playBtn.style.backgroundColor = '#16a34a';
+                            playBtn.textContent = 'Cashout';
+                        } else {
+                            playBtn.style.backgroundColor = ''; 
+                            playBtn.textContent = 'Play Mines';
+                        }
                 
                     } catch (err) {
                         console.error('Error restoring revealed tiles:', err);
@@ -867,6 +878,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
