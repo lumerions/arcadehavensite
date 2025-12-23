@@ -373,7 +373,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if is_mine:
         redis.delete("Debounce." + SessionId)
         redis.delete("ClickData." + SessionId)
-        redis.delete("Cashout" + SessionId)
+        redis.delete(SessionId + "Cashout")
         return JSONResponse(content={"ismine": is_mine,"mines": mines})
 
     data_raw = redis.get("ClickData." + SessionId)
@@ -383,10 +383,9 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     tilescleared = redis.incrby(SessionId + "Cleared",1)
     multiplier_per_click = 25 / (25 - len(mines))
     total_multiplier = multiplier_per_click ** tilescleared
-    bet_amount_raw = redis.get(SessionId + "BetAmount") or b"0"
-    bet_amount = float(bet_amount_raw)
-    winnings = bet_amount * total_multiplier
-    redis.incrby("Cashout" + SessionId,winnings)
+    bet_amount = redis.get(SessionId + "BetAmount") or b"0"
+    winnings = int(bet_amount * total_multiplier * 100)
+    redis.set(SessionId + "Cashout",winnings)
     redis.set("ClickData." + SessionId, json.dumps(existing_array))
 
     return JSONResponse(content={"ismine": is_mine})
@@ -396,10 +395,10 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     mainMongo = getMainMongo()
     mainCollection = mainMongo["collection"]
 
-    if redis.get(SessionId + "Cash"):
+    if redis.get(SessionId + "Cash."):
         return
     
-    redis.set(SessionId + "Cash",True) 
+    redis.set(SessionId + "Cash.",True) 
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -418,7 +417,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     except Exception as error:
         return {"error": str(error)}
     
-    bet_amount = redis.get("Cashout" + SessionId)
+    tocashout = redis.get(SessionId + "Cashout")
 
     result = mainCollection.update_one(
         {"username": username},
@@ -426,8 +425,8 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         upsert=True
     )
 
-    redis.delete("Cashout" + SessionId)
-    redis.delete(SessionId + "Cash") 
+    redis.delete(SessionId + "Cashout")
+    redis.delete(SessionId + "Cash.") 
 
     return JSONResponse(content={"success": True})
 
@@ -637,6 +636,4 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
 
