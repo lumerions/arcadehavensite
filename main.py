@@ -360,6 +360,8 @@ def withdrawearnings(data: deposit):
 
 @app.post("/mines/click")
 def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
+
+
     tile_index = data.tileIndex
     if tile_index is None:
         return JSONResponse(content={"error": "No tile index found"}, status_code=400)
@@ -383,52 +385,14 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     tilescleared = redis.incrby(SessionId + "Cleared",1)
     multiplier_per_click = 25 / (25 - len(mines))
     total_multiplier = multiplier_per_click ** tilescleared
-    bet_amount = redis.get(SessionId + "BetAmount") or b"0"
+    bet_amount_raw = redis.get(SessionId + "BetAmount")
+    bet_amount = int(bet_amount_raw.decode()) if bet_amount_raw else 0
     winnings = int(bet_amount * total_multiplier * 100)
     redis.set(SessionId + "Cashout",winnings)
     redis.set("ClickData." + SessionId, json.dumps(existing_array))
 
     return JSONResponse(content={"ismine": is_mine})
 
-@app.post("/cashout")
-def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
-    mainMongo = getMainMongo()
-    mainCollection = mainMongo["collection"]
-
-    if redis.get(SessionId + "Cash."):
-        return
-    
-    redis.set(SessionId + "Cash.",True) 
-
-    try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                result = cursor.fetchone()  
-                if not result:
-                    return {"error": "Session not found"}
-                username = result[0]
-    except Exception as error:
-        return {"error": str(error)}
-    
-    try:
-        doc = mainCollection.find_one({"username": username})
-        
-    except Exception as error:
-        return {"error": str(error)}
-    
-    tocashout = redis.get(SessionId + "Cashout")
-
-    result = mainCollection.update_one(
-        {"username": username},
-        {"$inc": {"balance": int(bet_amount)}},
-        upsert=True
-    )
-
-    redis.delete(SessionId + "Cashout")
-    redis.delete(SessionId + "Cash.") 
-
-    return JSONResponse(content={"success": True})
 
 @app.post("/startmines",response_class=HTMLResponse)
 async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
@@ -514,6 +478,47 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     redis.set(SessionId + "Cashout",bet_amount)
     redis.set(SessionId + "minesdata",json.dumps(mines))
     return RedirectResponse(url="/mines", status_code=303)
+
+
+@app.post("/cashout")
+def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
+    mainMongo = getMainMongo()
+    mainCollection = mainMongo["collection"]
+
+    if redis.get(SessionId + "Cash."):
+        return
+    
+    redis.set(SessionId + "Cash.",True) 
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                result = cursor.fetchone()  
+                if not result:
+                    return {"error": "Session not found"}
+                username = result[0]
+    except Exception as error:
+        return {"error": str(error)}
+    
+    try:
+        doc = mainCollection.find_one({"username": username})
+        
+    except Exception as error:
+        return {"error": str(error)}
+    
+    tocashout = redis.get(SessionId + "Cashout")
+
+    result = mainCollection.update_one(
+        {"username": username},
+        {"$inc": {"balance": int(bet_amount)}},
+        upsert=True
+    )
+
+    redis.delete(SessionId + "Cashout")
+    redis.delete(SessionId + "Cash.") 
+
+    return JSONResponse(content={"success": True})
 
 
 @app.post("/register", response_class=HTMLResponse)
