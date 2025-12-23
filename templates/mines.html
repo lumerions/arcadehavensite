@@ -310,7 +310,21 @@
             border-radius: 8px;
             color: #fff;
             margin-bottom: 14px;
+        
         }
+
+        .input2 {
+            width: 100%;
+            padding: 12px;
+            background: #2a3448;
+            border: 2px solid #7c3aed;
+            border-radius: 8px;
+            color: #fff;
+            margin-bottom: 14px;
+            position: relative;
+            top: 4px; 
+        }
+
         
         .instructions {
             background: #2a3448;
@@ -520,7 +534,7 @@ function setMaxBet() {
 
                 <div class="bet-input">
                     <span class="currency">$</span>
-                    <input type="number" id="betAmount" value="10" min="1">
+                        <input type="number" id="betAmount" value="10" min="1" class="input2">
                 </div>
 
                 <div class="bet-actions">
@@ -537,7 +551,7 @@ function setMaxBet() {
 
                 <div class="bet-input">
                     <span class="emoji">💣</span>
-                    <input type="number" id="mineCount" value="3" min="1" max="47">
+                    <input type="number" id="mineCount" value="3"class="input2">
                 </div>
             </div>
 
@@ -776,6 +790,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
