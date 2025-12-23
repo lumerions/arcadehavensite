@@ -514,12 +514,11 @@ function setMaxBet() {
             <button class="tab withdraw">Withdraw</button>
         </div>
 
-        {% if error %}
+        {% if wallet_error %}
             <p class="error-message">
-                <strong>Error:</strong> {{ error }}
+                <strong>Error:</strong> {{ wallet_error }}
             </p>
         {% endif %}
-
 
 
         <label>Amount</label>
@@ -588,6 +587,12 @@ function setMaxBet() {
                 <div class="cell" data-index="{{ i }}"></div>
             {% endfor %}
         </div>
+        
+        {% if mines_error %}
+            <p class="error-message">
+                <strong>Error:</strong> {{ mines_error }}
+            </p>
+        {% endif %}
 
         <script>
 
@@ -807,6 +812,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
