@@ -193,23 +193,33 @@ def get(SessionId: str = Cookie(None)):
 
 @app.get("/cashoutamount")
 def getcashoutAmount(SessionId: str = Cookie(None)):
+    try:
+        if not SessionId:
+            return JSONResponse({"error": "SessionId missing"}, status_code=400)
 
-    mines_raw = redis.get(SessionId + "minesdata")
-    if not mines_raw:
-        return JSONResponse({"error": "No mines found"}, status_code=400)
+        mines_raw = redis.get(SessionId + "minesdata")
+        if not mines_raw:
+            return JSONResponse({"error": "No mines found"}, status_code=400)
 
-    if isinstance(mines_raw, bytes):
-        mines_raw = mines_raw.decode()
+        if isinstance(mines_raw, bytes):
+            mines_raw = mines_raw.decode()
 
-    mines = json.loads(mines_raw)
-    multiplier_per_click = 25 / (25 - len(mines))
-    tilescleared = redis.incrby(SessionId + "Cleared", 1)
-    total_multiplier = multiplier_per_click ** tilescleared
-    bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
-    winnings = int(bet_amount * total_multiplier)
-    currentamount = redis.get(SessionId + "Cashout")
-    amountafternexttile = currentamount + bet_amount
-    return {"amount":currentamount,"amountafter":amountafternexttile,"multiplier":total_multiplier}
+        mines = json.loads(mines_raw)
+        multiplier_per_click = 25 / (25 - len(mines))
+        tilescleared = redis.incrby(SessionId + "Cleared", 1)
+        bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
+        total_multiplier = multiplier_per_click ** tilescleared
+        winnings = int(bet_amount * total_multiplier)
+        currentamount = int(redis.get(SessionId + "Cashout") or 0)
+        amountafternexttile = currentamount + bet_amount
+
+        return {"amount": currentamount,
+                "amountafter": amountafternexttile,
+                "multiplier": total_multiplier}
+
+    except Exception as e:
+        print("Error in /cashoutamount:", e)
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 @app.get("/deposit")
@@ -688,3 +698,4 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
