@@ -595,11 +595,8 @@ function setMaxBet() {
             
                     if (!response.ok) throw new Error('Request failed');
             
-                    const result = await response.json();
-                    console.log('Mines started:', result);
-            
-                    if (result.error) {
-                        alert(result.error); 
+                    if (response.redirected) {
+                        window.location.href = response.url;
                     }
             
                 } catch (err) {
@@ -870,6 +867,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
