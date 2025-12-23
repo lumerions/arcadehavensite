@@ -514,9 +514,6 @@ def print_endpoint(SessionId: str = Cookie(None)):
         return JSONResponse({"error": "Already cashed out"}, status_code=400)
     
     redis.set(SessionId + "Cash.",True) 
-    redis.delete("Debounce." + SessionId)
-    redis.delete("ClickData." + SessionId)
-    redis.delete(SessionId + "Cashout")
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -543,6 +540,9 @@ def print_endpoint(SessionId: str = Cookie(None)):
         upsert=True
     )
 
+    redis.delete(SessionId + "Cashout")
+    redis.delete("Debounce." + SessionId)
+    redis.delete("ClickData." + SessionId)
     redis.delete(SessionId + "Cashout")
     redis.delete(SessionId + "Cash.") 
 
@@ -669,3 +669,4 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
