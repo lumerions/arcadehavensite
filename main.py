@@ -361,10 +361,10 @@ def withdrawearnings(data: deposit):
 @app.post("/mines/click")
 def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     tile_index = data.tileIndex
-    if not tile_index:
+    if tile_index is None:
         return JSONResponse(content={"error": "No tile index found"}, status_code=400)
     mines = redis.get(SessionId + "minesdata")
-    if not mines:
+    if mines is None:
         return JSONResponse(content={"error": "No mines found"}, status_code=400)
 
     mines = json.loads(mines) 
@@ -442,8 +442,18 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
         return IfInsufficientFunds()
     if int(doc["balance"]) < int(bet_amount):
         return IfInsufficientFunds()
+    if int(mine_count) == 25:
+        return templates.TemplateResponse(
+            "mines.html",
+            {"request": request, "mines_error": "Insufficient Funds!"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    
+    
+    total_tiles = 24
+    mine_count = min(mine_count, total_tiles)  
 
-    mines = [i for i in range(25) if random.randint(0,mine_count) == mine_count]
+    mines = random.sample(range(total_tiles), mine_count)
 
     result = mainCollection.update_one(
         {"username": username},
@@ -575,4 +585,5 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
