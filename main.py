@@ -420,7 +420,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         redis.delete("ClickData." + SessionId)
         redis.delete(SessionId + "Cashout")
         redis.delete(SessionId + "BetAmount")
-        redis.incrby(SessionId + "Cleared",None)
+        redis.delete(SessionId + "Cleared",None)
         return JSONResponse({"ismine": True, "mines": mines})
 
     data_raw = redis.get("ClickData." + SessionId)
@@ -701,4 +701,5 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
