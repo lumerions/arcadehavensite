@@ -1,386 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mines - AH Gambling</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mines - AH Gambling</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #000;
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 
-        header { border-bottom: 1px solid #333; }
+header { border-bottom: 1px solid #333; }
 
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 1.25rem;
-            display: flex;
-            align-items: center;
-        }
+nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+}
 
-        .logo {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.25rem;
-        }
+.logo {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
 
-        .balance-wrapper {
-            margin-left: auto;
-            position: relative;
-        }
+.balance-wrapper {
+    margin-left: auto;
+    position: relative;
+}
 
-        .balance-btn {
-            background: #111;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 0.5rem 1.25rem;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+.balance-btn {
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
 
+.balance-menu {
+    position: absolute;
+    right: 0;
+    top: 120%;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    min-width: 160px;
+    padding: 0.5rem 0;
+    display: none;
+}
 
+.balance-wrapper.open .balance-menu { display: block; }
 
-        .balance-btn:hover {
-            background: #222;
-            border-color: #555;
-        }
+.balance-menu a {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #fff;
+    text-decoration: none;
+    font-size: .85rem;
+}
 
-        .balance-menu {
-            position: absolute;
-            right: 0;
-            top: 120%;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            min-width: 160px;
-            padding: 0.5rem 0;
-            display: none;
-            z-index: 100;
-        }
+.balance-menu a:hover { background: #222; }
 
-        .balance-menu a {
-            display: block;
-            padding: 0.5rem 1rem;
-            color: #fff;
-            text-decoration: none;
-            font-size: 0.875rem;
-        }
+main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1rem;
+}
 
-        .balance-menu a:hover {
-            background: #222;
-        }
+/* ================= MINES LAYOUT ================= */
 
-        .divider {
-            height: 1px;
-            background: #333;
-            margin: 0.4rem 0;
-        }
+.mines-layout {
+    display: flex;
+    gap: 20px;
+    max-width: 900px;
+    width: 100%;
+}
 
-        .balance-wrapper.open .balance-menu {
-            display: block;
-        }
+/* LEFT MENU */
+.mines-menu {
+    width: 260px;
+    background: #1c2433;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
 
-        main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            padding: 3rem 1rem;
-        }
+.mode-toggle {
+    display: flex;
+    background: #2a3448;
+    border-radius: 10px;
+    padding: 4px;
+}
 
-        .card {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            max-width: 520px;
-            width: 100%;
-        }
+.mode {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #cbd5f5;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+}
 
-        h1 {
-            font-size: clamp(1.6rem, 4vw, 2rem);
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #fff, #888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+.mode.active {
+    background: #7c3aed;
+    color: #fff;
+}
 
-        /* 🔹 RESPONSIVE GRID */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(8, clamp(34px, 8vw, 50px));
-            gap: clamp(6px, 2vw, 8px);
-            justify-content: center;
-            margin: 1.25rem 0;
-        }
+.menu-group {
+    background: #2a3448;
+    padding: 12px;
+    border-radius: 10px;
+}
 
-        .cell {
-            width: clamp(34px, 8vw, 50px);
-            height: clamp(34px, 8vw, 50px);
-            border-radius: 6px;
-            background: #222;
-            border: 1px solid #333;
-            touch-action: manipulation;
-        }
+.menu-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: .85rem;
+    color: #cbd5f5;
+    margin-bottom: 8px;
+}
 
-        .cell.mine { background: #b91c1c; }
-        .cell.empty { background: #555; }
+.bet-input {
+    display: flex;
+    align-items: center;
+    background: #1c2433;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+}
 
-        .cell.clicked {
-            background: #22c55e;
-        }
+.bet-input span {
+    margin-right: 6px;
+    color: #9ca3af;
+}
 
-        .cell.reveal {
-            background: #22c55e;
-            filter: brightness(0.4);
-        }
+.bet-input input,
+.mines-input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    width: 100%;
+    outline: none;
+}
 
-        button {
-            padding: 0.7rem 1.5rem;
-            background: #222;
-            border: 1px solid #333;
-            color: #fff;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            width: 100%;
-            max-width: 260px;
-            margin-top: 0.5rem;
-        }
+.bet-actions {
+    display: flex;
+    gap: 6px;
+}
 
-        button:hover {
-            background: #333;
-            border-color: #555;
-        }
+.bet-actions button {
+    flex: 1;
+    background: #1c2433;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
 
-        .error-message {
-            color: #ff5555;
-            font-weight: bold;
-            margin-bottom: 0.75rem;
-        }
+.start-btn {
+    margin-top: auto;
+    background: #7c3aed;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
 
-        @media (max-width: 420px) {
-            .card {
-                padding: 1.25rem 1rem;
-            }
-        }
-               
-        .action-btn {
-            position: relative;  
-            padding: 0.65rem 1.5rem;
-            border: 1px solid #333;
-            color: transparent;  
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem; 
-            font-family: Arial, sans-serif;
-            font-weight: normal; 
-            width: 100%;  
-            max-width: 100%; 
-        }
-        
-        .action-btn.deposit {
-            background: #16a34a;
-        }
-        
-        .action-btn.deposit::after {
-            content: "Initiate Deposit"; 
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);  
-            color: #000;  
-            font-size: 1rem;
-            font-family: Arial, sans-serif; 
-            font-weight: normal; 
-        }
-        
-        .action-btn.withdraw {
-            background: #2563eb;
-        }
-        
-        .action-btn.withdraw::after {
-            content: "Initiate Withdrawal";  
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);  
-            color: #000;  
-            font-size: 1rem;
-            font-family: Arial, sans-serif; 
-            font-weight: normal;
-        }
+.start-btn:hover { background: #6d28d9; }
 
-        
-        .error-message {
-            background: #2a3448; 
-            color: #f87171;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-top: 16px;
-            text-align: left;
-            border: 1px solid #7c3aed; 
-            font-weight: 500;
-        }
-        
-        .error-message strong {
-            font-weight: 600; 
-        }
-        
-                
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.75);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-        }
-        
-        .modal.open {
-            display: flex;
-        }
-        
-        .wallet {
-            background: #1c2433;
-            border-radius: 14px;
-            width: 420px;
-            padding: 20px;
-            position: relative;
-        }
-        
-        .wallet-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .wallet-header h2 {
-            font-size: 1.2rem;
-        }
-        
-        .close {
-            cursor: pointer;
-            font-size: 1.4rem;
-            color: #9ca3af;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 8px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            background: #2a3448;
-            color: #cbd5f5;
-        }
-        
-        .tab.active.deposit { background: #16a34a; color:#fff; }
-        .tab.active.withdraw { background: #2563eb; color:#fff; }
-        
-        label {
-            display: block;
-            font-size: .85rem;
-            margin-bottom: 6px;
-            color: #cbd5f5;
-        }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #2a3448;
-            border: 2px solid #7c3aed;
-            border-radius: 8px;
-            color: #fff;
-            margin-bottom: 14px;
-        }
-        
-        .instructions {
-            background: #2a3448;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: .85rem;
-            text-align: left;
-            color: #cbd5f5;
-            margin-bottom: 16px;
-        }
+/* RIGHT GAME */
+.card {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    flex: 1;
+}
 
-    </style>
+h1 {
+    margin-bottom: 1rem;
+    background: linear-gradient(to right, #fff, #888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(8, 48px);
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.cell {
+    width: 48px;
+    height: 48px;
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.cell.clicked { background: #22c55e; }
+.cell.mine { background: #b91c1c; }
+.cell.reveal { background: #22c55e; filter: brightness(.4); }
+
+button {
+    background: #222;
+    border: 1px solid #333;
+    color: #fff;
+    padding: .6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover { background: #333; }
+
+@media (max-width: 768px) {
+    .mines-layout { flex-direction: column; }
+    .mines-menu { width: 100%; }
+}
+</style>
 </head>
 
 <body>
+
 <header>
 <nav>
     <a href="/" class="logo">AH Gambling</a>
 
     <div class="balance-wrapper">
-        <button class="balance-btn"></button>
+        <button class="balance-btn">$0</button>
         <div class="balance-menu">
             <a id="openDeposit">Deposit</a>
             <a id="openWithdraw">Withdraw</a>
-            <div class="divider"></div>
             <a href="/logout">Log out</a>
         </div>
     </div>
 </nav>
 </header>
 
-
-    
-<div class="modal" id="walletModal">
-    <div class="wallet">
-        <div class="wallet-header">
-            <h2>Wallet</h2>
-            <span class="close">&times;</span>
-        </div>
-
-        <div class="tabs">
-            <button class="tab deposit active">Deposit</button>
-            <button class="tab withdraw">Withdraw</button>
-        </div>
-
-        {% if error %}
-            <p class="error-message">
-                <strong>Error:</strong> {{ error }}
-            </p>
-        {% endif %}
-
-
-
-        <label>Amount</label>
-        <input type="text" id="amount" value="">
-        <div class="instructions" id="instructions"></div>
-
-        <button class="action-btn deposit" id="depositBtn">
-            Initiate Deposit
-        </button>
-        <button class="action-btn withdraw" id="withdrawBtn">
-            Initiate Withdrawal
-        </button>
-    </div>
-</div>
-
 <main>
+<div class="mines-layout">
+
+    <!-- LEFT MENU -->
+    <div class="mines-menu">
+        <div class="mode-toggle">
+            <button class="mode active">Manual</button>
+            <button class="mode">Auto</button>
+        </div>
+
+        <div class="menu-group">
+            <div class="menu-label">
+                <span>Bet Amount</span>
+                <span>10 Tokens</span>
+            </div>
+
+            <div class="bet-input">
+                <span>$</span>
+                <input type="number" value="10">
+            </div>
+
+            <div class="bet-actions">
+                <button>½</button>
+                <button>2X</button>
+                <button>MAX</button>
+            </div>
+        </div>
+
+        <div class="menu-group">
+            <div class="menu-label">
+                <span>Mines</span>
+                <span>3 mines</span>
+            </div>
+
+            <input class="mines-input" type="number" value="3">
+        </div>
+
+        <button class="start-btn">Start Game</button>
+    </div>
+
+    <!-- GAME -->
     <div class="card">
         <h1>Mines</h1>
 
@@ -390,90 +310,15 @@
             {% endfor %}
         </div>
 
-        <script>
-
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.addEventListener('click', async () => {
-                    if (cell.classList.contains('revealed')) return;
-                    const grid = document.querySelector('.grid');
-                    if (grid.classList.contains('gamedone')) return;
-
-                    const tileIndex = cell.dataset.index;
-
-                    try {
-                        const response = await fetch('/mines/click', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ tileIndex })
-                        });
-
-                        if (!response.ok) throw new Error('Request failed');
-
-                        const result = await response.json();
-                        const mines = result.mines;
-
-                        if (result.ismine && Array.isArray(mines)) {
-                            document.querySelectorAll('.cell').forEach(cellEl => {
-                                const index = Number(cellEl.dataset.index);
-                                if (mines.includes(index)) {
-                                    cellEl.classList.add('mine');
-                                } else if (!cellEl.classList.contains('clicked')) {
-                                    cellEl.classList.add('reveal');
-                                }
-                            });
-                            grid.classList.add('gamedone');
-                        } else {
-                            cell.classList.add('clicked');
-                        }
-
-                        cell.classList.add('revealed');
-                    } catch (err) {
-                        console.error('Error sending tile click:', err);
-                    }
-                });
-            });
-        </script>
-
         <form method="POST" action="/startmines">
             <button type="submit">Play Mines</button>
         </form>
     </div>
+
+</div>
 </main>
 
-    <div class="modal" id="walletModal">
-    <div class="wallet">
-        <div class="wallet-header">
-            <h2>Wallet</h2>
-            <span class="close">&times;</span>
-        </div>
-
-        <div class="tabs">
-            <button class="tab deposit active">Deposit</button>
-            <button class="tab withdraw">Withdraw</button>
-        </div>
-
-        {% if error %}
-            <p class="error-message">
-                <strong>Error:</strong> {{ error }}
-            </p>
-        {% endif %}
-
-
-
-        <label>Amount</label>
-        <input type="text" id="amount" value="">
-        <div class="instructions" id="instructions"></div>
-
-        <button class="action-btn deposit" id="depositBtn">
-            Initiate Deposit
-        </button>
-        <button class="action-btn withdraw" id="withdrawBtn">
-            Initiate Withdrawal
-        </button>
-    </div>
-</div>
-
+<script>
 
     <script>
         
@@ -610,19 +455,10 @@
                 }
             };
     </script>
+</script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
