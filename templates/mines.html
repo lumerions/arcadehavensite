@@ -175,7 +175,7 @@
                 padding: 1.25rem 1rem;
             }
         }
-
+       
         .action-btn {
             position: relative;  
             padding: 0.65rem 1.5rem;
@@ -184,12 +184,14 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.95rem;
+            width: 100%;  
+            max-width: 100%; 
         }
-        
+
         .action-btn.deposit {
             background: #16a34a;
         }
-        
+
         .action-btn.deposit::after {
             content: "Initiate Deposit"; 
             position: absolute;
@@ -199,11 +201,11 @@
             color: #000;  
             font-size: 1rem;
         }
-        
+
         .action-btn.withdraw {
             background: #2563eb;
         }
-        
+
         .action-btn.withdraw::after {
             content: "Initiate Withdrawal";  
             position: absolute;
@@ -213,6 +215,8 @@
             color: #000;  
             font-size: 1rem;
         }
+
+
         
         .error-message {
             background: #2a3448; 
@@ -607,10 +611,6 @@
     </script>
 </body>
 </html>
-
-
-
-
 
 
 
