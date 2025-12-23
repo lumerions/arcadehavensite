@@ -383,8 +383,9 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     tilescleared = redis.incrby(SessionId + "Cleared",1)
     multiplier_per_click = 25 / (25 - len(mines))
     total_multiplier = multiplier_per_click ** tilescleared
-    betamount = redis.get(SessionId + "BetAmount")
-    winnings = betamount * total_multiplier
+    bet_amount_raw = redis.get(SessionId + "BetAmount") or b"0"
+    bet_amount = float(bet_amount_raw)
+    winnings = bet_amount * total_multiplier
     redis.incrby("Cashout" + SessionId,winnings)
     redis.set("ClickData." + SessionId, json.dumps(existing_array))
 
