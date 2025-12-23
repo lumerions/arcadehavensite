@@ -239,15 +239,27 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
     mainCollection = mainMongo["collection"]
     
     doc = mainCollection.find_one({"username": sitename})
-    print(doc)
 
-    if amount > int(doc["balance"]):
-        if page == "towers":
+    def MoreWithdraw(pagetype):
+        if pagetype == "towers":
             return templates.TemplateResponse(
                 "towers.html",
                 {"request": request,"error":"You are trying to withdraw more then you have!"},
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+        if pagetype == "mines":
+            return templates.TemplateResponse(
+                "mines.html",
+                {"request": request,"error":"You are trying to withdraw more then you have!"},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+    if not doc:
+        return MoreWithdraw(page)
+
+    if amount > int(doc["balance"]):
+        return MoreWithdraw(page)
+
 
 
     launch_data = {
