@@ -837,14 +837,40 @@ function setMaxBet() {
     
             window.onload = function() {
                 const errorMessage = document.querySelector('.error-message');
-        
                 if (errorMessage) {
                     openWallet('withdraw');
                 }
+
+                async function restoreRevealedTiles() {
+                    try {
+                        const response = await fetch('/getCurrentMinesData', {
+                            credentials: 'include' 
+                        });
+                
+                        if (!response.ok) throw new Error('Failed to fetch current mines data');
+                
+                        const revealedIndices = await response.json(); 
+                
+                        document.querySelectorAll('.cell').forEach(cell => {
+                            const index = Number(cell.dataset.index);
+                
+                            if (revealedIndices.includes(index)) {
+                                cell.classList.add('clicked', 'revealed'); 
+                            }
+                        });
+                
+                    } catch (err) {
+                        console.error('Error restoring revealed tiles:', err);
+                    }
+                }
+
+                restoreRevealedTiles()
+            
             };
     </script>
 </body>
 </html>
+
 
 
 
