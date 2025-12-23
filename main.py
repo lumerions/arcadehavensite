@@ -139,19 +139,6 @@ def read_root(request: Request):
 def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
-@app.get("/cookie/set")
-def set_cookie():
-    ten_years = 10 * 365 * 24 * 60 * 60
-    response = Response(content="Cookie set!")
-    response.set_cookie(
-        key="SessionId",
-        value="cookie_value",
-        max_age=ten_years,
-        expires=ten_years,
-        httponly=True,
-        path="/"
-    )
-    return response  
 
 @app.get("/logout")
 def logout():
@@ -187,6 +174,13 @@ def get(SessionId: str = Cookie(None)):
         return 0 
         
     return int(doc["balance"])
+
+@app.get("/getCurrentMinesData")
+def get(SessionId: str = Cookie(None)):
+    data_raw = redis.get("ClickData." + SessionId)
+    existing_array = json.loads(data_raw) if data_raw else []
+    return existing_array
+
 
 
 @app.get("/deposit")
@@ -244,13 +238,13 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
         if pagetype == "towers":
             return templates.TemplateResponse(
                 "towers.html",
-                {"request": request,"error":"You are trying to withdraw more then you have!"},
+                {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         if pagetype == "mines":
             return templates.TemplateResponse(
                 "mines.html",
-                {"request": request,"error":"You are trying to withdraw more then you have!"},
+                {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
                 status_code=status.HTTP_400_BAD_REQUEST
             )
 
@@ -378,19 +372,84 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if is_mine:
         redis.delete("Debounce." + SessionId)
+        redis.delete("ClickData." + SessionId)
         return JSONResponse(content={"ismine": is_mine,"mines": mines})
 
+    data_raw = redis.get("ClickData." + SessionId)
+    existing_array = json.loads(data_raw) if data_raw else []
+    new_entries = [tile_index]
+    existing_array.extend(new_entries)  
+
+    redis.set("ClickData." + SessionId, json.dumps(existing_array))
 
     return JSONResponse(content={"ismine": is_mine})
 
-@app.post("/startmines")
-def print_endpoint(SessionId: str = Cookie(None)):
+@app.post("/startmines",response_class=HTMLResponse)
+async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     if not SessionId or redis.get("Debounce." + SessionId):
         return RedirectResponse(url="/mines", status_code=303)
     
     redis.set("Debounce." + SessionId,True)
 
-    mines = [i for i in range(48) if random.randint(1,2) == 2]
+    data = await request.json()
+    bet_amount = data.get("betAmount")
+    mine_count = data.get("mineCount")
+
+    if bet_amount is None or mine_count is None:
+        return templates.TemplateResponse(
+            "mines.html",
+            {"request": request, "mines_error": "Bet amount or mine count is none!"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if int(mine_count) < 1:
+        return templates.TemplateResponse(
+            "mines.html",
+            {"request": request, "mines_error": "Must be over or equal to 1!"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    
+
+    def IfInsufficientFunds():
+        return templates.TemplateResponse(
+            "mines.html",
+            {"request": request, "mines_error": "Insufficient Funds!"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    
+    mainMongo = getMainMongo()
+    mainCollection = mainMongo["collection"]
+
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                result = cursor.fetchone()  
+                if not result:
+                    return {"error": "Session not found"}
+                username = result[0]
+    except Exception as error:
+        return {"error": str(error)}
+    
+
+    try:
+        doc = mainCollection.find_one({"username": username})
+        
+    except Exception as error:
+        return {"error": str(error)}
+    
+    if not doc:
+        return IfInsufficientFunds()
+    if int(doc["balance"]) < int(bet_amount):
+        return IfInsufficientFunds()
+
+    mines = [i for i in range(25) if random.randint(0,mine_count) == mine_count]
+
+    result = mainCollection.update_one(
+        {"username": username},
+        {"$inc": {"balance": -int(bet_amount)}},
+        upsert=True
+    )
 
     redis.set(SessionId + "minesdata",json.dumps(mines))
     return RedirectResponse(url="/mines", status_code=303)
