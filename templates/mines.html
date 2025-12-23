@@ -118,20 +118,24 @@
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(8, clamp(34px, 8vw, 50px));
-            gap: clamp(6px, 2vw, 8px);
+            grid-template-columns: repeat(
+                8,
+                clamp(40px, 9vw, 100px)
+            );
+            gap: clamp(6px, 2vw, 16px);
             justify-content: center;
             margin: 1.25rem 0;
         }
-
+        
         .cell {
-            width: clamp(68px, 16vw, 100px);
-            height: clamp(68px, 16vw, 100px);
-            border-radius: 6px;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 10px;
             background: #222;
             border: 1px solid #333;
             touch-action: manipulation;
         }
+
 
 
         .cell.mine { background: #b91c1c; }
@@ -787,6 +791,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
