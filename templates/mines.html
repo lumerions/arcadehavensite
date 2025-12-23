@@ -478,8 +478,13 @@ function adjustBet(multiplier) {
 }
 
 function setMaxBet() {
-    input = document.getElementById('betAmount');
-    input.value = 1000;
+    const input = document.getElementById('betAmount');
+    const balanceBtn = document.querySelector('.balance-btn');
+
+    const balanceText = balanceBtn.textContent.replace(/\$|,/g, '');
+    const balanceNumber = parseFloat(balanceText) || 0;
+
+    input.value = balanceNumber;
 }
 </script>
 
@@ -812,6 +817,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
