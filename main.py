@@ -544,7 +544,10 @@ def print_endpoint(SessionId: str = Cookie(None)):
     if redis.get(SessionId + "Cash."):
         return JSONResponse({"error": "Already cashed out"}, status_code=400)
     
-    redis.set(SessionId + "Cash.",True) 
+    tocashout = redis.get(SessionId + "Cashout")
+
+    if not tocashout:
+        return JSONResponse({"error": "No cashout value was set"}, status_code=400)
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -554,29 +557,23 @@ def print_endpoint(SessionId: str = Cookie(None)):
                 if not result:
                     return {"error": "Session not found"}
                 username = result[0]
+                doc = mainCollection.find_one({"username": username})
+                result = mainCollection.update_one(
+                    {"username": username},
+                    {"$inc": {"balance": int(tocashout)}},
+                    upsert=True
+                )
+
+                redis.set(SessionId + "Cash.", True)
+                return JSONResponse({"success": True})
     except Exception as error:
         return {"error": str(error)}
-    
-    try:
-        doc = mainCollection.find_one({"username": username})
-        
-    except Exception as error:
-        return {"error": str(error)}
-    
-    tocashout = redis.get(SessionId + "Cashout")
-
-    result = mainCollection.update_one(
-        {"username": username},
-        {"$inc": {"balance": int(tocashout)}},
-        upsert=True
-    )
-
-    redis.delete(SessionId + "Cashout")
-    redis.delete("Debounce." + SessionId)
-    redis.delete("ClickData." + SessionId)
-    redis.delete(SessionId + "BetAmount")
-    redis.delete(SessionId + "Cashout")
-    redis.delete(SessionId + "Cash.") 
+    finally:
+        redis.delete(SessionId + "Cashout")
+        redis.delete("Debounce." + SessionId)
+        redis.delete("ClickData." + SessionId)
+        redis.delete(SessionId + "BetAmount")
+        redis.delete(SessionId + "Cash.") 
 
     return JSONResponse(content={"success": True})
 
@@ -701,6 +698,5 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-True
 
 
