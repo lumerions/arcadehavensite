@@ -206,7 +206,7 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
 
         mines = json.loads(mines_raw)
         multiplier_per_click = 25 / (25 - len(mines))
-        tilescleared = redis.get(SessionId + "Cleared")
+        tilescleared = int(redis.get(SessionId + "Cleared") or 0)
         bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
         total_multiplier = multiplier_per_click ** tilescleared
         winnings = int(bet_amount * total_multiplier)
@@ -698,4 +698,5 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
