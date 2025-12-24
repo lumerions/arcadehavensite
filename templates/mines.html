@@ -700,7 +700,7 @@ function setMaxBet() {
             
                             grid.classList.add('gamedone');
             
-                        } else { // Safe click
+                        } else { 
                             cell.classList.add('clicked');
                             cell.classList.add('revealed');
             
@@ -897,11 +897,29 @@ function setMaxBet() {
                 window.location.href = `/withdraw?amount=${encodeURIComponent(amount)}&page=${encodeURIComponent("mines")}`;
             };
     
-            window.onload = function() {
+            window.onload = async function() {
                 const errorMessage = document.querySelector('.error-message');
                 if (errorMessage) {
                     openWallet('withdraw');
                 }
+
+                  const cashoutResponse = await fetch('/cashoutamount', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                });
+
+                if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
+
+                const data = await cashoutResponse.json();
+
+                const currentAmount = data.amount;
+                const amountAfterNextTile = data.amountafter;
+                const multiplier = data.multiplier;
+
+                document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+                document.getElementById('currentAmount').textContent = currentAmount;
+                document.getElementById('amountAfter').textContent = amountAfterNextTile;
 
                 async function restoreRevealedTiles() {
                     try {
@@ -942,6 +960,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
