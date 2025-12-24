@@ -406,14 +406,17 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
-
     mines_raw = redis.get(SessionId + "minesdata")
     if not mines_raw:
         return JSONResponse({"error": "No mines found"}, status_code=400)
-    
     if not redis.get(SessionId + "GameActive"):
         return JSONResponse({"error": "No active game"}, status_code=400)
-
+    if tile_index < 0 or tile_index >= 25:
+        return JSONResponse({"error": "Invalid tile"}, status_code=400)
+    clicks_key = SessionId + ":clicks"
+    added = redis.sadd(clicks_key, tile_index)  
+    if added == 0:
+        return JSONResponse({"error": "Tile already clicked"}, status_code=400)
     
     if redis.get(SessionId + "Cash.."):
         return JSONResponse(
@@ -429,12 +432,15 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     is_mine = tile_index in mines
 
     if is_mine:
-        redis.delete("Debounce." + SessionId)
-        redis.delete("ClickData." + SessionId)
-        redis.delete(SessionId + "Cashout")
-        redis.delete(SessionId + "BetAmount")
-        redis.delete(SessionId + "Cleared")
-        redis.delete(SessionId + "Cash..")
+        redis.delete(
+            "Debounce." + SessionId,
+            "ClickData." + SessionId,
+            SessionId + "Cashout",
+            SessionId + "BetAmount",
+            SessionId + "Cleared",
+            SessionId + "Cash..",
+            SessionId + ":clicks"
+        )
         return JSONResponse({"ismine": True, "mines": mines})
 
 
@@ -550,12 +556,15 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
 @app.post("/cashout")
 def cashout(SessionId: str = Cookie(None)):
-
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
 
     if not redis.get(SessionId + "GameActive"):
         return JSONResponse({"error": "No active game"}, status_code=400)
+
+    cashed_key = SessionId + ":cashed"
+    if not redis.set(cashed_key, "1", nx=True,ex = 5):
+        return JSONResponse({"error": "Already cashed out"}, status_code=400)
 
     tocashout = int(redis.get(SessionId + "Cashout") or 0)
     if tocashout <= 0:
@@ -572,69 +581,23 @@ def cashout(SessionId: str = Cookie(None)):
                 return JSONResponse({"error": "Session not found"}, status_code=400)
 
             username = row[0]
-            mainMongo = getMainMongo()
-            mainCollection = mainMongo["collection"]
+            mainCollection = getMainMongo()["collection"]
             mainCollection.update_one(
                 {"username": username},
-                {"$inc": {"balance": tocashout}},
-                upsert=True
-            )
-            redis.delete(
-                SessionId + "GameActive",
-                SessionId + "Cleared",
-                SessionId + "Cashout",
-                SessionId + "BetAmount",
-                "ClickData." + SessionId,
-                "Debounce." + SessionId
+                {"$inc": {"balance": tocashout}}
             )
 
+    redis.delete(
+        SessionId + "GameActive",
+        SessionId + "Cleared",
+        SessionId + "Cashout",
+        SessionId + "BetAmount",
+        "ClickData." + SessionId,
+        SessionId + ":clicks",
+        "Debounce." + SessionId
+    )
 
     return JSONResponse({"success": True, "amount": tocashout})
-
-
-
-@app.post("/cashout")
-def print_endpoint(SessionId: str = Cookie(None)):
-
-    mainMongo = getMainMongo()
-    mainCollection = mainMongo["collection"]
-
-    if redis.get(SessionId + "Cash.."):
-        return JSONResponse({"error": "Already cashed out"}, status_code=400)
-    
-    tocashout = redis.get(SessionId + "Cashout")
-
-    if not tocashout:
-        return JSONResponse({"error": "No cashout value was set"}, status_code=400)
-
-    try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                result = cursor.fetchone()  
-                if not result:
-                    return {"error": "Session not found"}
-                username = result[0]
-                doc = mainCollection.find_one({"username": username})
-                result = mainCollection.update_one(
-                    {"username": username},
-                    {"$inc": {"balance": int(tocashout)}},
-                    upsert=True
-                )
-
-                redis.set(SessionId + "Cash..", "1")
-                return JSONResponse({"success": True})
-    except Exception as error:
-        return {"error": str(error)}
-    finally:
-        redis.delete(SessionId + "Cash..")
-        redis.delete("Debounce." + SessionId)
-        redis.delete("ClickData." + SessionId)
-        redis.delete(SessionId + "Cashout")
-        redis.delete(SessionId + "BetAmount")
-        redis.delete(SessionId + "Cleared")
-
-    return JSONResponse(content={"success": True})
 
 
 @app.post("/register", response_class=HTMLResponse)
