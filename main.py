@@ -530,7 +530,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
         )
     
     
-    total_tiles = 24
+    total_tiles = 25
     mine_count = min(mine_count, total_tiles)  
 
     mines = random.sample(range(total_tiles), mine_count)
@@ -760,7 +760,5 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
 
 
