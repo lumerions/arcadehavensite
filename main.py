@@ -56,7 +56,7 @@ class deposit(BaseModel):
     siteusername : str
     sessionid : str
     amount : int
-    success : bool
+    Deposit : bool
 
 class MinesClick(BaseModel):
     tileIndex: int
@@ -270,7 +270,7 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
 
     return RedirectResponse(url)
 
-@app.post("/depositearnings")
+@app.post("/earnings")
 def depositearnings(data: deposit):
     if data.robloxusername == "":
         return "Username can't be empty!"
@@ -278,7 +278,7 @@ def depositearnings(data: deposit):
         return "Site username can't be empty!"
     if data.sessionid == "":
         return "Site sessionid can't be empty!"
-    if data.success == None:
+    if data.Deposit == None:
         return "Data success can't be empty!"
 
     try:
@@ -304,6 +304,13 @@ def depositearnings(data: deposit):
         mainMongo = getMainMongo()
         mainCollection = mainMongo["collection"]
 
+        if data.Deposit == False:
+            doc = mainCollection.find_one({"username": "testuser"})
+            balanceaftersubtract = int(doc["balance"]) - int(data.amount)
+
+            if balanceaftersubtract < 1:
+                return "This user is trying to subtract more then they have!"
+
         result = mainCollection.update_one(
             {"username": data.siteusername, "sessionid": data.sessionid},
             {"$inc": {"balance": data.amount}},
@@ -318,45 +325,6 @@ def depositearnings(data: deposit):
 
 
 
-@app.post("/withdrawearnings")
-def withdrawearnings(data: deposit):
-    if data.robloxusername == "":
-        return "Username can't be empty!"
-    if data.siteusername == "":
-        return "Site username can't be empty!"
-    if data.sessionid == "":
-        return "Site sessionid can't be empty!"
-    if data.success == None:
-        return "Data success can't be empty!"
-    
-    try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cur:
-
-                cur.execute("""
-                    UPDATE accounts
-                    SET robloxusername = %s
-                    WHERE username = %s
-                    AND  sessionid = %s
-                    RETURNING robloxusername;
-                """, (data.robloxusername, data.siteusername,data.sessionid))
-                row = cur.fetchone()
-                conn.commit()
-
-    except Exception as error:
-        return error
-    
-    if row is None:
-        return "Something went wrong!"
-    else:
-        mainMongo = getMainMongo()
-        MainDatabase, mainCollection = mainMongo["db"], mainMongo["collection"]
-
-        result = mainCollection.update_one(
-            {"username": data.siteusername, "sessionid": data.sessionid},
-            {"$inc": {"balance": data.amount}},
-            upsert=True
-        )
 
 
 
@@ -720,5 +688,7 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
 
 
