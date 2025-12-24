@@ -541,7 +541,7 @@ def print_endpoint(SessionId: str = Cookie(None)):
     mainMongo = getMainMongo()
     mainCollection = mainMongo["collection"]
 
-    if redis.get(SessionId + "Cash."):
+    if redis.get(SessionId + "Cash.."):
         return JSONResponse({"error": "Already cashed out"}, status_code=400)
     
     tocashout = redis.get(SessionId + "Cashout")
@@ -564,7 +564,7 @@ def print_endpoint(SessionId: str = Cookie(None)):
                     upsert=True
                 )
 
-                redis.set(SessionId + "Cash.", True)
+                redis.set(SessionId + "Cash..", "1")
                 return JSONResponse({"success": True})
     except Exception as error:
         return {"error": str(error)}
@@ -573,7 +573,7 @@ def print_endpoint(SessionId: str = Cookie(None)):
         redis.delete("Debounce." + SessionId)
         redis.delete("ClickData." + SessionId)
         redis.delete(SessionId + "BetAmount")
-        redis.delete(SessionId + "Cash.") 
+        redis.delete(SessionId + "Cash..") 
 
     return JSONResponse(content={"success": True})
 
@@ -698,5 +698,4 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
 
