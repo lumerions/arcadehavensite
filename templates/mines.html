@@ -903,6 +903,24 @@ function setMaxBet() {
                     openWallet('withdraw');
                 }
 
+                const cashoutResponse = await fetch('/cashoutamount', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                });
+
+                if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
+
+                const data = await cashoutResponse.json();
+
+                const currentAmount = data.amount;
+                const amountAfterNextTile = data.amountafter;
+                const multiplier = data.multiplier;
+
+                document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+                document.getElementById('currentAmount').textContent = currentAmount;
+                document.getElementById('amountAfter').textContent = amountAfterNextTile;
+
                
 
                 async function restoreRevealedTiles() {
@@ -944,6 +962,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
