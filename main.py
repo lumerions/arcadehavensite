@@ -185,43 +185,6 @@ def get(SessionId: str = Cookie(None)):
         
     return int(doc["balance"])
 
-@app.get("/getCurrentMinesData")
-def get(SessionId: str = Cookie(None)):
-    data_raw = redis.get("ClickData." + SessionId)
-    existing_array = json.loads(data_raw) if data_raw else []
-    return existing_array
-
-@app.get("/cashoutamount")
-def getcashoutAmount(SessionId: str = Cookie(None)):
-    if not SessionId:
-        return JSONResponse({"error": "SessionId missing"}, status_code=400)
-
-    mines_raw = redis.get(SessionId + "minesdata")
-    if not mines_raw:
-        return JSONResponse({"error": "No mines found"}, status_code=400)
-
-    mines = json.loads(mines_raw.decode() if isinstance(mines_raw, bytes) else mines_raw)
-
-    tilescleared = int(redis.get(SessionId + "Cleared") or 0)
-    bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
-
-    multiplier_per_click = 25 / (25 - len(mines))
-
-    current_multiplier = multiplier_per_click ** tilescleared
-    next_multiplier = multiplier_per_click ** (tilescleared + 1)
-
-    currentamount = int(bet_amount * current_multiplier)
-    amountafternexttile = int(bet_amount * next_multiplier)
-
-    return {
-        "amount": currentamount,
-        "amountafter": amountafternexttile,
-        "multiplier": current_multiplier
-    }
-
-
-
-
 @app.get("/deposit")
 async def depositget(amount: float, SessionId: str = Cookie(None)):
     if not SessionId:
@@ -397,6 +360,45 @@ def withdrawearnings(data: deposit):
 
 
 
+@app.get("/getCurrentMinesData")
+def get(SessionId: str = Cookie(None)):
+    data_raw = redis.get("ClickData." + SessionId)
+    existing_array = json.loads(data_raw) if data_raw else []
+    return existing_array
+
+@app.get("/cashoutamount")
+def getcashoutAmount(SessionId: str = Cookie(None)):
+    if not SessionId:
+        return JSONResponse({"error": "SessionId missing"}, status_code=400)
+
+    mines_raw = redis.get(SessionId + "minesdata")
+    if not mines_raw:
+        return JSONResponse({"error": "No mines found"}, status_code=400)
+    
+    if not redis.get(SessionId + "GameActive"):
+        return {"amount": 0, "amountafter": 0, "multiplier": 1}
+
+
+    mines = json.loads(mines_raw.decode() if isinstance(mines_raw, bytes) else mines_raw)
+
+    tilescleared = int(redis.get(SessionId + "Cleared") or 0)
+    bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
+
+    multiplier_per_click = 25 / (25 - len(mines))
+
+    current_multiplier = multiplier_per_click ** tilescleared
+    next_multiplier = multiplier_per_click ** (tilescleared + 1)
+
+    currentamount = int(bet_amount * current_multiplier)
+    amountafternexttile = int(bet_amount * next_multiplier)
+
+    return {
+        "amount": currentamount,
+        "amountafter": amountafternexttile,
+        "multiplier": current_multiplier
+    }
+
+
 @app.post("/mines/click")
 def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
@@ -408,6 +410,10 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     mines_raw = redis.get(SessionId + "minesdata")
     if not mines_raw:
         return JSONResponse({"error": "No mines found"}, status_code=400)
+    
+    if not redis.get(SessionId + "GameActive"):
+        return JSONResponse({"error": "No active game"}, status_code=400)
+
     
     if redis.get(SessionId + "Cash.."):
         return JSONResponse(
@@ -537,9 +543,10 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     multiplier_per_click = 25 / (25 - mine_count)
 
-    redis.set(SessionId + "Cleared",0)
+    redis.set(SessionId + "GameActive", "1")
+    redis.set(SessionId + "Cleared", 0)
+    redis.set(SessionId + "Cashout", 0)
     redis.set(SessionId + "BetAmount",bet_amount)
-    redis.set(SessionId + "Cashout",bet_amount)
     redis.set(SessionId + "minesdata",json.dumps(mines))
     return RedirectResponse(url="/mines", status_code=303)
 
@@ -550,12 +557,12 @@ def cashout(SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
 
-    if redis.get(SessionId + "Cash.."):
-        return JSONResponse({"error": "Already cashed out"}, status_code=400)
+    if not redis.get(SessionId + "GameActive"):
+        return JSONResponse({"error": "No active game"}, status_code=400)
 
     tocashout = int(redis.get(SessionId + "Cashout") or 0)
     if tocashout <= 0:
-        return JSONResponse({"error": "No cashout value"}, status_code=400)
+        return JSONResponse({"error": "Nothing to cash out"}, status_code=400)
 
     with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
         with conn.cursor() as cursor:
@@ -575,8 +582,15 @@ def cashout(SessionId: str = Cookie(None)):
                 {"$inc": {"balance": tocashout}},
                 upsert=True
             )
+            redis.delete(
+                SessionId + "GameActive",
+                SessionId + "Cleared",
+                SessionId + "Cashout",
+                SessionId + "BetAmount",
+                "ClickData." + SessionId,
+                "Debounce." + SessionId
+            )
 
-    redis.set(SessionId + "Cash..", "1")
 
     return JSONResponse({"success": True, "amount": tocashout})
 
@@ -746,6 +760,7 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
