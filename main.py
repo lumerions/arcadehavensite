@@ -193,33 +193,33 @@ def get(SessionId: str = Cookie(None)):
 
 @app.get("/cashoutamount")
 def getcashoutAmount(SessionId: str = Cookie(None)):
-    try:
-        if not SessionId:
-            return JSONResponse({"error": "SessionId missing"}, status_code=400)
+    if not SessionId:
+        return JSONResponse({"error": "SessionId missing"}, status_code=400)
 
-        mines_raw = redis.get(SessionId + "minesdata")
-        if not mines_raw:
-            return JSONResponse({"error": "No mines found"}, status_code=400)
+    mines_raw = redis.get(SessionId + "minesdata")
+    if not mines_raw:
+        return JSONResponse({"error": "No mines found"}, status_code=400)
 
-        if isinstance(mines_raw, bytes):
-            mines_raw = mines_raw.decode()
+    mines = json.loads(mines_raw.decode() if isinstance(mines_raw, bytes) else mines_raw)
 
-        mines = json.loads(mines_raw)
-        multiplier_per_click = 25 / (25 - len(mines))
-        tilescleared = int(redis.get(SessionId + "Cleared") or 0)
-        bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
-        total_multiplier = multiplier_per_click ** tilescleared
-        winnings = int(bet_amount * total_multiplier)
-        currentamount = int(redis.get(SessionId + "Cashout") or 0)
-        amountafternexttile = currentamount + bet_amount
+    tilescleared = int(redis.get(SessionId + "Cleared") or 0)
+    bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
 
-        return {"amount": currentamount,
-                "amountafter": amountafternexttile,
-                "multiplier": total_multiplier}
+    multiplier_per_click = 25 / (25 - len(mines))
 
-    except Exception as e:
-        print("Error in /cashoutamount:", e)
-        return JSONResponse({"error": str(e)}, status_code=500)
+    current_multiplier = multiplier_per_click ** tilescleared
+    next_multiplier = multiplier_per_click ** (tilescleared + 1)
+
+    currentamount = int(bet_amount * current_multiplier)
+    amountafternexttile = int(bet_amount * next_multiplier)
+
+    return {
+        "amount": currentamount,
+        "amountafter": amountafternexttile,
+        "multiplier": current_multiplier
+    }
+
+
 
 
 @app.get("/deposit")
@@ -698,5 +698,4 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
 
