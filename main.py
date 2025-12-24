@@ -420,7 +420,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         redis.delete("ClickData." + SessionId)
         redis.delete(SessionId + "Cashout")
         redis.delete(SessionId + "BetAmount")
-        redis.delete(SessionId + "Cleared",None)
+        redis.delete(SessionId + "Cleared")
         return JSONResponse({"ismine": True, "mines": mines})
 
     data_raw = redis.get("ClickData." + SessionId)
