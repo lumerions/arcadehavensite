@@ -305,7 +305,7 @@ def depositearnings(data: deposit):
         mainCollection = mainMongo["collection"]
 
         if data.Deposit == False:
-            doc = mainCollection.find_one({"username": "testuser"})
+            doc = mainCollection.find_one({"username": data.siteusername})
             amount = abs(int(data["amount"]))  
             balanceaftersubtract = int(doc["balance"]) - amount
 
