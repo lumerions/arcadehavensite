@@ -309,6 +309,9 @@ def depositearnings(data: deposit):
             amount = abs(int(data["amount"]))  
             balanceaftersubtract = int(doc["balance"]) - amount
 
+            if not doc:
+                return "Document was not found!"
+
             if balanceaftersubtract < 0:
                 return "This user is trying to subtract more then they have!"
 
@@ -689,4 +692,5 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
