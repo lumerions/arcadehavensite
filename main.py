@@ -475,27 +475,24 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     bet_amount = data.get("betAmount")
     mine_count = data.get("mineCount")
 
+    def returnTemplate(error):
+        return templates.TemplateResponse(
+            "mines.html",
+            {"request": request, "mines_error": error},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
     if bet_amount is None or mine_count is None:
-        return templates.TemplateResponse(
-            "mines.html",
-            {"request": request, "mines_error": "Bet amount or mine count is none!"},
-            status_code=status.HTTP_400_BAD_REQUEST
-        )
-    
+        return returnTemplate("Bet amount or mine count is none!")
+
     if int(mine_count) < 1:
-        return templates.TemplateResponse(
-            "mines.html",
-            {"request": request, "mines_error": "Must be over or equal to 1!"},
-            status_code=status.HTTP_400_BAD_REQUEST
-        )
+        return returnTemplate("Must be over or equal to 1!")
     
+    if int(bet_amount) < 1:
+        return returnTemplate("Cannot be a negative number!")
 
     def IfInsufficientFunds():
-        return templates.TemplateResponse(
-            "mines.html",
-            {"request": request, "mines_error": "Insufficient Funds!"},
-            status_code=status.HTTP_400_BAD_REQUEST
-        )
+        return returnTemplate("Insufficient Funds!")
     
     mainMongo = getMainMongo()
     mainCollection = mainMongo["collection"]
