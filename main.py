@@ -408,6 +408,13 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     mines_raw = redis.get(SessionId + "minesdata")
     if not mines_raw:
         return JSONResponse({"error": "No mines found"}, status_code=400)
+    
+    if redis.get(SessionId + "Cash.."):
+        return JSONResponse(
+            {"error": "Game already cashed out"},
+            status_code=400
+        )
+
 
     if isinstance(mines_raw, bytes):
         mines_raw = mines_raw.decode()
@@ -421,7 +428,9 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         redis.delete(SessionId + "Cashout")
         redis.delete(SessionId + "BetAmount")
         redis.delete(SessionId + "Cleared")
+        redis.delete(SessionId + "Cash..")
         return JSONResponse({"ismine": True, "mines": mines})
+
 
     data_raw = redis.get("ClickData." + SessionId)
     if data_raw:
@@ -533,6 +542,44 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     redis.set(SessionId + "Cashout",bet_amount)
     redis.set(SessionId + "minesdata",json.dumps(mines))
     return RedirectResponse(url="/mines", status_code=303)
+
+
+@app.post("/cashout")
+def cashout(SessionId: str = Cookie(None)):
+
+    if not SessionId:
+        return JSONResponse({"error": "No session"}, status_code=400)
+
+    if redis.get(SessionId + "Cash.."):
+        return JSONResponse({"error": "Already cashed out"}, status_code=400)
+
+    tocashout = int(redis.get(SessionId + "Cashout") or 0)
+    if tocashout <= 0:
+        return JSONResponse({"error": "No cashout value"}, status_code=400)
+
+    with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT username FROM accounts WHERE sessionid = %s",
+                (SessionId,)
+            )
+            row = cursor.fetchone()
+            if not row:
+                return JSONResponse({"error": "Session not found"}, status_code=400)
+
+            username = row[0]
+            mainMongo = getMainMongo()
+            mainCollection = mainMongo["collection"]
+            mainCollection.update_one(
+                {"username": username},
+                {"$inc": {"balance": tocashout}},
+                upsert=True
+            )
+
+    redis.set(SessionId + "Cash..", "1")
+
+    return JSONResponse({"success": True, "amount": tocashout})
+
 
 
 @app.post("/cashout")
@@ -699,5 +746,6 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
