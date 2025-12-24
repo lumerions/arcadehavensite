@@ -206,7 +206,7 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
 
         mines = json.loads(mines_raw)
         multiplier_per_click = 25 / (25 - len(mines))
-        tilescleared = redis.incrby(SessionId + "Cleared", 1)
+        tilescleared = redis.get(SessionId + "Cleared")
         bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
         total_multiplier = multiplier_per_click ** tilescleared
         winnings = int(bet_amount * total_multiplier)
