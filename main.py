@@ -569,11 +569,11 @@ def print_endpoint(SessionId: str = Cookie(None)):
     except Exception as error:
         return {"error": str(error)}
     finally:
-        redis.delete(SessionId + "Cashout")
         redis.delete("Debounce." + SessionId)
         redis.delete("ClickData." + SessionId)
+        redis.delete(SessionId + "Cashout")
         redis.delete(SessionId + "BetAmount")
-        redis.delete(SessionId + "Cash..") 
+        redis.delete(SessionId + "Cleared",None)
 
     return JSONResponse(content={"success": True})
 
