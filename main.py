@@ -306,7 +306,7 @@ def depositearnings(data: deposit):
 
         if data.Deposit == False:
             doc = mainCollection.find_one({"username": "testuser"})
-            balanceaftersubtract = int(doc["balance"]) - int(data.amount)
+            balanceaftersubtract = int(doc["balance"]) + int(data.amount)
 
             if balanceaftersubtract < 1:
                 return "This user is trying to subtract more then they have!"
