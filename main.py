@@ -26,7 +26,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 def getMongoClient(ConnectionURI = None):
