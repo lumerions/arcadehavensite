@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form, Request, Response, Cookie,status,Query
-from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse
+from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse,FileResponse
 from fastapi.templating import Jinja2Templates
 from upstash_redis import Redis
 import psycopg
@@ -25,6 +25,8 @@ app = FastAPI(
     description="AH Gambling",
     version="1.0.0",
 )
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 def getMongoClient(ConnectionURI = None):
@@ -349,19 +351,26 @@ def get(SessionId: str = Cookie(None)):
 def getcashoutAmount(SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
+    
+    keys = [
+        SessionId + "minesdata",
+        SessionId + "GameActive",
+        SessionId + "Cleared",
+        SessionId + "BetAmount"
+    ]
 
-    mines_raw = redis.get(SessionId + "minesdata")
+    mines_raw, game_active, cleared_raw, bet_amount_raw = redis.mget(*keys)
+
     if not mines_raw:
         return JSONResponse({"error": "No mines found"}, status_code=400)
-    
-    if not redis.get(SessionId + "GameActive"):
-        return {"amount": 0, "amountafter": 0, "multiplier": 1}
 
+    if not game_active:
+        return {"amount": 0, "amountafter": 0, "multiplier": 1}
 
     mines = json.loads(mines_raw.decode() if isinstance(mines_raw, bytes) else mines_raw)
 
-    tilescleared = int(redis.get(SessionId + "Cleared") or 0)
-    bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
+    tilescleared = int(cleared_raw) or 0
+    bet_amount = int(bet_amount_raw) or 0
 
     multiplier_per_click = 25 / (25 - len(mines))
 
@@ -538,15 +547,24 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 def cashout(SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
+    
 
-    if not redis.get(SessionId + "GameActive"):
+    keys = [
+        SessionId + "GameActive",
+        SessionId + "Cashout",
+        SessionId + "minesdata"
+    ]
+
+    GameActive,tocashout,mines_raw = redis.mget(*keys)
+
+    if not GameActive:
         return JSONResponse({"error": "No active game"}, status_code=400)
 
     cashed_key = SessionId + ":cashed"
     if not redis.set(cashed_key, "1", nx=True,ex = 5):
         return JSONResponse({"error": "Already cashed out"}, status_code=400)
 
-    tocashout = int(redis.get(SessionId + "Cashout") or 0)
+    tocashout = int(tocashout) or 0
     if tocashout <= 0:
         return JSONResponse({"error": "Nothing to cash out"}, status_code=400)
 
@@ -568,7 +586,6 @@ def cashout(SessionId: str = Cookie(None)):
             )
 
 
-    mines_raw = redis.get(SessionId + "minesdata")
     if not mines_raw:
         return JSONResponse({"error": "No mines found"}, status_code=400)
     if isinstance(mines_raw, bytes):
@@ -709,7 +726,6 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
 
 
 
