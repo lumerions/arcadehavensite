@@ -19,11 +19,15 @@ import uvicorn
 from pymongo import MongoClient
 import certifi
 
+
 app = FastAPI(
     title="AH Gambling",
     description="AH Gambling",
     version="1.0.0",
 )
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 def getMongoClient(ConnectionURI = None):
     if not ConnectionURI:
@@ -269,6 +273,7 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
     url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
 
     return RedirectResponse(url)
+
 
 @app.post("/earnings")
 def depositearnings(data: deposit):
