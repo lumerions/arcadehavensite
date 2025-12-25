@@ -564,6 +564,15 @@ def cashout(SessionId: str = Cookie(None)):
                 {"$inc": {"balance": tocashout}}
             )
 
+
+    mines_raw = redis.get(SessionId + "minesdata")
+    if not mines_raw:
+        return JSONResponse({"error": "No mines found"}, status_code=400)
+    if isinstance(mines_raw, bytes):
+        mines_raw = mines_raw.decode()
+
+    mines = json.loads(mines_raw)
+
     redis.delete(
         SessionId + "GameActive",
         SessionId + "Cleared",
@@ -574,7 +583,7 @@ def cashout(SessionId: str = Cookie(None)):
         "Debounce." + SessionId
     )
 
-    return JSONResponse({"success": True, "amount": tocashout})
+    return JSONResponse({"success": True, "amount": tocashout,"mines": mines})
 
 
 @app.post("/register", response_class=HTMLResponse)
@@ -697,6 +706,7 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
