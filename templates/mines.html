@@ -592,8 +592,12 @@ function setMaxBet() {
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
                         });
-                
-                        if (!response.ok) throw new Error('Request failed');
+                                    
+                        if (!response.ok) {
+                            const text = await response.text();
+                            throw new Error(`Cashout failed: ${response.status} ${text}`);
+                        }
+
                 
                         const result = await response.json();
                         const mines = result.mines;
@@ -961,6 +965,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
