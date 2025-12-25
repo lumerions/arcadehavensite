@@ -43,12 +43,12 @@ def getMainMongo():
     collection = db["main"]
     return {"db": db,"collection":collection}
 
-def redis_int(value, default=0):
-    if value is None:
+def redis_int(val, default=0):
+    if val is None:
         return default
-    if isinstance(value, bytes):
-        value = value.decode()
-    return int(value)
+    if isinstance(val, bytes):
+        val = val.decode()
+    return int(val)
 
 
 class deposit(BaseModel):
@@ -303,9 +303,12 @@ def depositearnings(data: deposit):
     else:
         mainMongo = getMainMongo()
         mainCollection = mainMongo["collection"]
+        try:
+            doc = mainCollection.find_one({"username": data.siteusername})
+        except Exception as e:
+            return e
 
         if data.Deposit == False:
-            doc = mainCollection.find_one({"username": data.siteusername})
             amount = abs(int(data.amount))  
             balanceaftersubtract = int(doc["balance"]) - amount
 
@@ -318,6 +321,7 @@ def depositearnings(data: deposit):
             amount = -data.amount
         else:
             amount = abs(int(data.amount))
+
 
         result = mainCollection.update_one(
             {"username": data.siteusername, "sessionid": data.sessionid},
@@ -357,8 +361,13 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
 
     mines = json.loads(mines_raw.decode() if isinstance(mines_raw, bytes) else mines_raw)
 
-    tilescleared = int(redis.get(SessionId + "Cleared") or 0)
-    bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
+    cleared_raw, bet_raw = redis.mget(
+        SessionId + "Cleared",
+        SessionId + "BetAmount"
+    )
+
+    tilescleared = redis_int(cleared_raw)
+    bet_amount = redis_int(bet_raw)
 
     multiplier_per_click = 25 / (25 - len(mines))
 
@@ -409,7 +418,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if is_mine:
         redis.delete(
-            "Debounce." + SessionId,
+            SessionId + "GameActive",
             "ClickData." + SessionId,
             SessionId + "Cashout",
             SessionId + "BetAmount",
@@ -439,8 +448,11 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     winnings = int(bet_amount * total_multiplier)
 
-    redis.set(SessionId + "Cashout", winnings)
-    redis.set("ClickData." + SessionId, json.dumps(existing_array))
+    redis.mset({
+        SessionId + "Cashout": winnings,
+        "ClickData." + SessionId: json.dumps(existing_array)
+    })
+
 
     return JSONResponse({"ismine": False})
 
@@ -448,10 +460,10 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
 @app.post("/startmines",response_class=HTMLResponse)
 async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
-    if not SessionId or redis.get("Debounce." + SessionId):
+    if not SessionId or redis.get(SessionId + "GameActive"):
         return RedirectResponse(url="/mines", status_code=303)
     
-    redis.set("Debounce." + SessionId,True)
+    redis.set(SessionId + "GameActive","1")
 
     data = await request.json()
     bet_amount = data.get("betAmount")
@@ -522,11 +534,14 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     multiplier_per_click = 25 / (25 - mine_count)
 
-    redis.set(SessionId + "GameActive", "1")
-    redis.set(SessionId + "Cleared", 0)
-    redis.set(SessionId + "Cashout", 0)
-    redis.set(SessionId + "BetAmount",bet_amount)
-    redis.set(SessionId + "minesdata",json.dumps(mines))
+    redis.mset(
+        SessionId + "Cleared", 0,
+        SessionId + "Cashout", 0,
+        SessionId + "BetAmount", bet_amount,
+        SessionId + "minesdata", json.dumps(mines)
+    )
+
+
     return RedirectResponse(url="/mines", status_code=303)
 
 
@@ -570,7 +585,6 @@ def cashout(SessionId: str = Cookie(None)):
         SessionId + "BetAmount",
         "ClickData." + SessionId,
         SessionId + ":clicks",
-        "Debounce." + SessionId
     )
 
     return JSONResponse({"success": True, "amount": tocashout})
@@ -696,5 +710,6 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
