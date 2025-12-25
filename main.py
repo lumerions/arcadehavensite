@@ -26,7 +26,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.mount("/public", StaticFiles(directory="public"), name="public")
 
 def getMongoClient(ConnectionURI = None):
     if not ConnectionURI:
