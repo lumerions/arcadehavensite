@@ -336,10 +336,6 @@ def depositearnings(data: deposit):
         }
 
 
-
-
-
-
 @app.get("/getCurrentMinesData")
 def get(SessionId: str = Cookie(None)):
     data_raw = redis.get("ClickData." + SessionId)
@@ -361,13 +357,8 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
 
     mines = json.loads(mines_raw.decode() if isinstance(mines_raw, bytes) else mines_raw)
 
-    cleared_raw, bet_raw = redis.mget(
-        SessionId + "Cleared",
-        SessionId + "BetAmount"
-    )
-
-    tilescleared = redis_int(cleared_raw)
-    bet_amount = redis_int(bet_raw)
+    tilescleared = int(redis.get(SessionId + "Cleared") or 0)
+    bet_amount = int(redis.get(SessionId + "BetAmount") or 0)
 
     multiplier_per_click = 25 / (25 - len(mines))
 
@@ -418,13 +409,14 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if is_mine:
         redis.delete(
-            SessionId + "GameActive",
+            "Debounce." + SessionId,
             "ClickData." + SessionId,
             SessionId + "Cashout",
             SessionId + "BetAmount",
             SessionId + "Cleared",
             SessionId + "Cash..",
-            SessionId + ":clicks"
+            SessionId + ":clicks",
+            SessionId + "GameActive"
         )
         return JSONResponse({"ismine": True, "mines": mines})
 
@@ -448,11 +440,8 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     winnings = int(bet_amount * total_multiplier)
 
-    redis.mset({
-        SessionId + "Cashout": winnings,
-        "ClickData." + SessionId: json.dumps(existing_array)
-    })
-
+    redis.set(SessionId + "Cashout", winnings)
+    redis.set("ClickData." + SessionId, json.dumps(existing_array))
 
     return JSONResponse({"ismine": False})
 
@@ -460,10 +449,10 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
 @app.post("/startmines",response_class=HTMLResponse)
 async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
-    if not SessionId or redis.get(SessionId + "GameActive"):
+    if not SessionId or redis.get("Debounce." + SessionId):
         return RedirectResponse(url="/mines", status_code=303)
     
-    redis.set(SessionId + "GameActive","1")
+    redis.set("Debounce." + SessionId,True)
 
     data = await request.json()
     bet_amount = data.get("betAmount")
@@ -534,14 +523,11 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     multiplier_per_click = 25 / (25 - mine_count)
 
-    redis.mset(
-        SessionId + "Cleared", 0,
-        SessionId + "Cashout", 0,
-        SessionId + "BetAmount", bet_amount,
-        SessionId + "minesdata", json.dumps(mines)
-    )
-
-
+    redis.set(SessionId + "GameActive", "1")
+    redis.set(SessionId + "Cleared", 0)
+    redis.set(SessionId + "Cashout", 0)
+    redis.set(SessionId + "BetAmount",bet_amount)
+    redis.set(SessionId + "minesdata",json.dumps(mines))
     return RedirectResponse(url="/mines", status_code=303)
 
 
@@ -585,6 +571,7 @@ def cashout(SessionId: str = Cookie(None)):
         SessionId + "BetAmount",
         "ClickData." + SessionId,
         SessionId + ":clicks",
+        "Debounce." + SessionId
     )
 
     return JSONResponse({"success": True, "amount": tocashout})
@@ -710,6 +697,7 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
