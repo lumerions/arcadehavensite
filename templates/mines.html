@@ -656,6 +656,8 @@ function setMaxBet() {
                     }
 
                     updateBalance();
+                    playBtn.style.backgroundColor = '';
+                    playBtn.textContent = 'Play Mines';
 
                     } catch (err) {
                         console.error('Error starting Mines:', err);
@@ -1011,6 +1013,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
