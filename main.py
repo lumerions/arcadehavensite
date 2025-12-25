@@ -306,7 +306,7 @@ def depositearnings(data: deposit):
 
         if data.Deposit == False:
             doc = mainCollection.find_one({"username": data.siteusername})
-            amount = abs(int(data["amount"]))  
+            amount = abs(int(data.amount))  
             balanceaftersubtract = int(doc["balance"]) - amount
 
             if not doc:
@@ -314,10 +314,14 @@ def depositearnings(data: deposit):
 
             if balanceaftersubtract < 0:
                 return "This user is trying to subtract more then they have!"
+            amount = abs(int(data.amount))  
+            amount = -data.amount
+        else:
+            amount = abs(int(data.amount))
 
         result = mainCollection.update_one(
             {"username": data.siteusername, "sessionid": data.sessionid},
-            {"$inc": {"balance": data.amount}},
+            {"$inc": {"balance": amount}},
             upsert=True
         )
 
