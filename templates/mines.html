@@ -585,107 +585,43 @@ function setMaxBet() {
             <button id="playMinesBtn">Play Mines</button>
            
             <script>
-            document.getElementById('playMinesBtn').addEventListener('click', async () => {
-                const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
-                const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
-                const playBtn = document.getElementById('playMinesBtn');
-
-                if (playBtn.textContent.includes('Cashout')) {
-                      try {
-                        const response = await fetch('/cashout', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            credentials: 'include',
-                        });
-                
-                        if (!response.ok) throw new Error('Request failed');
-                
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        }
-                          
-                        const result = await response.json(); 
-                        const mines = response.mines;
-
-                        if (Array.isArray(mines)) {
-                            document.querySelectorAll('.cell').forEach(cellEl => {
-                                const index = Number(cellEl.dataset.index);
-                        
-                                if (mines.includes(index)) {
-                                    cellEl.classList.add('mine');
-                                } else if (!cellEl.classList.contains('clicked')) {
-                                    cellEl.classList.add('reveal');
-                                }
-                            });
-                        }
-
-                    async function getData() {
-                        try {
-                            const response = await fetch('/getbalance');
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
+            if (playBtn.textContent.includes('Cashout')) {
+                try {
+                    const response = await fetch('/cashout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                    });
+            
+                    if (!response.ok) throw new Error('Request failed');
+            
+                    const result = await response.json(); 
+                    const mines = result.mines;           
+            
+                    if (Array.isArray(mines)) {
+                        document.querySelectorAll('.cell').forEach(cellEl => {
+                            const index = Number(cellEl.dataset.index);
+            
+                            if (mines.includes(index)) {
+                                cellEl.classList.add('mine');
+                            } else if (!cellEl.classList.contains('clicked')) {
+                                cellEl.classList.add('reveal');
                             }
-                                const data = await response.text(); 
-                                const number = parseFloat(data);
-                        
-                                if (isNaN(number)) {
-                                    console.error('Error: The response is not a valid number');
-                                    return "Something went wrong!";
-                                }
-            
-                                return number
-                        } catch (error) {
-                            console.error('There was a problem with the fetch operation:', error);
-                        }
-                    }
-            
-                    function formatWithCommas(num) {
-                        return num.toLocaleString();
-                    }
-            
-                    async function updateBalance() {
-                        let balance = await getData();
-                        if (typeof balance === 'number') {
-                            balance = balance.toLocaleString(); 
-                            document.querySelector('.balance-btn').textContent = `$${balance}`;
-                        } else {
-                            document.querySelector('.balance-btn').textContent = "Error loading balance";
-                        }
-                    }
-
-                    updateBalance();
-
-                    } catch (err) {
-                        console.error('Error starting Mines:', err);
-                        alert('Failed to start Mines. Please try again.');
-                    }
-                } else {
-                    try {
-                        const response = await fetch('/startmines', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            credentials: 'include',
-                            body: JSON.stringify({ betAmount, mineCount })
                         });
-                
-                        if (!response.ok) throw new Error('Request failed');
-                
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        }
-                
-                    } catch (err) {
-                        console.error('Error starting Mines:', err);
-                        alert('Failed to start Mines. Please try again.');
                     }
-
+            
+                    updateBalance(); // ✅ safe to call here
+            
+                    if (result.redirect) {               // ✅ backend-controlled
+                        window.location.href = result.redirect;
+                    }
+            
+                } catch (err) {
+                    console.error('Cashout error:', err);
+                    alert('Cashout failed. Please try again.');
                 }
-               
-            });
+            }
+
             </script>
         </div>
     </aside>
@@ -1011,6 +947,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
