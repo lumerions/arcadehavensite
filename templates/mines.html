@@ -605,8 +605,9 @@ function setMaxBet() {
                         if (response.redirected) {
                             window.location.href = response.url;
                         }
-
-                        const mines = result.mines;
+                          
+                        const result = await response.json(); 
+                        const mines = response.mines;
 
                         if (Array.isArray(mines)) {
                             document.querySelectorAll('.cell').forEach(cellEl => {
@@ -1010,6 +1011,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
