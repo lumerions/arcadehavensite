@@ -585,42 +585,56 @@ function setMaxBet() {
             <button id="playMinesBtn">Play Mines</button>
            
             <script>
-            if (playBtn.textContent.includes('Cashout')) {
-                try {
-                    const response = await fetch('/cashout', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                    });
-            
-                    if (!response.ok) throw new Error('Request failed');
-            
-                    const result = await response.json(); 
-                    const mines = result.mines;           
-            
-                    if (Array.isArray(mines)) {
-                        document.querySelectorAll('.cell').forEach(cellEl => {
-                            const index = Number(cellEl.dataset.index);
-            
-                            if (mines.includes(index)) {
-                                cellEl.classList.add('mine');
-                            } else if (!cellEl.classList.contains('clicked')) {
-                                cellEl.classList.add('reveal');
-                            }
+                document.getElementById('playMinesBtn').addEventListener('click', async () => {
+                    try {
+                        const response = await fetch('/cashout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
                         });
+                
+                        if (!response.ok) throw new Error('Request failed');
+                
+                        const result = await response.json();
+                        const mines = result.mines;
+                
+                        if (Array.isArray(mines)) {
+                            document.querySelectorAll('.cell').forEach(cellEl => {
+                                const index = Number(cellEl.dataset.index);
+                                if (mines.includes(index)) {
+                                    cellEl.classList.add('mine');
+                                } else if (!cellEl.classList.contains('clicked')) {
+                                    cellEl.classList.add('reveal');
+                                }
+                            });
+                        }
+                
+                        await updateBalance(); 
+                
+                    } catch (err) {
+                        console.error(err);
+                        alert('Cashout failed.');
                     }
-            
-                    updateBalance(); // ✅ safe to call here
-            
-                    if (result.redirect) {               // ✅ backend-controlled
-                        window.location.href = result.redirect;
-                    }
-            
-                } catch (err) {
-                    console.error('Cashout error:', err);
-                    alert('Cashout failed. Please try again.');
+                });
+                
+                async function getData() {
+                    const response = await fetch('/getbalance');
+                    if (!response.ok) throw new Error('Network error');
+                    const data = await response.text();
+                    const number = parseFloat(data);
+                    if (isNaN(number)) throw new Error('Invalid number');
+                    return number;
                 }
-            }
+                
+                async function updateBalance() {
+                    try {
+                        const balance = await getData();
+                        document.querySelector('.balance-btn').textContent = `$${balance.toLocaleString()}`;
+                    } catch (err) {
+                        console.error(err);
+                        document.querySelector('.balance-btn').textContent = 'Error';
+                    }
+                }
 
             </script>
         </div>
@@ -947,6 +961,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
