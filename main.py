@@ -139,7 +139,7 @@ def loadmines(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","mines.html")
 
 
-@app.get("/towers",response_class =  HTMLResponse)
+@app.get("/towersgam",response_class =  HTMLResponse)
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
@@ -724,6 +724,10 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
 
 
 
