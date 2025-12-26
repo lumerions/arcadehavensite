@@ -544,33 +544,13 @@ function setMaxBet() {
             <h1>Towers</h1>
 
             <div class="payout-grid">
-                <div class="payout"><span>$</span>1,046</div>
-                <div class="payout"><span>$</span>1,046</div>
-                <div class="payout"><span>$</span>1,046</div>
-                <div class="payout"><span>$</span>762</div>
-                <div class="payout"><span>$</span>762</div>
-                <div class="payout"><span>$</span>762</div>
-                <div class="payout"><span>$</span>621</div>
-                <div class="payout"><span>$</span>621</div>
-                <div class="payout"><span>$</span>621</div>
-                <div class="payout"><span>$</span>461</div>
-                <div class="payout"><span>$</span>461</div>
-                <div class="payout"><span>$</span>461</div>
-                <div class="payout"><span>$</span>306</div>
-                <div class="payout"><span>$</span>306</div>
-                <div class="payout"><span>$</span>306</div>
-                <div class="payout"><span>$</span>232</div>
-                <div class="payout"><span>$</span>232</div>
-                <div class="payout"><span>$</span>232</div>
-                <div class="payout"><span>$</span>177</div>
-                <div class="payout"><span>$</span>177</div>
-                <div class="payout"><span>$</span>177</div>
-                <div class="payout"><span>$</span>151</div>
-                <div class="payout"><span>$</span>151</div>
-                <div class="payout"><span>$</span>151</div>
+                {% for i in range(24) %}
+                    <div class="payout" data-index="{{ i }}"></div>
+                {% endfor %}
+               <!--  <div class="payout"><span>$</span>1,046</div> -->
             </div>
 
-            <button id="playTowersBtn">Play Mines</button>
+            <button id="playTowersBtn">Play Towers</button>
         </div>
     </div>
 
@@ -929,6 +909,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
