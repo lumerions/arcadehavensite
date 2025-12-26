@@ -346,6 +346,110 @@ button:hover {
 }
 
 
+
+.field {
+    margin-bottom: 3px;
+}
+
+.field-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    color: #c7c9ff;
+}
+
+.muted {
+    opacity: 0.6;
+}
+
+.bet-input {
+    display: flex;
+    align-items: center;
+    background: #2a2d52;
+    border-radius: 10px;
+    padding: 6px 10px; 
+    gap: 6px;
+    margin-top: 10px; 
+}
+
+.bet-input input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 0.95rem;
+    width: 100%;
+    padding: 8px 0 4px 0; 
+}
+
+
+.currency,
+.emoji {
+    opacity: 0.7;
+    font-size: 0.9rem; 
+}
+
+.bet-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.bet-actions button {
+    flex: 1;
+    background: #343769;
+    border: none;
+    border-radius: 8px;
+    padding: 6px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.bet-actions button:hover {
+    background: #4a4ee8;
+}
+
+@media (max-width: 900px) {
+    .game-layout {
+        flex-direction: column;
+    }
+
+    .side-panel {
+        width: 100%;
+    }
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.panel-card {
+    background: linear-gradient(180deg, #1e2140, #15162b);
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid #2e2f55;
+}
+
+.game-layout {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.side-panel {
+    width: 300px;
+}
+
+
+
 </style>
 </head>
 
@@ -366,6 +470,7 @@ button:hover {
     </div>
 </nav>
 </header>
+    
 <main>
     <div class="card">
         <h1>Towers</h1>
@@ -503,6 +608,81 @@ button:hover {
                 }
                
             });
+
+              
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.addEventListener('click', async () => {
+                    if (cell.classList.contains('revealed')) return;
+            
+                    const grid = document.querySelector('.grid');
+                    if (grid.classList.contains('gamedone')) return;
+            
+                    const tileIndex = cell.dataset.index;
+                    const playBtn = document.getElementById('playTowersBtn');
+            
+                    try {
+                        const response = await fetch('/mines/click', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ tileIndex })
+                        });
+            
+                        if (!response.ok) throw new Error('Request failed');
+            
+                        const result = await response.json();
+                        const mines = result.mines;
+            
+                        if (result.ismine && Array.isArray(mines)) {
+                            document.querySelectorAll('.cell').forEach(cellEl => {
+                                const index = Number(cellEl.dataset.index);
+                                if (mines.includes(index)) {
+                                    cellEl.classList.add('mine');
+                                } else if (!cellEl.classList.contains('clicked')) {
+                                    cellEl.classList.add('reveal');
+                                }
+                            });
+            
+                            playBtn.style.backgroundColor = '';
+                            playBtn.textContent = 'Play Mines';
+                            document.getElementById('multiplier').textContent = '1x';
+                            document.getElementById('currentAmount').textContent = '0';
+                            document.getElementById('amountAfter').textContent = '0';
+            
+                            grid.classList.add('gamedone');
+            
+                        } else { 
+                            cell.classList.add('clicked');
+                            cell.classList.add('revealed');
+            
+                            const cashoutResponse = await fetch('/cashoutamount', {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                            });
+            
+                            if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
+            
+                            const data = await cashoutResponse.json();
+            
+                            const currentAmount = data.amount;
+                            const amountAfterNextTile = data.amountafter;
+                            const multiplier = data.multiplier;
+            
+                            document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+                            document.getElementById('currentAmount').textContent = currentAmount;
+                            document.getElementById('amountAfter').textContent = amountAfterNextTile;
+            
+                            playBtn.style.backgroundColor = '#16a34a';
+                            playBtn.textContent = 'Cashout';
+                        }
+            
+                    } catch (err) {
+                        console.error('Error handling tile click:', err);
+                    }
+                });
+            });
+
             </script>
     </div>
 </main>
@@ -676,6 +856,7 @@ button:hover {
     </script>
 </body>
 </html>
+
 
 
 
