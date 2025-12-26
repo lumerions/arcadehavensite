@@ -249,6 +249,13 @@ input {
     color: #fff;
     margin-bottom: 14px;
 }
+    
+.game-layout {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+    max-width: 1200px;
+}
 
 .instructions {
     background: #2a3448;
@@ -419,6 +426,10 @@ button:hover {
         width: 100%;
     }
 }
+    
+.side-panel {
+    width: 300px;
+}
 
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -444,9 +455,6 @@ input[type=number] {
     max-width: 1200px;
 }
 
-.side-panel {
-    width: 300px;
-}
 
 
 
@@ -491,81 +499,83 @@ function setMaxBet() {
 </header>
     
 <main>
-    <div>class="game-layout" </div>
-    <div class="side-panel" </div>
+    <div class="game-layout">
+        <div class="side-panel">
 
-        <div class="panel-card">
-            <!-- <div class="mode-toggle"> -->
-               <!--   <button class="mode active">Manual</button>  -->
-             <!-- </div> -->
+            <div class="panel-card">
+                <div class="field">
+                    <div class="field-header">
+                        <span>Bet Amount</span>
+                        <span class="muted">Tokens</span>
+                    </div>
 
-            <div class="field">
-                <div class="field-header">
-                    <span>Bet Amount</span>
-                    <span class="muted">Tokens</span>
-                </div>
-
-                <div class="bet-input">
-                    <span class="currency">$</span>
+                    <div class="bet-input">
+                        <span class="currency">$</span>
                         <input type="number" id="betAmount" value="10" min="1" class="input2">
+                    </div>
+
+                    <div class="bet-actions">
+                        <button onclick="adjustBet(0.5)">½</button>
+                        <button onclick="adjustBet(2)">2×</button>
+                        <button onclick="setMaxBet()">MAX</button>
+                    </div>
                 </div>
 
-                <div class="bet-actions">
-                    <button onclick="adjustBet(0.5)">½</button>
-                    <button onclick="adjustBet(2)">2×</button>
-                    <button onclick="setMaxBet()">MAX</button>
+                <div class="field">
+                    <div class="field-header">
+                        <span>Mines</span>
+                    </div>
+
+                    <div class="bet-input">
+                        <span class="emoji">💣</span>
+                        <input type="number" id="mineCount" value="3" class="input2">
+                    </div>
+                </div>
+
+                <div id="cashoutInfo" style="margin-bottom: 10px; text-align: center; font-size: 0.95rem; color: #cbd5f5;">
+                    <div>Multiplier: <span id="multiplier">1x</span></div>
+                    <div>Current Amount: $<span id="currentAmount">0</span></div>
+                    <div>Amount After Next Tile: $<span id="amountAfter">0</span></div>
                 </div>
             </div>
-
-            <div class="field">
-                <div class="field-header">
-                    <span>Mines</span>
-                </div>
-
-                <div class="bet-input">
-                    <span class="emoji">💣</span>
-                    <input type="number" id="mineCount" value="3"class="input2">
-                </div>
-            </div>
-        
-            <div id="cashoutInfo" style="margin-bottom: 10px; text-align: center; font-size: 0.95rem; color: #cbd5f5;">
-                <div>Multiplier: <span id="multiplier">1x</span></div>
-                <div>Current Amount: $<span id="currentAmount">0</span></div>
-                <div>Amount After Next Tile: $<span id="amountAfter">0</span></div>
-            </div>
-
-    <div class="card">
-        <h1>Towers</h1>
-
-        <div class="payout-grid">
-            <div class="payout"><span>$</span>1,046</div>
-            <div class="payout"><span>$</span>1,046</div>
-            <div class="payout"><span>$</span>1,046</div>
-            <div class="payout"><span>$</span>762</div>
-            <div class="payout"><span>$</span>762</div>
-            <div class="payout"><span>$</span>762</div>
-            <div class="payout"><span>$</span>621</div>
-            <div class="payout"><span>$</span>621</div>
-            <div class="payout"><span>$</span>621</div>
-            <div class="payout"><span>$</span>461</div>
-            <div class="payout"><span>$</span>461</div>
-            <div class="payout"><span>$</span>461</div>
-            <div class="payout"><span>$</span>306</div>
-            <div class="payout"><span>$</span>306</div>
-            <div class="payout"><span>$</span>306</div>
-            <div class="payout"><span>$</span>232</div>
-            <div class="payout"><span>$</span>232</div>
-            <div class="payout"><span>$</span>232</div>
-            <div class="payout"><span>$</span>177</div>
-            <div class="payout"><span>$</span>177</div>
-            <div class="payout"><span>$</span>177</div>
-            <div class="payout"><span>$</span>151</div>
-            <div class="payout"><span>$</span>151</div>
-            <div class="payout"><span>$</span>151</div>
         </div>
 
-        <button id="playTowersBtn">Play Towers</button>
+        <div class="card">
+            <h1>Towers</h1>
 
+            <div class="payout-grid">
+                <div class="payout"><span>$</span>1,046</div>
+                <div class="payout"><span>$</span>1,046</div>
+                <div class="payout"><span>$</span>1,046</div>
+                <div class="payout"><span>$</span>762</div>
+                <div class="payout"><span>$</span>762</div>
+                <div class="payout"><span>$</span>762</div>
+                <div class="payout"><span>$</span>621</div>
+                <div class="payout"><span>$</span>621</div>
+                <div class="payout"><span>$</span>621</div>
+                <div class="payout"><span>$</span>461</div>
+                <div class="payout"><span>$</span>461</div>
+                <div class="payout"><span>$</span>461</div>
+                <div class="payout"><span>$</span>306</div>
+                <div class="payout"><span>$</span>306</div>
+                <div class="payout"><span>$</span>306</div>
+                <div class="payout"><span>$</span>232</div>
+                <div class="payout"><span>$</span>232</div>
+                <div class="payout"><span>$</span>232</div>
+                <div class="payout"><span>$</span>177</div>
+                <div class="payout"><span>$</span>177</div>
+                <div class="payout"><span>$</span>177</div>
+                <div class="payout"><span>$</span>151</div>
+                <div class="payout"><span>$</span>151</div>
+                <div class="payout"><span>$</span>151</div>
+            </div>
+
+            <button id="playTowersBtn">Play Mines</button>
+        </div>
+    </div>
+
+    <script>
+       
           <script>
             document.getElementById('playTowersBtn').addEventListener('click', async () => {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
@@ -746,8 +756,9 @@ function setMaxBet() {
             });
 
             </script>
-    </div>
+    </script>
 </main>
+
 
 <div class="modal" id="walletModal">
     <div class="wallet">
@@ -918,6 +929,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
