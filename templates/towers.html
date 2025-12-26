@@ -551,7 +551,7 @@ button:hover {
 
         async function getData() {
             try {
-                const response = await fetch('https://arcadehavengambling.vercel.app/getbalance');
+                const response = await fetch('/getbalance');
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -676,6 +676,7 @@ button:hover {
     </script>
 </body>
 </html>
+
 
 
 
