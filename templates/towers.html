@@ -453,6 +453,25 @@ input[type=number] {
 </style>
 </head>
 
+    
+<script>
+function adjustBet(multiplier) {
+    const input = document.getElementById('betAmount');
+    const value = parseFloat(input.value) || 0;
+    input.value = Math.max(1, Math.floor(value * multiplier));
+}
+
+function setMaxBet() {
+    const input = document.getElementById('betAmount');
+    const balanceBtn = document.querySelector('.balance-btn');
+
+    const balanceText = balanceBtn.textContent.replace(/\$|,/g, '');
+    const balanceNumber = parseFloat(balanceText) || 0;
+
+    input.value = balanceNumber;
+}
+</script>
+
 <body>
 
 <header>
@@ -472,6 +491,49 @@ input[type=number] {
 </header>
     
 <main>
+    <div>class="game-layout" </div>
+    <div class="side-panel" </div>
+
+        <div class="panel-card">
+            <!-- <div class="mode-toggle"> -->
+               <!--   <button class="mode active">Manual</button>  -->
+             <!-- </div> -->
+
+            <div class="field">
+                <div class="field-header">
+                    <span>Bet Amount</span>
+                    <span class="muted">Tokens</span>
+                </div>
+
+                <div class="bet-input">
+                    <span class="currency">$</span>
+                        <input type="number" id="betAmount" value="10" min="1" class="input2">
+                </div>
+
+                <div class="bet-actions">
+                    <button onclick="adjustBet(0.5)">½</button>
+                    <button onclick="adjustBet(2)">2×</button>
+                    <button onclick="setMaxBet()">MAX</button>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="field-header">
+                    <span>Mines</span>
+                </div>
+
+                <div class="bet-input">
+                    <span class="emoji">💣</span>
+                    <input type="number" id="mineCount" value="3"class="input2">
+                </div>
+            </div>
+        
+            <div id="cashoutInfo" style="margin-bottom: 10px; text-align: center; font-size: 0.95rem; color: #cbd5f5;">
+                <div>Multiplier: <span id="multiplier">1x</span></div>
+                <div>Current Amount: $<span id="currentAmount">0</span></div>
+                <div>Amount After Next Tile: $<span id="amountAfter">0</span></div>
+            </div>
+
     <div class="card">
         <h1>Towers</h1>
 
@@ -856,6 +918,7 @@ input[type=number] {
     </script>
 </body>
 </html>
+
 
 
 
