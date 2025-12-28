@@ -18,6 +18,7 @@ import time
 import uvicorn
 from pymongo import MongoClient
 import certifi
+import base64
 
 
 app = FastAPI(
@@ -211,10 +212,16 @@ async def depositget(amount: float, SessionId: str = Cookie(None)):
         "deposit" : True
     }
 
-    encoded_data = urllib.parse.quote(json.dumps(launch_data))
-    url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
+    json_data = json.dumps(launch_data)
+    b64_data = base64.b64encode(json_data.encode()).decode()
 
-    return RedirectResponse(url)
+    roblox_url = (
+        f"https://www.roblox.com/games/start"
+        f"?placeId={place_id}"
+        f"&launchData={urllib.parse.quote(b64_data)}"
+    )
+
+    return RedirectResponse(roblox_url)
 
 @app.get("/withdraw",response_class =  HTMLResponse)
 async def withdrawget(amount: float, page: str, request: Request, SessionId: str = Cookie(None)):
@@ -258,8 +265,6 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
     if amount > int(doc["balance"]):
         return MoreWithdraw(page)
 
-
-
     launch_data = {
         "sitename": str(sitename),
         "sessionid": SessionId,
@@ -267,10 +272,16 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
         "deposit" : False
     }
 
-    encoded_data = urllib.parse.quote(json.dumps(launch_data))
-    url = f"https://www.roblox.com/games/{place_id}?launchData={encoded_data}"
+    json_data = json.dumps(launch_data)
+    b64_data = base64.b64encode(json_data.encode()).decode()
 
-    return RedirectResponse(url)
+    roblox_url = (
+        f"https://www.roblox.com/games/start"
+        f"?placeId={place_id}"
+        f"&launchData={urllib.parse.quote(b64_data)}"
+    )
+
+    return RedirectResponse(roblox_url)
 
 
 @app.post("/earnings")
@@ -736,9 +747,6 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
-
 
 
 
