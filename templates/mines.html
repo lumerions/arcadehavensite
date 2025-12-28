@@ -757,7 +757,9 @@ function setMaxBet() {
                             cell.classList.add('clicked');
                             cell.classList.add('revealed');
             
-                            const cashoutResponse = await fetch('/games/cashoutamount', {
+                            const game = "Mines"; 
+                            
+                            const cashoutResponse = await fetch(`/games/cashoutamount?Game=${encodeURIComponent(game)}`, {
                                 method: 'GET',
                                 headers: { 'Content-Type': 'application/json' },
                                 credentials: 'include',
@@ -1015,6 +1017,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
