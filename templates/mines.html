@@ -592,7 +592,7 @@ function setMaxBet() {
 
                 if (playBtn.textContent.includes('Cashout')) {
                       try {
-                        const response = await fetch('/cashout', {
+                        const response = await fetch('/games/cashout', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -665,13 +665,14 @@ function setMaxBet() {
                     }
                 } else {
                     try {
-                        const response = await fetch('/startmines', {
+                        const Game = "Mines"
+                        const response = await fetch('/games/start', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             credentials: 'include',
-                            body: JSON.stringify({ betAmount, mineCount })
+                            body: JSON.stringify({ betAmount, mineCount, Game})
                         });
                 
                         if (!response.ok) throw new Error('Request failed');
@@ -719,13 +720,14 @@ function setMaxBet() {
             
                     const tileIndex = cell.dataset.index;
                     const playBtn = document.getElementById('playMinesBtn');
-            
+                    const Game = "Mines";
+
                     try {
-                        const response = await fetch('/mines/click', {
+                        const response = await fetch('/games/click', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({ tileIndex })
+                            body: JSON.stringify({ tileIndex,Game })
                         });
             
                         if (!response.ok) throw new Error('Request failed');
@@ -755,7 +757,7 @@ function setMaxBet() {
                             cell.classList.add('clicked');
                             cell.classList.add('revealed');
             
-                            const cashoutResponse = await fetch('/cashoutamount', {
+                            const cashoutResponse = await fetch('/games/cashoutamount', {
                                 method: 'GET',
                                 headers: { 'Content-Type': 'application/json' },
                                 credentials: 'include',
@@ -954,7 +956,7 @@ function setMaxBet() {
                     openWallet('withdraw');
                 }
 
-                const cashoutResponse = await fetch('/cashoutamount', {
+                const cashoutResponse = await fetch('/games/cashoutamount', {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -976,7 +978,7 @@ function setMaxBet() {
 
                 async function restoreRevealedTiles() {
                     try {
-                        const response = await fetch('/getCurrentMinesData', {
+                        const response = await fetch('/games/getCurrentData', {
                             credentials: 'include' 
                         });
                 
@@ -1013,6 +1015,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
