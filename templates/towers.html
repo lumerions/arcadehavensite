@@ -103,6 +103,24 @@ nav {
     font-size: 1.1rem;
 }
 
+.payout.reveal {
+    background-color: #272727; 
+    border: 2px solid #22c55e; 
+    border-radius: 8px;
+    color: #22c55e; 
+    font-weight: 600;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.payout.mine {
+    background-color: #b91c1c; 
+    border: 2px solid #f87171; 
+    border-radius: 8px;
+    color: #f87171; 
+    font-weight: 700;
+    transition: background 0.3s, transform 0.2s;
+}
+
 .balance-wrapper {
     margin-left: auto;
     position: relative;
@@ -546,7 +564,7 @@ function setMaxBet() {
             <div class="payout-grid">
                 {% for i in range(24) %}
                     <div class="payout" data-index="{{ i }}">
-                        <span>$</span>1,046
+                        <span>$</span>???
                     </div>
                 {% endfor %}
             </div>
@@ -558,6 +576,7 @@ function setMaxBet() {
     <script>
        
           <script>
+
             document.getElementById('playTowersBtn').addEventListener('click', async () => {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
                 const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
@@ -571,6 +590,7 @@ function setMaxBet() {
                                 'Content-Type': 'application/json'
                             },
                             credentials: 'include',
+                            body: JSON.stringify({  Game: "Towers"})
                         });
                 
                         if (!response.ok) throw new Error('Request failed');
@@ -582,17 +602,31 @@ function setMaxBet() {
                         const result = await response.json();
                         const mines = result.mines;
 
-                        if (Array.isArray(mines)) {
-                            document.querySelectorAll('.cell').forEach(cellEl => {
-                                const index = Number(cellEl.dataset.index);
-                        
-                                if (mines.includes(index)) {
-                                    cellEl.classList.add('mine');
-                                } else if (!cellEl.classList.contains('clicked')) {
-                                    cellEl.classList.add('reveal');
+
+                    if (Array.isArray(mines)) {
+                        document.querySelectorAll('.payout').forEach(cellEl => {
+                            const index = Number(cellEl.dataset.index);
+                    
+                            cellEl.classList.remove('mine', 'reveal');
+                    
+                            if (mines.includes(index)) {
+                                cellEl.classList.add('mine');
+                                cellEl.querySelector('span').textContent = '💣'; 
+                            } else {
+                                cellEl.classList.add('reveal');
+                    
+                                if (!cellEl.classList.contains('clicked')) {
+                                    const total_tiles = 24; 
+                                    const tiles_cleared = document.querySelectorAll('.payout.reveal').length; 
+                                    const multiplier_per_click = total_tiles / (total_tiles - mines.length);
+                                    const total_multiplier = Math.pow(multiplier_per_click, tiles_cleared + 1); 
+                                    const bet_amount = result.betamount; 
+                                    const winnings = Math.floor(bet_amount * total_multiplier);
+                                    cellEl.querySelector('span').textContent = `$${winnings}`;
                                 }
-                            });
-                        }
+                            }
+                        });
+                    }
 
                     async function getData() {
                         try {
@@ -911,6 +945,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
