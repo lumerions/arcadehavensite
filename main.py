@@ -559,6 +559,12 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     multiplier_per_click = 25 / (25 - mine_count)
 
+    redis.delete(
+        SessionId + ":clicks",
+        SessionId + ":cashed",
+        "ClickData." + SessionId
+    )
+
     redis.mset({
         SessionId + "GameActive": "1",
         SessionId + "Cleared": 0,
@@ -756,8 +762,6 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
 
 
 
