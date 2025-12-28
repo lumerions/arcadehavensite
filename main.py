@@ -275,69 +275,84 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
 
 @app.post("/earnings")
 def depositearnings(data: deposit):
-    if data.robloxusername == "":
-        return "Username can't be empty!"
-    if data.siteusername == "":
-        return "Site username can't be empty!"
-    if data.sessionid == "":
-        return "Site sessionid can't be empty!"
-    if data.Deposit == None:
-        return "Data success can't be empty!"
+
+    if not data.robloxusername:
+        return JSONResponse({"error": "Roblox username missing"}, status_code=400)
+
+    if not data.siteusername:
+        return JSONResponse({"error": "Site username missing"}, status_code=400)
+
+    if not data.sessionid:
+        return JSONResponse({"error": "Session ID missing"}, status_code=400)
+
+    if data.Deposit is None:
+        return JSONResponse({"error": "Deposit flag missing"}, status_code=400)
+
+    try:
+        amount = abs(int(data.amount))
+        if amount <= 0:
+            return JSONResponse({"error": "Invalid amount"}, status_code=400)
+    except Exception:
+        return JSONResponse({"error": "Amount must be an integer"}, status_code=400)
+
+    lock_key = f"earnings:{data.sessionid}"
+    if not redis.set(lock_key, "1", nx=True, ex=5):
+        return JSONResponse({"error": "Duplicate request detected"}, status_code=429)
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
-
-                cur.execute("""
-                    UPDATE accounts
-                    SET robloxusername = %s
-                    WHERE username = %s
-                    AND  sessionid = %s
-                    RETURNING robloxusername;
-                """, (data.robloxusername, data.siteusername,data.sessionid))
+                cur.execute(
+                    "SELECT username FROM accounts WHERE username = %s AND sessionid = %s",
+                    (data.siteusername, data.sessionid)
+                )
                 row = cur.fetchone()
+
+                if not row:
+                    return JSONResponse({"error": "Invalid session"}, status_code=403)
+
+                cur.execute(
+                    "UPDATE accounts SET robloxusername = %s WHERE username = %s",
+                    (data.robloxusername, data.siteusername)
+                )
                 conn.commit()
 
-    except Exception as error:
-        return error
-    
-    if row is None:
-        return "Something went wrong!"
-    else:
-        mainMongo = getMainMongo()
-        mainCollection = mainMongo["collection"]
-        try:
-            doc = mainCollection.find_one({"username": data.siteusername})
-        except Exception as e:
-            return e
+    except Exception as e:
+        return JSONResponse({"error": f"Database error: {str(e)}"}, status_code=400)
 
-        if data.Deposit == False:
-            amount = abs(int(data.amount))  
-            balanceaftersubtract = int(doc["balance"]) - amount
+    mainCollection = getMainMongo()["collection"]
 
-            if not doc:
-                return "Document was not found!"
-
-            if balanceaftersubtract < 0:
-                return "This user is trying to subtract more then they have!"
-            amount = abs(int(data.amount))  
-            amount = -data.amount
-        else:
-            amount = abs(int(data.amount))
-
-
+    if data.Deposit:
         result = mainCollection.update_one(
             {"username": data.siteusername, "sessionid": data.sessionid},
             {"$inc": {"balance": amount}},
-            upsert=True
+            upsert=False
         )
 
-        return {
-            "matched_count": result.matched_count,
-            "modified_count": result.modified_count,
-            "upserted_id": str(result.upserted_id) if result.upserted_id else None
-        }
+        if result.matched_count == 0:
+            return JSONResponse({"error": "User wallet not found"}, status_code=404)
 
+        return {"success": True, "type": "deposit", "amount": amount}
+
+    else:
+        result = mainCollection.update_one(
+            {
+                "username": data.siteusername,
+                "sessionid": data.sessionid,
+                "balance": {"$gte": amount}
+            },
+            {
+                "$inc": {"balance": -amount}
+            }
+        )
+
+        if result.modified_count == 0:
+            return JSONResponse(
+                {"error": "Insufficient funds or wallet not found"},
+                status_code=400
+            )
+
+        return {"success": True, "type": "withdraw", "amount": amount}
 
 @app.get("/getCurrentMinesData")
 def get(SessionId: str = Cookie(None)):
