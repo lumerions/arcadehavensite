@@ -523,7 +523,7 @@ function setMaxBet() {
 
                 <div class="field">
                     <div class="field-header">
-                        <span>Mines</span>
+                        <span>Towers</span>
                     </div>
 
                     <div class="bet-input">
@@ -565,7 +565,7 @@ function setMaxBet() {
 
                 if (playBtn.textContent.includes('Cashout')) {
                       try {
-                        const response = await fetch('/cashout', {
+                        const response = await fetch('/games/cashout', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -630,21 +630,22 @@ function setMaxBet() {
 
                     updateBalance();
                     playBtn.style.backgroundColor = '';
-                    playBtn.textContent = 'Play Mines';
+                    playBtn.textContent = 'Play Towers';
 
                     } catch (err) {
-                        console.error('Error starting Mines:', err);
-                        alert('Failed to start Mines. Please try again.');
+                        console.error('Error starting Towers:', err);
+                        alert('Failed to start Towers. Please try again.');
                     }
                 } else {
                     try {
-                        const response = await fetch('/startmines', {
+                        const Game = "Towers"
+                        const response = await fetch('/games/start', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             credentials: 'include',
-                            body: JSON.stringify({ betAmount, mineCount })
+                            body: JSON.stringify({ betAmount, mineCount, Game})
                         });
                 
                         if (!response.ok) throw new Error('Request failed');
@@ -654,8 +655,8 @@ function setMaxBet() {
                         }
                 
                     } catch (err) {
-                        console.error('Error starting Mines:', err);
-                        alert('Failed to start Mines. Please try again.');
+                        console.error('Error starting Towers:', err);
+                        alert('Failed to start Towers. Please try again.');
                     }
 
                 }
@@ -674,7 +675,7 @@ function setMaxBet() {
                     const playBtn = document.getElementById('playTowersBtn');
             
                     try {
-                        const response = await fetch('/mines/click', {
+                        const response = await fetch('/games/click', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
@@ -697,7 +698,7 @@ function setMaxBet() {
                             });
             
                             playBtn.style.backgroundColor = '';
-                            playBtn.textContent = 'Play Mines';
+                            playBtn.textContent = 'Play Towers';
                             document.getElementById('multiplier').textContent = '1x';
                             document.getElementById('currentAmount').textContent = '0';
                             document.getElementById('amountAfter').textContent = '0';
@@ -708,7 +709,7 @@ function setMaxBet() {
                             cell.classList.add('clicked');
                             cell.classList.add('revealed');
             
-                            const cashoutResponse = await fetch('/cashoutamount', {
+                            const cashoutResponse = await fetch('/games/cashoutamount', {
                                 method: 'GET',
                                 headers: { 'Content-Type': 'application/json' },
                                 credentials: 'include',
@@ -910,6 +911,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
