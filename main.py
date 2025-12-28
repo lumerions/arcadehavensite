@@ -326,11 +326,8 @@ def depositearnings(data: deposit):
         result = mainCollection.update_one(
             {"username": data.siteusername, "sessionid": data.sessionid},
             {"$inc": {"balance": amount}},
-            upsert=False
+            upsert=True
         )
-
-        if result.matched_count == 0:
-            return JSONResponse({"error": "User wallet not found"}, status_code=404)
 
         return {"success": True, "type": "deposit", "amount": amount}
 
@@ -739,6 +736,10 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
 
 
 
