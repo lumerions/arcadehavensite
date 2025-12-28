@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, Form, Request, Response, Cookie,status,Query
 from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse,FileResponse
 from fastapi.templating import Jinja2Templates
@@ -63,6 +64,7 @@ class deposit(BaseModel):
 
 class MinesClick(BaseModel):
     tileIndex: int
+    Game : str
 
 class Cashout(BaseModel):
     amount: int
@@ -362,17 +364,19 @@ def depositearnings(data: deposit):
 
         return {"success": True, "type": "withdraw", "amount": amount}
 
-@app.get("/getCurrentMinesData")
+@app.get("/games/getCurrentData")
 def get(SessionId: str = Cookie(None)):
     data_raw = redis.get("ClickData." + SessionId)
     existing_array = json.loads(data_raw) if data_raw else []
     return existing_array
 
-@app.get("/cashoutamount")
-def getcashoutAmount(SessionId: str = Cookie(None)):
+@app.get("/games/cashoutamount")
+def getcashoutAmount(Game: str,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
-    
+    if Game is None:
+        return JSONResponse({"error": "Page missing"}, status_code=400)
+
     keys = [
         SessionId + "minesdata",
         SessionId + "GameActive",
@@ -393,7 +397,19 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
     tilescleared = int(cleared_raw) or 0
     bet_amount = int(bet_amount_raw) or 0
 
-    multiplier_per_click = 25 / (25 - len(mines))
+    total_tiles = None
+
+    if Game == "Towers":
+        total_tiles = 24
+    elif Game == "Mines":
+        total_tiles = 25
+    else:
+        return JSONResponse(
+            {"error": "Unknown error"},
+            status_code=400
+        )
+
+    multiplier_per_click = total_tiles / (total_tiles - len(mines))
 
     current_multiplier = multiplier_per_click ** tilescleared
     next_multiplier = multiplier_per_click ** (tilescleared + 1)
@@ -408,10 +424,11 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
     }
 
 
-@app.post("/mines/click")
+@app.post("/games/click")
 def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     tile_index = int(data.tileIndex)
+    Game = str(data.Game)
 
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
@@ -469,7 +486,19 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     tilescleared = redis.incrby(SessionId + "Cleared", 1)
 
-    multiplier_per_click = 25 / (25 - len(mines))
+    total_tiles = None
+
+    if Game == "Towers":
+        total_tiles = 24
+    elif Game == "Mines":
+        total_tiles = 25
+    else:
+        return JSONResponse(
+            {"error": "Unknown error"},
+            status_code=400
+        )
+
+    multiplier_per_click = total_tiles / (total_tiles - len(mines))
     total_multiplier = multiplier_per_click ** tilescleared
 
     bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
@@ -483,7 +512,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
 
 
-@app.post("/startmines",response_class=HTMLResponse)
+@app.post("/games/start",response_class=HTMLResponse)
 async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     if not SessionId or redis.get("Debounce." + SessionId):
         return RedirectResponse(url="/mines", status_code=303)
@@ -493,6 +522,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     data = await request.json()
     bet_amount = data.get("betAmount")
     mine_count = data.get("mineCount")
+    Game = data.get("Game")
 
     def returnTemplate(error):
         return templates.TemplateResponse(
@@ -534,6 +564,20 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     except Exception as error:
         return {"error": str(error)}
     
+    total_tiles = None
+
+    if Game == "Towers":
+        total_tiles = 24
+    elif Game == "Mines":
+        total_tiles = 25
+    else:
+        return templates.TemplateResponse(
+            "mines.html",
+            {"request": request, "mines_error": "Unknown error"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    
+    
     if not doc:
         return IfInsufficientFunds()
     if int(doc["balance"]) < int(bet_amount):
@@ -541,12 +585,11 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     if int(mine_count) == 25:
         return templates.TemplateResponse(
             "mines.html",
-            {"request": request, "mines_error": "Insufficient Funds!"},
+            {"request": request, "mines_error": "Mines cant be over the total tile count!"},
             status_code=status.HTTP_400_BAD_REQUEST
         )
     
     
-    total_tiles = 25
     mine_count = min(mine_count, total_tiles)  
 
     mines = random.sample(range(total_tiles), mine_count)
@@ -557,7 +600,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
         upsert=True
     )
 
-    multiplier_per_click = 25 / (25 - mine_count)
+    multiplier_per_click = total_tiles / (total_tiles - mine_count)
 
     redis.delete(
         SessionId + ":clicks",
@@ -576,7 +619,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     return RedirectResponse(url="/mines", status_code=303)
 
 
-@app.post("/cashout")
+@app.post("/games/cashout")
 def cashout(SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
@@ -762,6 +805,7 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
