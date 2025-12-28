@@ -307,7 +307,7 @@ def depositearnings(data: deposit):
         return JSONResponse({"error": "Amount must be an integer"}, status_code=400)
 
     lock_key = f"earnings:{data.sessionid}"
-    if not redis.set(lock_key, "1", nx=True, ex=5):
+    if not redis.set(lock_key, "1", nx=True, ex=4):
         return JSONResponse({"error": "Duplicate request detected"}, status_code=429)
 
     try:
@@ -415,24 +415,28 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
-    mines_raw = redis.get(SessionId + "minesdata")
+    mines_raw = redis.exists(SessionId + "minesdata")
     if not mines_raw:
         return JSONResponse({"error": "No mines found"}, status_code=400)
-    if not redis.get(SessionId + "GameActive"):
+    else:
+        mines_raw = redis.get(SessionId + "minesdata")
+
+    GameActive = redis.exists(SessionId + "GameActive")
+    if not GameActive:
         return JSONResponse({"error": "No active game"}, status_code=400)
-    if tile_index < 0 or tile_index >= 25:
+    if tile_index < 0 or tile_index > 25:
         return JSONResponse({"error": "Invalid tile"}, status_code=400)
     clicks_key = SessionId + ":clicks"
     added = redis.sadd(clicks_key, tile_index)  
     if added == 0:
         return JSONResponse({"error": "Tile already clicked"}, status_code=400)
     
-    if redis.get(SessionId + "Cash.."):
+    cashed_key = SessionId + ":cashed"
+    if redis.get(cashed_key):
         return JSONResponse(
             {"error": "Game already cashed out"},
             status_code=400
         )
-
 
     if isinstance(mines_raw, bytes):
         mines_raw = mines_raw.decode()
@@ -447,7 +451,6 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
             SessionId + "Cashout",
             SessionId + "BetAmount",
             SessionId + "Cleared",
-            SessionId + "Cash..",
             SessionId + ":clicks",
             SessionId + "GameActive"
         )
@@ -556,11 +559,14 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     multiplier_per_click = 25 / (25 - mine_count)
 
-    redis.set(SessionId + "GameActive", "1")
-    redis.set(SessionId + "Cleared", 0)
-    redis.set(SessionId + "Cashout", 0)
-    redis.set(SessionId + "BetAmount",bet_amount)
-    redis.set(SessionId + "minesdata",json.dumps(mines))
+    redis.mset({
+        SessionId + "GameActive": "1",
+        SessionId + "Cleared": 0,
+        SessionId + "Cashout": 0,
+        SessionId + "BetAmount": bet_amount,
+        SessionId + "minesdata": json.dumps(mines),
+    })
+
     return RedirectResponse(url="/mines", status_code=303)
 
 
@@ -569,20 +575,25 @@ def cashout(SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
     
-
     keys = [
-        SessionId + "GameActive",
         SessionId + "Cashout",
         SessionId + "minesdata"
     ]
 
-    GameActive,tocashout,mines_raw = redis.mget(*keys)
+    tocashout,mines_raw = redis.mget(*keys)
 
+    GameActive = redis.exists(SessionId + "GameActive")
     if not GameActive:
         return JSONResponse({"error": "No active game"}, status_code=400)
+    
+    mines_raw = redis.exists(SessionId + "minesdata")
+    if not mines_raw:
+        return JSONResponse({"error": "No mines found"}, status_code=400)
+    else:
+        mines_raw = redis.get(SessionId + "minesdata")
 
     cashed_key = SessionId + ":cashed"
-    if not redis.set(cashed_key, "1", nx=True,ex = 5):
+    if not redis.set(cashed_key, "1", nx=True,ex = 4):
         return JSONResponse({"error": "Already cashed out"}, status_code=400)
 
     tocashout = int(tocashout) or 0
@@ -607,8 +618,6 @@ def cashout(SessionId: str = Cookie(None)):
             )
 
 
-    if not mines_raw:
-        return JSONResponse({"error": "No mines found"}, status_code=400)
     if isinstance(mines_raw, bytes):
         mines_raw = mines_raw.decode()
 
@@ -747,6 +756,10 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
 
 
 
