@@ -602,28 +602,28 @@ function setMaxBet() {
                         const result = await response.json();
                         const mines = result.mines;
 
-                    
-                    if (Array.isArray(mines)) {
-                        document.querySelectorAll('.payout').forEach(cellEl => {
-                            const index = Number(cellEl.dataset.index);
-                            const r = Number(cellEl.dataset.row);
-                            const payoutEl = cellEl.querySelector('.payout-value');
-                    
-                            cellEl.classList.remove('mine', 'reveal');
-                    
-                            if (mines.includes(index)) {
-                                cellEl.classList.add('mine');
-                                if (payoutEl) payoutEl.textContent = '💣';
-                            } else {
-                                cellEl.classList.add('reveal');
-                                if (!cellEl.classList.contains('clicked') && payoutEl) {
-                                    const betAmount = Number(result.betamount) || 0;
-                                    payoutEl.textContent = betAmount * (r + 1);
-                                }
+                                
+                        if (Array.isArray(mines)) {
+                                document.querySelectorAll('.payout').forEach(cellEl => {
+                                    const index = Number(cellEl.dataset.index);
+                                    const r = Number(cellEl.dataset.row);
+                                    const payoutEl = cellEl.querySelector('.payout-value');
+                            
+                                    cellEl.classList.remove('mine', 'reveal');
+                            
+                                    if (mines.includes(index)) {
+                                        cellEl.classList.add('mine');
+                                        if (payoutEl) payoutEl.textContent = '💣';
+                                    } else if (cellEl.classList.contains('clicked')) {
+                                        cellEl.classList.add('reveal');
+                                        if (payoutEl) {
+                                            const betAmount = Number(result.betamount) || 0;
+                                            payoutEl.textContent = betAmount * (r + 1);
+                                        }
+                                    }
+                                });
                             }
-                        });
-                    }
-
+            
 
                     async function getData() {
                         try {
@@ -974,6 +974,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
