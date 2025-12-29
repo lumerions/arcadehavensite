@@ -620,7 +620,9 @@ function setMaxBet() {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
                                             const betAmount = Number(result.betamount) || 0;
-                                            payoutEl.textContent = betAmount * (r + 1);
+                                            const minesCount = result.mines.length; 
+                                            const cashCalc = betAmount * (r + 1) * ((minesCount / 23) ** 1.5);
+                                            payoutEl.textContent = cashCalc.toFixed(2);
                                         }
                                     }
                                 });
@@ -738,7 +740,9 @@ function setMaxBet() {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
                                             const betAmount = Number(result.betamount) || 0;
-                                            payoutEl.textContent = betAmount * (r + 1);
+                                            const minesCount = result.minescount; 
+                                            const cashCalc = betAmount * (r + 1) * ((minesCount / 23) ** 1.5);
+                                            payoutEl.textContent = cashCalc.toFixed(2);
                                         }
                                     }
                                 });
@@ -989,6 +993,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
