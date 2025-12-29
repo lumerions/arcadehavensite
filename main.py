@@ -413,8 +413,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
         current_multiplier = Row + 1
         return {
             "amount": amountcurrent,
-            "amountafter": amountafternexttile,
-            "multiplier": current_multiplier
+            "amountafter": amountafternexttile
         }
     elif Game == "Mines":
         total_tiles = 25
