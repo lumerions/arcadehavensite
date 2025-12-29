@@ -748,8 +748,7 @@ function setMaxBet() {
                                 headers: { 'Content-Type': 'application/json' },
                                 credentials: 'include',
                             });
-            
-                            if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
+                            if (!cashoutResponse.ok) return;
             
                             const data = await cashoutResponse.json();
             
@@ -999,6 +998,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
