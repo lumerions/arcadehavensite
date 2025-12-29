@@ -701,7 +701,7 @@ function setMaxBet() {
                 cell.addEventListener('click', async () => {
                     if (cell.classList.contains('revealed')) return;
             
-                    const grid = document.querySelector('.grid');
+                    const grid = document.querySelector('.payout-grid');
                     if (grid.classList.contains('gamedone')) return;
             
                     const tileIndex = cell.dataset.index;
@@ -945,8 +945,8 @@ function setMaxBet() {
                     credentials: 'include',
                 });
 
-                if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
-
+                if (!cashoutResponse.ok) return;
+              
                 const data = await cashoutResponse.json();
 
                 const currentAmount = data.amount;
@@ -999,6 +999,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
