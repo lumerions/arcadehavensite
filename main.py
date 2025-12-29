@@ -412,6 +412,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
         amountafternexttile = bet_amount * (next_row + 1)
         current_multiplier = Row + 1
         return {
+            "betamount": bet_amount,
             "amount": amountcurrent,
             "amountafter": amountafternexttile
         }
