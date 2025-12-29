@@ -934,19 +934,7 @@ function setMaxBet() {
             
                      
             window.onload = async function() {
-         
-                const response = await fetch('/games/getCurrentData', {
-                    credentials: 'include'
-                });
-            
-                if (!response.ok) return;
-            
-                const revealedIndices = await response.json();
-            
-                if (!Array.isArray(revealedIndices) || revealedIndices.length === 0) {
-                    return;
-                }
-            
+
                  const cashoutResponse = await fetch('/games/cashoutamount?Game=Towers', {
                             method: 'GET',
                             credentials: 'include', 
@@ -1021,6 +1009,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
