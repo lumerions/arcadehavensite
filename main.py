@@ -366,6 +366,8 @@ def depositearnings(data: deposit):
 
 @app.get("/games/getCurrentData")
 def get(SessionId: str = Cookie(None)):
+    if not SessionId:
+        return JSONResponse({"error": "SessionId missing"}, status_code=400)
     data_raw = redis.get("ClickData." + SessionId)
     existing_array = json.loads(data_raw) if data_raw else []
     return existing_array
