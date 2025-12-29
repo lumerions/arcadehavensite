@@ -373,7 +373,7 @@ def get(SessionId: str = Cookie(None)):
     return existing_array
 
 @app.get("/games/cashoutamount")
-def getcashoutAmount(Game: str,Row = None,SessionId: str = Cookie(None)):
+def getcashoutAmount(Game: str,Row : int = 0,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
     if Game is None:
