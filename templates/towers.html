@@ -960,15 +960,15 @@ function setMaxBet() {
                 document.getElementById('currentAmount').textContent = data.amount;
                 document.getElementById('amountAfter').textContent = data.amountafter;
 
-                const cashoutResponse = await fetch('/games/cashoutamount', {
+                const reply = await fetch('/games/cashoutamount', {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                 });
 
-                if (!cashoutResponse.ok) return;
+                if (!reply.ok) return;
               
-                const data = await cashoutResponse.json();
+                const data = await reply.json();
 
                 const currentAmount = data.amount;
                 const amountAfterNextTile = data.amountafter;
@@ -1020,6 +1020,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
