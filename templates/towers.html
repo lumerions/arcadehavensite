@@ -948,11 +948,10 @@ function setMaxBet() {
                 data.multiplier.toFixed(2) + 'x';
                 document.getElementById('currentAmount').textContent = data.amount;
                 document.getElementById('amountAfter').textContent = data.amountafter;
-
-                const reply = await fetch('/games/cashoutamount', {
+                
+                const reply = await fetch('/games/cashoutamount?Game=Towers', {
                     method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
+                    credentials: 'include',  
                 });
 
                 if (!reply.ok) return;
@@ -1009,6 +1008,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
