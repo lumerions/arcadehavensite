@@ -697,7 +697,7 @@ function setMaxBet() {
             });
 
               
-            document.querySelectorAll('.cell').forEach(cell => {
+            document.querySelectorAll('.payout').forEach(cell => {
                 cell.addEventListener('click', async () => {
                     if (cell.classList.contains('revealed')) return;
             
@@ -721,7 +721,7 @@ function setMaxBet() {
                         const mines = result.mines;
             
                         if (result.ismine && Array.isArray(mines)) {
-                            document.querySelectorAll('.cell').forEach(cellEl => {
+                            document.querySelectorAll('.payout').forEach(cellEl => {
                                 const index = Number(cellEl.dataset.index);
                                 if (mines.includes(index)) {
                                     cellEl.classList.add('mine');
@@ -932,17 +932,73 @@ function setMaxBet() {
             window.location.href = `/withdraw?amount=${encodeURIComponent(amount)}&page=${encodeURIComponent("towers")}`;
         };
 
-        window.onload = function() {
-            const errorMessage = document.querySelector('.error-message');
-    
-            if (errorMessage) {
-                openWallet('withdraw');
-            }
-        };
+          window.onload = async function() {
+                const errorMessage = document.querySelector('.error-message');
+                if (errorMessage) {
+                    openWallet('withdraw');
+                }
+
+                const cashoutResponse = await fetch('/games/cashoutamount', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                });
+
+                if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
+
+                const data = await cashoutResponse.json();
+
+                const currentAmount = data.amount;
+                const amountAfterNextTile = data.amountafter;
+                const multiplier = data.multiplier;
+
+                document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+                document.getElementById('currentAmount').textContent = currentAmount;
+                document.getElementById('amountAfter').textContent = amountAfterNextTile;
+
+               
+
+                async function restoreRevealedTiles() {
+                    try {
+                        const response = await fetch('/games/getCurrentData', {
+                            credentials: 'include' 
+                        });
+                
+                        if (!response.ok) throw new Error('Failed to fetch current mines data');
+                
+                        const revealedIndices = await response.json(); 
+                
+                        document.querySelectorAll('.payout').forEach(cell => {
+                            const index = Number(cell.dataset.index);
+                
+                            if (revealedIndices.includes(index)) {
+                                cell.classList.add('clicked', 'revealed'); 
+                            }
+                        });
+
+                        const playBtn = document.getElementById('playTowersBtn');
+
+                        if (revealedIndices.length > 0) {
+                            playBtn.style.backgroundColor = '#16a34a';
+                            playBtn.textContent = 'Cashout';
+                        } else {
+                            playBtn.style.backgroundColor = ''; 
+                            playBtn.textContent = 'Play Towers';
+                        }
+                
+                    } catch (err) {
+                        console.error('Error restoring revealed tiles:', err);
+                    }
+                }
+
+                restoreRevealedTiles()
+            
+            };
 
     </script>
 </body>
 </html>
+
 
 
 
