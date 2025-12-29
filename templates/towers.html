@@ -103,7 +103,7 @@ nav {
     font-size: 1.1rem;
 }
 
-'.payout.reveal' {
+.payout.reveal {
     background-color: #272727; 
     border: 2px solid #22c55e; 
     border-radius: 8px;
@@ -743,11 +743,11 @@ function setMaxBet() {
                             cell.classList.add('clicked');
                             cell.classList.add('revealed');
             
-                            const cashoutResponse = await fetch('/games/cashoutamount', {
+                            const cashoutResponse = await fetch('/games/cashoutamount?Game=Towers', {
                                 method: 'GET',
-                                headers: { 'Content-Type': 'application/json' },
-                                credentials: 'include',
+                                credentials: 'include', 
                             });
+
                             if (!cashoutResponse.ok) return;
             
                             const data = await cashoutResponse.json();
@@ -947,8 +947,9 @@ function setMaxBet() {
                     return;
                 }
             
-                const cashoutResponse = await fetch('/games/cashoutamount', {
-                    credentials: 'include'
+                 const cashoutResponse = await fetch('/games/cashoutamount?Game=Towers', {
+                            method: 'GET',
+                            credentials: 'include', 
                 });
             
                 if (!cashoutResponse.ok) return;
@@ -1020,6 +1021,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
