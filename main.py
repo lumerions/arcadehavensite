@@ -616,7 +616,16 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
         SessionId + "minesdata": json.dumps(mines),
     })
 
-    return RedirectResponse(url="/mines", status_code=303)
+    if Game == "Towers":
+        return RedirectResponse(url="/towers", status_code=303)
+    elif Game == "Mines":
+        return RedirectResponse(url="/mines", status_code=303)
+    else:
+        return templates.TemplateResponse(
+            "mines.html",
+            {"request": request, "mines_error": "Unknown error"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
 
 
 @app.post("/games/cashout")
