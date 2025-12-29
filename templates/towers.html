@@ -602,27 +602,28 @@ function setMaxBet() {
                         const result = await response.json();
                         const mines = result.mines;
 
-
+                    
                     if (Array.isArray(mines)) {
                         document.querySelectorAll('.payout').forEach(cellEl => {
                             const index = Number(cellEl.dataset.index);
+                            const r = Number(cellEl.dataset.row);
+                            const payoutEl = cellEl.querySelector('.payout-value');
                     
                             cellEl.classList.remove('mine', 'reveal');
                     
                             if (mines.includes(index)) {
                                 cellEl.classList.add('mine');
-                                cellEl.querySelector('span').textContent = '💣'; 
+                                if (payoutEl) payoutEl.textContent = '💣';
                             } else {
                                 cellEl.classList.add('reveal');
-                    
-                                if (!cellEl.classList.contains('clicked')) {
-                                    const total_tiles = 24; 
-                                    const bet_amount = result.betamount; 
-                                    cell.querySelector('.payout-value').textContent = betAmount * (r + 1);
+                                if (!cellEl.classList.contains('clicked') && payoutEl) {
+                                    const betAmount = Number(result.betamount) || 0;
+                                    payoutEl.textContent = betAmount * (r + 1);
                                 }
                             }
                         });
                     }
+
 
                     async function getData() {
                         try {
@@ -688,9 +689,7 @@ function setMaxBet() {
                         console.error('Error starting Towers:', err);
                         alert('Failed to start Towers. Please try again.');
                     }
-
                 }
-               
             });
 
               
@@ -977,6 +976,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
