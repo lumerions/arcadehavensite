@@ -712,7 +712,7 @@ function setMaxBet() {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({ tileIndex,Game,Row })
+                            body: JSON.stringify({ tileIndex,Game })
                         });
             
                         if (!response.ok) throw new Error('Request failed');
@@ -989,6 +989,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
