@@ -371,7 +371,7 @@ def get(SessionId: str = Cookie(None)):
     return existing_array
 
 @app.get("/games/cashoutamount")
-def getcashoutAmount(Game: str,SessionId: str = Cookie(None)):
+def getcashoutAmount(Game: str,Row = None,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
     if Game is None:
@@ -401,6 +401,15 @@ def getcashoutAmount(Game: str,SessionId: str = Cookie(None)):
 
     if Game == "Towers":
         total_tiles = 24
+        amountcurrent = bet_amount * (Row + 1)
+        next_row = min(Row + 1, 8)
+        amountafternexttile = bet_amount * (next_row + 1)
+        current_multiplier = Row + 1
+        return {
+            "amount": amountcurrent,
+            "amountafter": amountafternexttile,
+            "multiplier": current_multiplier
+        }
     elif Game == "Mines":
         total_tiles = 25
     else:
