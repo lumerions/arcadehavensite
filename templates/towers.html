@@ -756,7 +756,7 @@ function setMaxBet() {
                             const currentAmount = data.amount;
                             const amountAfterNextTile = data.amountafter;
                             const multiplier = data.multiplier;
-            
+                            cell.classList.add('reveal'); 
                             document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
                             document.getElementById('currentAmount').textContent = currentAmount;
                             document.getElementById('amountAfter').textContent = amountAfterNextTile;
@@ -1008,6 +1008,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
