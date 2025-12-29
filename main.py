@@ -664,10 +664,11 @@ def cashout(SessionId: str = Cookie(None)):
     
     keys = [
         SessionId + "Cashout",
-        SessionId + "minesdata"
+        SessionId + "minesdata",
+        SessionId + "BetAmount"
     ]
 
-    tocashout,mines_raw = redis.mget(*keys)
+    tocashout,mines_raw,betamount = redis.mget(*keys)
 
     GameActive = redis.exists(SessionId + "GameActive")
     if not GameActive:
@@ -719,7 +720,7 @@ def cashout(SessionId: str = Cookie(None)):
         SessionId + ":clicks"
     )
 
-    return JSONResponse({"success": True, "amount": tocashout,"mines": mines})
+    return JSONResponse({"success": True, "amount": tocashout,"mines": mines,"betamount":betamount})
 
 
 @app.post("/register", response_class=HTMLResponse)
