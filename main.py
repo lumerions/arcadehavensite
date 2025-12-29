@@ -365,9 +365,18 @@ def depositearnings(data: deposit):
         return {"success": True, "type": "withdraw", "amount": amount}
 
 @app.get("/games/getCurrentData")
+def get(SessionId: str = Cookie(None)):
+    if not SessionId:
+        return JSONResponse({"error": "SessionId missing"}, status_code=400)
+    data_raw = redis.get("ClickData." + SessionId)
+    existing_array = json.loads(data_raw) if data_raw else []
+    return existing_array
+
+@app.get("/games/cashoutamount")
 def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
+    
     if not Game:
         return JSONResponse({"error": "Page missing"}, status_code=400)
 
@@ -407,14 +416,12 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
             "amountafter": amountafternexttile,
             "multiplier": current_multiplier
         }
-
     elif Game == "Mines":
         total_tiles = 25
     else:
         return JSONResponse({"error": "Unknown game"}, status_code=400)
 
-    multiplier_per_click = total_tiles / max(total_tiles - len(mines), 1)  
-
+    multiplier_per_click = total_tiles / max(total_tiles - len(mines), 1)
     current_multiplier = multiplier_per_click ** tilescleared
     next_multiplier = multiplier_per_click ** (tilescleared + 1)
 
@@ -426,6 +433,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
         "amountafter": amountafternexttile,
         "multiplier": current_multiplier
     }
+
 
 
 @app.post("/games/click")
@@ -829,6 +837,10 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
 
 
 
