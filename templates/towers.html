@@ -724,16 +724,25 @@ function setMaxBet() {
                             if (result.ismine && Array.isArray(mines)) {
                                 document.querySelectorAll('.payout').forEach(cellEl => {
                                     const index = Number(cellEl.dataset.index);
+                                    const r = Number(cellEl.dataset.row);
+                                    const payoutEl = cellEl.querySelector('.payout-value');
                                     const dollarEl = cellEl.querySelector('span'); 
 
+                                    cellEl.classList.remove('mine', 'reveal');
+                            
                                     if (mines.includes(index)) {
-                                        cellEl.classList.add('mine');   
+                                        cellEl.classList.add('mine');
                                         if (dollarEl) dollarEl.style.display = 'none'; 
                                         if (payoutEl) payoutEl.textContent = '💣';
-                                    } else if (!cellEl.classList.contains('clicked')) {
-                                        cellEl.classList.add('reveal'); 
+                                    } else if (cellEl.classList.contains('clicked')) {
+                                        cellEl.classList.add('reveal');
+                                        if (payoutEl) {
+                                            const betAmount = Number(result.betamount) || 0;
+                                            payoutEl.textContent = betAmount * (r + 1);
+                                        }
                                     }
                                 });
+
   
                                 playBtn.style.backgroundColor = '';
                                 playBtn.textContent = 'Play Towers';
@@ -980,6 +989,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
