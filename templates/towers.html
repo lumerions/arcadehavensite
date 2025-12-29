@@ -979,10 +979,11 @@ function setMaxBet() {
 
                 restoreRevealedTiles()
 
-                const reply = await fetch(''/games/cashoutamount?Game=Towers&Row=' + row', {
+                const reply = await fetch('/games/cashoutamount?Game=Towers&Row=' + row, {
                     method: 'GET',
-                    credentials: 'include',  
+                    credentials: 'include',
                 });
+
 
                 if (!reply.ok) return;
               
@@ -999,6 +1000,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
