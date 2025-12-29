@@ -462,6 +462,8 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
             status_code=400
         )
 
+    bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
+
     if isinstance(mines_raw, bytes):
         mines_raw = mines_raw.decode()
 
@@ -477,7 +479,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
             SessionId + ":clicks",
             SessionId + "GameActive"
         )
-        return JSONResponse({"ismine": True, "mines": mines})
+        return JSONResponse({"ismine": True, "mines": mines,"betamount":bet_amount})
 
 
     data_raw = redis.get("ClickData." + SessionId)
@@ -495,7 +497,6 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     total_tiles = None
 
     if Game == "Towers":
-        bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
         row = 7 - (tile_index // 3)
         payout = bet_amount * (row + 1)
         redis.incrby(SessionId + "Cashout", payout)
