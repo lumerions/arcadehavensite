@@ -563,7 +563,7 @@ function setMaxBet() {
 
             <div class="payout-grid">
                 {% for i in range(24) %}
-                    <div class="payout" data-index="{{ i }}">
+                    <div class="payout" data-index="{{ i }}" data-row="{{ i }}">
                         <span>$</span>???
                     </div>
                 {% endfor %}
@@ -705,6 +705,7 @@ function setMaxBet() {
                     if (grid.classList.contains('gamedone')) return;
             
                     const tileIndex = cell.dataset.index;
+                    const Row = cell.dataset.row;
                     const playBtn = document.getElementById('playTowersBtn');
                     const Game = "Towers";
             
@@ -713,32 +714,32 @@ function setMaxBet() {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({ tileIndex,Game })
+                            body: JSON.stringify({ tileIndex,Game,Row })
                         });
             
                         if (!response.ok) throw new Error('Request failed');
             
                         const result = await response.json();
                         const mines = result.mines;
-            
-                        if (result.ismine && Array.isArray(mines)) {
-                            document.querySelectorAll('.payout').forEach(cellEl => {
-                                const index = Number(cellEl.dataset.index);
-                                if (mines.includes(index)) {
-                                    cellEl.classList.add('.payout.mine');
-                                } else if (!cellEl.classList.contains('clicked')) {
-                                    cellEl.classList.add('.payout.reveal');
-                                }
-                            });
-            
-                            playBtn.style.backgroundColor = '';
-                            playBtn.textContent = 'Play Towers';
-                            document.getElementById('multiplier').textContent = '1x';
-                            document.getElementById('currentAmount').textContent = '0';
-                            document.getElementById('amountAfter').textContent = '0';
-            
-                            grid.classList.add('gamedone');
-            
+                            
+                                        
+                            if (result.ismine && Array.isArray(mines)) {
+                                document.querySelectorAll('.payout').forEach(cellEl => {
+                                    const index = Number(cellEl.dataset.index);
+                                    if (mines.includes(index)) {
+                                        cellEl.classList.add('mine');   
+                                    } else if (!cellEl.classList.contains('clicked')) {
+                                        cellEl.classList.add('reveal'); 
+                                    }
+                                });
+                            
+                                playBtn.style.backgroundColor = '';
+                                playBtn.textContent = 'Play Towers';
+                                document.getElementById('multiplier').textContent = '1x';
+                                document.getElementById('currentAmount').textContent = '0';
+                                document.getElementById('amountAfter').textContent = '0';
+                                grid.classList.add('gamedone');
+                            
                         } else { 
                             cell.classList.add('clicked');
                             cell.classList.add('revealed');
@@ -759,7 +760,6 @@ function setMaxBet() {
                             document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
                             document.getElementById('currentAmount').textContent = currentAmount;
                             document.getElementById('amountAfter').textContent = amountAfterNextTile;
-            
                             playBtn.style.backgroundColor = '#16a34a';
                             playBtn.textContent = 'Cashout';
                         }
@@ -1008,6 +1008,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
