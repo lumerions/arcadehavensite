@@ -144,7 +144,7 @@ def loadmines(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","mines.html")
 
 
-@app.get("/towersgam",response_class =  HTMLResponse)
+@app.get("/towers",response_class =  HTMLResponse)
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
@@ -543,7 +543,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     def CheckGame():
         if Game == "Towers":
-            return RedirectResponse(url="/towersgam", status_code=303)
+            return RedirectResponse(url="/towers", status_code=303)
         elif Game == "Mines":
             return RedirectResponse(url="/mines", status_code=303)
         else:
@@ -652,7 +652,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     })
 
     if Game == "Towers":
-        return RedirectResponse(url="/towersgam", status_code=303)
+        return RedirectResponse(url="/towers", status_code=303)
     elif Game == "Mines":
         return RedirectResponse(url="/mines", status_code=303)
     else:
