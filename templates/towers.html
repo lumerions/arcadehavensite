@@ -561,13 +561,10 @@ function setMaxBet() {
             <h1>Towers</h1>
 
             <div class="payout-grid">
-                {% set bet_amount = 10 %}
                 
                 {% for i in range(24) %}
                     {% set row = 7 - (i // 3) %} 
-                    
-                    {% set payout = bet_amount * (row + 1) %} 
-                
+                                    
                     <div class="payout" data-index="{{ i }}" data-row="{{ row }}">
                         <span>$</span>{{ payout }}
                     </div>
@@ -991,15 +988,22 @@ function setMaxBet() {
 
                 const currentAmount = dataa.amount;
                 const amountAfterNextTile = dataa.amountafter;
+                const betAmount = dataa.betamount;
 
                 document.getElementById('currentAmount').textContent = currentAmount;
                 document.getElementById('amountAfter').textContent = amountAfterNextTile;
 
-            };
+            document.querySelectorAll('.payout').forEach(cell => {
+                const row = Number(cell.dataset.row);
+                const payout = betAmount * (row + 1);
+                cell.querySelector('.payout-value').textContent = payout;
+            });
+         };
 
     </script>
 </body>
 </html>
+
 
 
 
