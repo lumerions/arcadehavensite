@@ -463,7 +463,6 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if is_mine:
         redis.delete(
-            "Debounce." + SessionId,
             "ClickData." + SessionId,
             SessionId + "Cashout",
             SessionId + "BetAmount",
@@ -514,11 +513,25 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
 @app.post("/games/start",response_class=HTMLResponse)
 async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
-    if not SessionId or redis.get("Debounce." + SessionId):
-        return RedirectResponse(url="/mines", status_code=303)
-    
-    redis.set("Debounce." + SessionId,True)
 
+    def CheckGame():
+        if Game == "Towers":
+            return RedirectResponse(url="/towersgam", status_code=303)
+        elif Game == "Mines":
+            return RedirectResponse(url="/mines", status_code=303)
+        else:
+            return templates.TemplateResponse(
+                "mines.html",
+                {"request": request, "mines_error": "Unknown error"},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+            
+    if not redis.set("Debounce." + SessionId, 1, nx=True, ex=2):
+        return CheckGame()
+
+    if not SessionId:
+        return CheckGame()
+    
     data = await request.json()
     bet_amount = data.get("betAmount")
     mine_count = data.get("mineCount")
@@ -582,14 +595,13 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
         return IfInsufficientFunds()
     if int(doc["balance"]) < int(bet_amount):
         return IfInsufficientFunds()
-    if int(mine_count) == 25:
+    if int(mine_count) >= total_tiles:
         return templates.TemplateResponse(
             "mines.html",
-            {"request": request, "mines_error": "Mines cant be over the total tile count!"},
+            {"request": request, "mines_error": "Mines cant be equal to or over the total tile count!"},
             status_code=status.HTTP_400_BAD_REQUEST
         )
-    
-    
+
     mine_count = min(mine_count, total_tiles)  
 
     mines = random.sample(range(total_tiles), mine_count)
@@ -617,7 +629,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     })
 
     if Game == "Towers":
-        return RedirectResponse(url="/towers", status_code=303)
+        return RedirectResponse(url="/towersgam", status_code=303)
     elif Game == "Mines":
         return RedirectResponse(url="/mines", status_code=303)
     else:
@@ -687,8 +699,7 @@ def cashout(SessionId: str = Cookie(None)):
         SessionId + "Cashout",
         SessionId + "BetAmount",
         "ClickData." + SessionId,
-        SessionId + ":clicks",
-        "Debounce." + SessionId
+        SessionId + ":clicks"
     )
 
     return JSONResponse({"success": True, "amount": tocashout,"mines": mines})
