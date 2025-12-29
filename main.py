@@ -492,7 +492,6 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     is_mine = tile_index in mines
 
 
-
     if is_mine:
         redis.delete(
             "ClickData." + SessionId,
@@ -520,11 +519,11 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     total_tiles = None
 
     if Game == "Towers":
-        payout = bet_amount * (row + 1)
+        payout = bet_amount * (row + 1) * (1 + (len(mines) / 23))
         redis.incrby(SessionId + "Cashout", payout)
         redis.set("ClickData." + SessionId, json.dumps(existing_array))
         redis.incrby(SessionId + "Row", 1)
-        return JSONResponse({"ismine": False,"betamount":bet_amount})
+        return JSONResponse({"ismine": False,"betamount":bet_amount,"minescount":len(mines)})
     elif Game == "Mines":
         total_tiles = 25
     else:
