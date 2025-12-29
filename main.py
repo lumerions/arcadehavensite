@@ -514,6 +514,11 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 @app.post("/games/start",response_class=HTMLResponse)
 async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
+    data = await request.json()
+    bet_amount = data.get("betAmount")
+    mine_count = data.get("mineCount")
+    Game = data.get("Game")
+
     def CheckGame():
         if Game == "Towers":
             return RedirectResponse(url="/towersgam", status_code=303)
@@ -525,17 +530,12 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
                 {"request": request, "mines_error": "Unknown error"},
                 status_code=status.HTTP_400_BAD_REQUEST
             )
-            
-    if not redis.set("Debounce." + SessionId, 1, nx=True, ex=2):
-        return CheckGame()
 
     if not SessionId:
         return CheckGame()
-    
-    data = await request.json()
-    bet_amount = data.get("betAmount")
-    mine_count = data.get("mineCount")
-    Game = data.get("Game")
+            
+    if not redis.set("Debounce." + SessionId, 1, nx=True, ex=2):
+        return CheckGame()
 
     def returnTemplate(error):
         return templates.TemplateResponse(
