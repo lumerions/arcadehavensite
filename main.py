@@ -502,7 +502,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if Game == "Towers":
         bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
         row = 7 - (tile_index // 3)
-        payout = betAmount * (row + 1)
+        payout = bet_amount * (row + 1)
         redis.incrby(SessionId + "Cashout", payout)
         redis.set("ClickData." + SessionId, json.dumps(existing_array))
         return JSONResponse({"ismine": False})
