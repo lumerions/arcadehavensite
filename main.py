@@ -65,6 +65,8 @@ class deposit(BaseModel):
 class MinesClick(BaseModel):
     tileIndex: int
     Game : str
+class Config:
+        extra = "allow"
 
 class Cashout(BaseModel):
     amount: int
