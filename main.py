@@ -365,18 +365,10 @@ def depositearnings(data: deposit):
         return {"success": True, "type": "withdraw", "amount": amount}
 
 @app.get("/games/getCurrentData")
-def get(SessionId: str = Cookie(None)):
+def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
-    data_raw = redis.get("ClickData." + SessionId)
-    existing_array = json.loads(data_raw) if data_raw else []
-    return existing_array
-
-@app.get("/games/cashoutamount")
-def getcashoutAmount(Game: str,Row : int = 0,SessionId: str = Cookie(None)):
-    if not SessionId:
-        return JSONResponse({"error": "SessionId missing"}, status_code=400)
-    if Game is None:
+    if not Game:
         return JSONResponse({"error": "Page missing"}, status_code=400)
 
     keys = [
@@ -394,12 +386,15 @@ def getcashoutAmount(Game: str,Row : int = 0,SessionId: str = Cookie(None)):
     if not game_active:
         return {"amount": 0, "amountafter": 0, "multiplier": 1}
 
-    mines = json.loads(mines_raw.decode() if isinstance(mines_raw, bytes) else mines_raw)
+    try:
+        mines = json.loads(mines_raw.decode() if isinstance(mines_raw, bytes) else mines_raw)
+        if not isinstance(mines, list):
+            mines = []
+    except Exception:
+        mines = []
 
-    tilescleared = int(cleared_raw) or 0
-    bet_amount = int(bet_amount_raw) or 0
-
-    total_tiles = None
+    tilescleared = int(cleared_raw) if cleared_raw else 0
+    bet_amount = int(bet_amount_raw) if bet_amount_raw else 0
 
     if Game == "Towers":
         total_tiles = 24
@@ -412,15 +407,13 @@ def getcashoutAmount(Game: str,Row : int = 0,SessionId: str = Cookie(None)):
             "amountafter": amountafternexttile,
             "multiplier": current_multiplier
         }
+
     elif Game == "Mines":
         total_tiles = 25
     else:
-        return JSONResponse(
-            {"error": "Unknown error"},
-            status_code=400
-        )
+        return JSONResponse({"error": "Unknown game"}, status_code=400)
 
-    multiplier_per_click = total_tiles / (total_tiles - len(mines))
+    multiplier_per_click = total_tiles / max(total_tiles - len(mines), 1)  
 
     current_multiplier = multiplier_per_click ** tilescleared
     next_multiplier = multiplier_per_click ** (tilescleared + 1)
