@@ -926,7 +926,6 @@ function setMaxBet() {
                              
         window.onload = async function () {
             let row = -1;
-            let currentamount = 0;
         
             async function restoreRevealedTiles() {
                 const response = await fetch('/games/getCurrentData', { credentials: 'include' });
@@ -960,6 +959,7 @@ function setMaxBet() {
             const data = await reply.json();
         
             const betAmount = Number(data.betamount) || 0;
+            const currentamount = Number(data.amount) || 0;
             document.getElementById('currentAmount').textContent = currentamount;
         
             document.querySelectorAll('.payout').forEach(cell => {
@@ -974,6 +974,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
