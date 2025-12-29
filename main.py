@@ -440,7 +440,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     Game = str(data.Game)
     currentMaxTileIndex = 0
 
-     if Game == "Towers":
+    if Game == "Towers":
         currentMaxTileIndex = 24
     elif Game == "Mines":
          currentMaxTileIndex = 25
