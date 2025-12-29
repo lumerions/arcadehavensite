@@ -562,12 +562,15 @@ function setMaxBet() {
             <h1>Towers</h1>
 
             <div class="payout-grid">
-                {% for i in range(24) %}
-                                                    
-                    {% set row = 7 - (i // 3) %}
+                {% set bet_amount = 10 %}
                 
-                    <div class="payout" data-index="{{ i }}" data-row="{{ row + 1 }}">
-                        <span>$</span>???
+                {% for i in range(24) %}
+                    {% set row = 7 - (i // 3) %} 
+                    
+                    {% set payout = bet_amount * (row + 1) %} 
+                
+                    <div class="payout" data-index="{{ i }}" data-row="{{ row }}">
+                        <span>$</span>{{ payout }}
                     </div>
                 {% endfor %}
             </div>
@@ -1011,6 +1014,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
