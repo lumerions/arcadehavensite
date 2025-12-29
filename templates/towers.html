@@ -552,7 +552,6 @@ function setMaxBet() {
 
                 <div id="cashoutInfo" style="margin-bottom: 10px; text-align: center; font-size: 0.95rem; color: #cbd5f5;">
                     <div>Current Amount: $<span id="currentAmount">0</span></div>
-                    <div>Amount After Next Tile: $<span id="amountAfter">0</span></div>
                 </div>
             </div>
         </div>
@@ -734,7 +733,6 @@ function setMaxBet() {
                                 playBtn.style.backgroundColor = '';
                                 playBtn.textContent = 'Play Towers';
                                 document.getElementById('currentAmount').textContent = '0';
-                                document.getElementById('amountAfter').textContent = '0';
                                 grid.classList.add('gamedone');
                             
                         } else { 
@@ -752,10 +750,8 @@ function setMaxBet() {
                             const data = await cashoutResponse.json();
             
                             const currentAmount = data.amount;
-                            const amountAfterNextTile = data.amountafter;
                             cell.classList.add('reveal'); 
                             document.getElementById('currentAmount').textContent = currentAmount;
-                            document.getElementById('amountAfter').textContent = amountAfterNextTile;
                             playBtn.style.backgroundColor = '#16a34a';
                             playBtn.textContent = 'Cashout';
                         }
@@ -968,9 +964,9 @@ function setMaxBet() {
             
                 const data = await reply.json();
             
-                const betAmount = data.betamount;
+                const betAmount = Number(data.betamount) || 0;
+
                 document.getElementById('currentAmount').textContent = data.amount;
-                document.getElementById('amountAfter').textContent = data.amountafter;
             
                 document.querySelectorAll('.payout').forEach(cell => {
                     const r = Number(cell.dataset.row);
@@ -981,6 +977,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
