@@ -501,7 +501,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if Game == "Towers":
         row = 7 - (tile_index // 3)
         currentRow = int(redis.get(SessionId + "Row"))
-        if currentRow + 1 > row:
+        if row > currentRow:
             return JSONResponse(
                 {"error": "Row cannot be higher then row argument!"},
                 status_code=400
