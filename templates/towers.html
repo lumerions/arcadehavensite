@@ -749,8 +749,9 @@ function setMaxBet() {
                         } else { 
                             cell.classList.add('clicked');
                             cell.classList.add('revealed');
+                            const rowValue = cell.dataset.row
             
-                            const cashoutResponse = await fetch('/games/cashoutamount?Game=Towers', {
+                            const cashoutResponse = await fetch('/games/cashoutamount?Game=Towers&Row=' + rowValue, {
                                 method: 'GET',
                                 credentials: 'include', 
                             });
@@ -940,40 +941,7 @@ function setMaxBet() {
             
                      
             window.onload = async function() {
-
-                 const cashoutResponse = await fetch('/games/cashoutamount?Game=Towers', {
-                            method: 'GET',
-                            credentials: 'include', 
-                });
-            
-                if (!cashoutResponse.ok) return;
-            
-                const data = await cashoutResponse.json();
-            
-                document.getElementById('multiplier').textContent =
-                data.multiplier.toFixed(2) + 'x';
-                document.getElementById('currentAmount').textContent = data.amount;
-                document.getElementById('amountAfter').textContent = data.amountafter;
-                
-                const reply = await fetch('/games/cashoutamount?Game=Towers', {
-                    method: 'GET',
-                    credentials: 'include',  
-                });
-
-                if (!reply.ok) return;
-              
-                const dataa = await reply.json();
-
-                const currentAmount = dataa.amount;
-                const amountAfterNextTile = dataa.amountafter;
-                const multiplier = dataa.multiplier;
-
-                document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
-                document.getElementById('currentAmount').textContent = currentAmount;
-                document.getElementById('amountAfter').textContent = amountAfterNextTile;
-
-               
-
+                let row = -1;
                 async function restoreRevealedTiles() {
                     try {
                         const response = await fetch('/games/getCurrentData', {
@@ -986,6 +954,12 @@ function setMaxBet() {
                 
                         document.querySelectorAll('.payout').forEach(cell => {
                             const index = Number(cell.dataset.index);
+                            const maxRow = 8; 
+                            const currentrow = maxRow - 1 - Math.floor(index / 3); 
+
+                            if (currentrow > row) {
+                                row = currentrow
+                            }
                 
                             if (revealedIndices.includes(index)) {
                                 cell.classList.add('reveal'); 
@@ -1008,12 +982,30 @@ function setMaxBet() {
                 }
 
                 restoreRevealedTiles()
-            
+
+                const reply = await fetch(''/games/cashoutamount?Game=Towers&Row=' + row', {
+                    method: 'GET',
+                    credentials: 'include',  
+                });
+
+                if (!reply.ok) return;
+              
+                const dataa = await reply.json();
+
+                const currentAmount = dataa.amount;
+                const amountAfterNextTile = dataa.amountafter;
+                const multiplier = dataa.multiplier;
+
+                document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+                document.getElementById('currentAmount').textContent = currentAmount;
+                document.getElementById('amountAfter').textContent = amountAfterNextTile;
+
             };
 
     </script>
 </body>
 </html>
+
 
 
 
