@@ -969,20 +969,22 @@ function setMaxBet() {
                 const betAmount = Number(data.betamount) || 0;
 
                 document.getElementById('currentAmount').textContent = currentamount;
-                
-                document.querySelectorAll('.payout').forEach(cell => {
-                    if (cell.classList.contains('reveal')) {
-                        const r = Number(cell.dataset.row);       
-                        const betAmount = Number(result.betamount) || 0; 
-                        const payoutEl = cell.querySelector('.payout-value');
-                        if (payoutEl) {
-                            payoutEl.textContent = betAmount * (r + 1);
-                        }
+                            
+            document.querySelectorAll('.payout').forEach(cell => {
+                if (cell.classList.contains('reveal')) {
+                    const r = Number(cell.dataset.row);       
+                    const betAmount = Number(result.betamount) || 0; 
+                    const payoutEl = cell.querySelector('.payout-value');
+                    if (payoutEl) {
+                        payoutEl.textContent = betAmount * (r + 1);
                     }
-                });
+                }
+            });
+
     </script>
 </body>
 </html>
+
 
 
 
