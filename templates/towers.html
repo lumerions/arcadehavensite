@@ -968,11 +968,11 @@ function setMaxBet() {
 
                 if (!reply.ok) return;
               
-                const data = await reply.json();
+                const dataa = await reply.json();
 
-                const currentAmount = data.amount;
-                const amountAfterNextTile = data.amountafter;
-                const multiplier = data.multiplier;
+                const currentAmount = dataa.amount;
+                const amountAfterNextTile = dataa.amountafter;
+                const multiplier = dataa.multiplier;
 
                 document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
                 document.getElementById('currentAmount').textContent = currentAmount;
@@ -1020,6 +1020,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
