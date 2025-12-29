@@ -608,11 +608,13 @@ function setMaxBet() {
                                     const index = Number(cellEl.dataset.index);
                                     const r = Number(cellEl.dataset.row);
                                     const payoutEl = cellEl.querySelector('.payout-value');
-                            
+                                    const dollarEl = cellEl.querySelector('span'); 
+
                                     cellEl.classList.remove('mine', 'reveal');
                             
                                     if (mines.includes(index)) {
                                         cellEl.classList.add('mine');
+                                        if (dollarEl) dollarEl.style.display = 'none'; 
                                         if (payoutEl) payoutEl.textContent = '💣';
                                     } else if (cellEl.classList.contains('clicked')) {
                                         cellEl.classList.add('reveal');
@@ -974,6 +976,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
