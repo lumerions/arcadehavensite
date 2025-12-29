@@ -384,10 +384,11 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
         SessionId + "minesdata",
         SessionId + "GameActive",
         SessionId + "Cleared",
-        SessionId + "BetAmount"
+        SessionId + "BetAmount",
+        SessionId + "Cashout"
     ]
 
-    mines_raw, game_active, cleared_raw, bet_amount_raw = redis.mget(*keys)
+    mines_raw, game_active, cleared_raw, bet_amount_raw,CurrentUserAmount = redis.mget(*keys)
 
     if not mines_raw:
         return JSONResponse({"error": "No mines found"}, status_code=400)
@@ -406,8 +407,8 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     bet_amount = int(bet_amount_raw) if bet_amount_raw else 0
 
     if Game == "Towers":
-        next_row = min(Row + 1, 8)
         return {
+            "amount": CurrentUserAmount
             "betamount": bet_amount
         }
     elif Game == "Mines":
