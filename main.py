@@ -438,6 +438,17 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     tile_index = int(data.tileIndex)
     Game = str(data.Game)
+    currentMaxTileIndex = 0
+
+     if Game == "Towers":
+        currentMaxTileIndex = 24
+    elif Game == "Mines":
+         currentMaxTileIndex = 25
+    else:
+        return JSONResponse(
+            {"error": "Unknown error"},
+            status_code=400
+        )
 
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
@@ -450,12 +461,8 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     GameActive = redis.exists(SessionId + "GameActive")
     if not GameActive:
         return JSONResponse({"error": "No active game"}, status_code=400)
-    if tile_index < 0 or tile_index > 25:
+    if tile_index < 0 or tile_index > currentMaxTileIndex:
         return JSONResponse({"error": "Invalid tile"}, status_code=400)
-    clicks_key = SessionId + ":clicks"
-    added = redis.sadd(clicks_key, tile_index)  
-    if added == 0:
-        return JSONResponse({"error": "Tile already clicked"}, status_code=400)
     row = 7 - (tile_index // 3)
     currentRow = int(redis.get(SessionId + "Row"))
     if row > currentRow:
@@ -463,6 +470,11 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
             {"error": "Row cannot be higher then row argument!"},
             status_code=400
         )
+    clicks_key = SessionId + ":clicks"
+    added = redis.sadd(clicks_key, tile_index)  
+    if added == 0:
+        return JSONResponse({"error": "Tile already clicked"}, status_code=400)
+
     
     cashed_key = SessionId + ":cashed"
     if redis.get(cashed_key):
