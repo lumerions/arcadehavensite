@@ -500,6 +500,12 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if Game == "Towers":
         row = 7 - (tile_index // 3)
+        currentRow = int(redis.get(SessionId + "Row"))
+        if row + 1 > currentRow:
+            return JSONResponse(
+                {"error": "Row cannot be higher then row argument!"},
+                status_code=400
+            )
         payout = bet_amount * (row + 1)
         redis.incrby(SessionId + "Cashout", payout)
         redis.set("ClickData." + SessionId, json.dumps(existing_array))
@@ -596,6 +602,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     if Game == "Towers":
         total_tiles = 24
+        redis.set(SessionId + "Row", 0)
     elif Game == "Mines":
         total_tiles = 25
     else:
