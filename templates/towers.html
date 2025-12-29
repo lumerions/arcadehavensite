@@ -103,7 +103,7 @@ nav {
     font-size: 1.1rem;
 }
 
-.payout.reveal {
+'.payout.reveal' {
     background-color: #272727; 
     border: 2px solid #22c55e; 
     border-radius: 8px;
@@ -606,13 +606,13 @@ function setMaxBet() {
                         document.querySelectorAll('.payout').forEach(cellEl => {
                             const index = Number(cellEl.dataset.index);
                     
-                            cellEl.classList.remove('mine', 'reveal');
+                            cellEl.classList.remove('.payout.mine', '.payout.reveal');
                     
                             if (mines.includes(index)) {
-                                cellEl.classList.add('mine');
+                                cellEl.classList.add('payout.mine');
                                 cellEl.querySelector('span').textContent = '💣'; 
                             } else {
-                                cellEl.classList.add('reveal');
+                                cellEl.classList.add('payout.reveal');
                     
                                 if (!cellEl.classList.contains('clicked')) {
                                     const total_tiles = 24; 
@@ -724,9 +724,9 @@ function setMaxBet() {
                             document.querySelectorAll('.payout').forEach(cellEl => {
                                 const index = Number(cellEl.dataset.index);
                                 if (mines.includes(index)) {
-                                    cellEl.classList.add('mine');
+                                    cellEl.classList.add('.payout.mine');
                                 } else if (!cellEl.classList.contains('clicked')) {
-                                    cellEl.classList.add('reveal');
+                                    cellEl.classList.add('.payout.reveal');
                                 }
                             });
             
@@ -998,6 +998,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
