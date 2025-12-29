@@ -411,7 +411,8 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     if Game == "Towers":
         return {
             "amount": CurrentUserAmount,
-            "betamount": bet_amount
+            "betamount": bet_amount,
+            "minescount": len(mines)
         }
     elif Game == "Mines":
         total_tiles = 25
