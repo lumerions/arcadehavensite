@@ -456,6 +456,13 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     added = redis.sadd(clicks_key, tile_index)  
     if added == 0:
         return JSONResponse({"error": "Tile already clicked"}, status_code=400)
+    row = 7 - (tile_index // 3)
+    currentRow = int(redis.get(SessionId + "Row"))
+    if row > currentRow:
+        return JSONResponse(
+            {"error": "Row cannot be higher then row argument!"},
+            status_code=400
+        )
     
     cashed_key = SessionId + ":cashed"
     if redis.get(cashed_key):
@@ -471,6 +478,8 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     mines = json.loads(mines_raw)
     is_mine = tile_index in mines
+
+
 
     if is_mine:
         redis.delete(
@@ -499,13 +508,6 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     total_tiles = None
 
     if Game == "Towers":
-        row = 7 - (tile_index // 3)
-        currentRow = int(redis.get(SessionId + "Row"))
-        if row > currentRow:
-            return JSONResponse(
-                {"error": "Row cannot be higher then row argument!"},
-                status_code=400
-            )
         payout = bet_amount * (row + 1)
         redis.incrby(SessionId + "Cashout", payout)
         redis.set("ClickData." + SessionId, json.dumps(existing_array))
