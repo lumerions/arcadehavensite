@@ -620,9 +620,7 @@ function setMaxBet() {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
                                             const betAmount = Number(result.betamount) || 0;
-                                            const minesCount = result.mines.length; 
-                                            const cashCal = betAmount * (r + 1) * ((minesCount / 23) ** 1.5);
-                                            payoutEl.textContent = cashCal.toFixed(2);
+                                            payoutEl.textContent = betAmount * (r + 1);
                                         }
                                     }
                                 });
@@ -740,9 +738,7 @@ function setMaxBet() {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
                                             const betAmount = Number(result.betamount) || 0;
-                                            const minesCount = result.minescount; 
-                                            const cashCalc = betAmount * (r + 1) * ((minesCount / 23) ** 1.5);
-                                            payoutEl.textContent = cashCalc.toFixed(2);
+                                            payoutEl.textContent = betAmount * (r + 1);
                                         }
                                     }
                                 });
@@ -979,22 +975,96 @@ function setMaxBet() {
         
             const betAmount = Number(data.betamount) || 0;
             const currentamount = Number(data.amount) || 0;
-            const minesCount = Number(data.minescount) || 0;
-
             document.getElementById('currentAmount').textContent = currentamount;
         
             document.querySelectorAll('.payout').forEach(cell => {
                     const r = Number(cell.dataset.row);       
                     const payoutEl = cell.querySelector('.payout-value');
                     if (payoutEl) {
-                        const cashCalcu = betAmount * (r + 1) * ((minesCount / 23) ** 1.5);
-                        payoutEl.textContent = cashCalcu.toFixed(2);
+                        payoutEl.textContent = betAmount * (r + 1);
                     }
+                
             });
         }; 
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
