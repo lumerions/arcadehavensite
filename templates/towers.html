@@ -706,13 +706,14 @@ function setMaxBet() {
             
                     const tileIndex = cell.dataset.index;
                     const playBtn = document.getElementById('playTowersBtn');
+                    const Game = "Towers";
             
                     try {
                         const response = await fetch('/games/click', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({ tileIndex })
+                            body: JSON.stringify({ tileIndex,Game })
                         });
             
                         if (!response.ok) throw new Error('Request failed');
@@ -998,6 +999,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
