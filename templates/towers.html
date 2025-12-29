@@ -923,67 +923,59 @@ function setMaxBet() {
             window.location.href = `/withdraw?amount=${encodeURIComponent(amount)}&page=${encodeURIComponent("towers")}`;
         };
             
-                                 
-            window.onload = async function () {
-                let row = -1;
-                let currentamount = 0;
-
-            
-                async function restoreRevealedTiles() {
-                    const response = await fetch('/games/getCurrentData', {
-                        credentials: 'include'
-                    });
-            
-                    if (!response.ok) return;
-            
-                    const revealedIndices = await response.json();
-            
-                    document.querySelectorAll('.payout').forEach(cell => {
-                        const index = Number(cell.dataset.index);
-                        const maxRow = 8;
-                        const currentrow = maxRow - 1 - Math.floor(index / 3);
-            
-                        if (currentrow > row) row = currentrow;
-
-
-                        if (revealedIndices.includes(index)) {
-                            cell.classList.add('reveal');
-                        }
-                    });
-            
-                    const playBtn = document.getElementById('playTowersBtn');
-                    playBtn.textContent = revealedIndices.length ? 'Cashout' : 'Play Towers';
-                    playBtn.style.backgroundColor = revealedIndices.length ? '#16a34a' : '';
-                }
-            
-                await restoreRevealedTiles();
-            
-                const reply = await fetch(`/games/cashoutamount?Game=Towers&Row=${row}`, {
-                    credentials: 'include'
+                             
+        window.onload = async function () {
+            let row = -1;
+            let currentamount = 0;
+        
+            async function restoreRevealedTiles() {
+                const response = await fetch('/games/getCurrentData', { credentials: 'include' });
+        
+                if (!response.ok) return;
+        
+                const revealedIndices = await response.json();
+        
+                document.querySelectorAll('.payout').forEach(cell => {
+                    const index = Number(cell.dataset.index);
+                    const maxRow = 8;
+                    const currentrow = maxRow - 1 - Math.floor(index / 3);
+        
+                    if (currentrow > row) row = currentrow;
+        
+                    if (revealedIndices.includes(index)) {
+                        cell.classList.add('reveal');
+                    }
                 });
-            
-                if (!reply.ok) return;
-            
-                const data = await reply.json();
-            
-                const betAmount = Number(data.betamount) || 0;
-
-                document.getElementById('currentAmount').textContent = currentamount;
-                            
+        
+                const playBtn = document.getElementById('playTowersBtn');
+                playBtn.textContent = revealedIndices.length ? 'Cashout' : 'Play Towers';
+                playBtn.style.backgroundColor = revealedIndices.length ? '#16a34a' : '';
+            }
+        
+            await restoreRevealedTiles();
+        
+            const reply = await fetch(`/games/cashoutamount?Game=Towers&Row=${row}`, { credentials: 'include' });
+            if (!reply.ok) return;
+        
+            const data = await reply.json();
+        
+            const betAmount = Number(data.betamount) || 0;
+            document.getElementById('currentAmount').textContent = currentamount;
+        
             document.querySelectorAll('.payout').forEach(cell => {
                 if (cell.classList.contains('reveal')) {
                     const r = Number(cell.dataset.row);       
-                    const betAmount = Number(result.betamount) || 0; 
                     const payoutEl = cell.querySelector('.payout-value');
                     if (payoutEl) {
                         payoutEl.textContent = betAmount * (r + 1);
                     }
                 }
             });
-
+        }; 
     </script>
 </body>
 </html>
+
 
 
 
