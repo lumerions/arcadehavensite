@@ -963,18 +963,18 @@ function setMaxBet() {
             document.getElementById('currentAmount').textContent = currentamount;
         
             document.querySelectorAll('.payout').forEach(cell => {
-                if (cell.classList.contains('reveal')) {
                     const r = Number(cell.dataset.row);       
                     const payoutEl = cell.querySelector('.payout-value');
                     if (payoutEl) {
                         payoutEl.textContent = betAmount * (r + 1);
                     }
-                }
+                
             });
         }; 
     </script>
 </body>
 </html>
+
 
 
 
