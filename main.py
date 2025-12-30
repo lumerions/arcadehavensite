@@ -464,13 +464,14 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         return JSONResponse({"error": "No active game"}, status_code=400)
     if tile_index < 0 or tile_index > currentMaxTileIndex:
         return JSONResponse({"error": "Invalid tile"}, status_code=400)
-    row = 7 - (tile_index // 3)
-    currentRow = int(redis.get(SessionId + "Row"))
-    if row > currentRow:
-        return JSONResponse(
-            {"error": "Row cannot be higher then row argument!"},
-            status_code=400
-        )
+    if Game == "Towers":
+        row = 7 - (tile_index // 3)
+        currentRow = int(redis.get(SessionId + "Row"))
+        if row > currentRow:
+            return JSONResponse(
+                {"error": "Row cannot be higher then row argument!"},
+                status_code=400
+            )
     clicks_key = SessionId + ":clicks"
     added = redis.sadd(clicks_key, tile_index)  
     if added == 0:
