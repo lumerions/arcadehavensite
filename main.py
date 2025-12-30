@@ -450,7 +450,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
 
 
 @app.post("/games/click")
-async def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
+def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
 
@@ -478,7 +478,7 @@ async def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         SessionId + "Cleared"
     ]
 
-    mines_raw, towers_active, GameActive, currentRow, cashedAlready, bet_amount, data_raw, tilescleared = await redis.mget(*keys)
+    mines_raw, towers_active, GameActive, currentRow, cashedAlready, bet_amount, data_raw, tilescleared =  redis.mget(*keys)
 
     def decode(value):
         if value is None:
@@ -515,7 +515,7 @@ async def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
             )
 
     clicks_key = SessionId + ":clicks"
-    added = await redis.sadd(clicks_key, tile_index)
+    added =  redis.sadd(clicks_key, tile_index)
     if added == 0:
         return JSONResponse({"error": "Tile already clicked"}, status_code=400)
 
@@ -531,7 +531,7 @@ async def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     is_mine = tile_index in mines
     if is_mine:
-        await redis.delete(
+         redis.delete(
             "ClickData." + SessionId,
             SessionId + "Cashout",
             SessionId + "BetAmount",
@@ -558,11 +558,9 @@ async def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if Game == "Towers":
         payout = bet_amount * (row + 1) * (23 + len(mines)) // 23
-        await asyncio.gather(
-            redis.incrby(SessionId + "Cashout", payout),
-            redis.set("ClickData." + SessionId, json.dumps(existing_array)),
-            redis.incrby(SessionId + "Row", 1)
-        )
+        redis.incrby(SessionId + "Cashout", payout),
+        redis.set("ClickData." + SessionId, json.dumps(existing_array)),
+        redis.incrby(SessionId + "Row", 1)
         return JSONResponse({"ismine": False, "betamount": bet_amount, "minescount": len(mines)})
 
     elif Game == "Mines":
@@ -570,7 +568,7 @@ async def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         multiplier_per_click = total_tiles / (total_tiles - len(mines))
         total_multiplier = multiplier_per_click ** tilescleared
         winnings = int(bet_amount * total_multiplier)
-        await redis.mset({
+        redis.mset({
             SessionId + "Cashout": winnings,
             "ClickData." + SessionId: json.dumps(existing_array),
             SessionId + "Cleared": tilescleared
