@@ -619,8 +619,8 @@ function setMaxBet() {
                                     } else if (cellEl.classList.contains('clicked')) {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
-                                            const betAmount = Number(result.betamount) || 0;
-                                            const Payout = Math.floor(betAmount * (r + 1) * (23 + result.mines.length) / 23);
+                                            const betA = Number(result.betamount) || 0;
+                                            const Payout = Math.floor(betA * (r + 1) * (23 + result.mines.length) / 23);
                                             payoutEl.textContent = Payout;
                                         }
                                     }
@@ -725,7 +725,6 @@ function setMaxBet() {
                             if (result.ismine && Array.isArray(mines)) {
                                 document.querySelectorAll('.payout').forEach(cellEl => {
                                     const index = Number(cellEl.dataset.index);
-                                    const r = Number(cellEl.dataset.row);
                                     const payoutEl = cellEl.querySelector('.payout-value');
                                     const dollarEl = cellEl.querySelector('span'); 
 
@@ -738,8 +737,9 @@ function setMaxBet() {
                                     } else if (cellEl.classList.contains('clicked')) {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
+                                            const row = Number(cellEl.dataset.row);
                                             const bet = Number(result.betamount) || 0;
-                                            const cashAmount = Math.floor(bet * (r + 1) * (23 + data.minecount) / 23);
+                                            const cashAmount = Math.floor(bet * (row + 1) * (23 + data.minecount) / 23);
                                             payoutEl.textContent = cashAmount;
                                         }
                                     }
@@ -980,10 +980,10 @@ function setMaxBet() {
             document.getElementById('currentAmount').textContent = currentamount;
         
             document.querySelectorAll('.payout').forEach(cell => {
-                    const r = Number(cell.dataset.row);       
+                    const ro = Number(cell.dataset.row);       
                     const payoutEl = cell.querySelector('.payout-value');
                     if (payoutEl) {
-                        const PayoutCash = Math.floor(betAmount * (r + 1) * (23 + data.minecount) / 23);
+                        const PayoutCash = Math.floor(betamount * (ro + 1) * (23 + data.minecount) / 23);
                         payoutEl.textContent = PayoutCash;
                     }
             });
@@ -991,6 +991,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
