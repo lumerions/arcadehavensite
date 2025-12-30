@@ -448,12 +448,6 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     }
 
 
-from fastapi import FastAPI, Cookie
-from fastapi.responses import JSONResponse
-import json
-
-app = FastAPI()
-
 @app.post("/games/click")
 def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if not SessionId:
