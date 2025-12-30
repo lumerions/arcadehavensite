@@ -739,7 +739,7 @@ function setMaxBet() {
                                         if (payoutEl) {
                                             const row = Number(cellEl.dataset.row);
                                             const bet = Number(result.betamount) || 0;
-                                            const cashAmount = Math.floor(bet * (row + 1) * (23 + data.minecount) / 23);
+                                            const cashAmount = Math.floor(bet * (row + 1) * (23 + result.minecount) / 23);
                                             payoutEl.textContent = cashAmount;
                                         }
                                     }
@@ -996,6 +996,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
