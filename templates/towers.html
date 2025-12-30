@@ -620,7 +620,8 @@ function setMaxBet() {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
                                             const betAmount = Number(result.betamount) || 0;
-                                            payoutEl.textContent = betAmount * (r + 1);
+                                            const Payout = Math.floor(betAmount * (row + 1) * (23 + result.mines.length) / 23);
+                                            payoutEl.textContent = Payout;
                                         }
                                     }
                                 });
@@ -737,8 +738,9 @@ function setMaxBet() {
                                     } else if (cellEl.classList.contains('clicked')) {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
-                                            const betAmount = Number(result.betamount) || 0;
-                                            payoutEl.textContent = betAmount * (r + 1);
+                                            const bet = Number(result.betamount) || 0;
+                                            const cashAmount = Math.floor(bet * (row + 1) * (23 + data.minecount) / 23);
+                                            payoutEl.textContent = cashAmount;
                                         }
                                     }
                                 });
@@ -973,7 +975,7 @@ function setMaxBet() {
         
             const data = await reply.json();
         
-            const betAmount = Number(data.betamount) || 0;
+            const betamount = Number(data.betamount) || 0;
             const currentamount = Number(data.amount) || 0;
             document.getElementById('currentAmount').textContent = currentamount;
         
@@ -981,14 +983,15 @@ function setMaxBet() {
                     const r = Number(cell.dataset.row);       
                     const payoutEl = cell.querySelector('.payout-value');
                     if (payoutEl) {
-                        payoutEl.textContent = betAmount * (r + 1);
+                        const PayoutCash = Math.floor(betAmount * (row + 1) * (23 + data.minecount) / 23);
+                        payoutEl.textContent = PayoutCash;
                     }
-                
             });
         }; 
     </script>
 </body>
 </html>
+
 
 
 
