@@ -21,6 +21,7 @@ import uvicorn
 from pymongo import MongoClient
 import certifi
 import base64
+import asyncio
 
 
 app = FastAPI(
@@ -518,7 +519,7 @@ async def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if added == 0:
         return JSONResponse({"error": "Tile already clicked"}, status_code=400)
 
-    if cashedAlready:
+    if decode(cashedAlready) == "1":
         return JSONResponse({"error": "Game already cashed out"}, status_code=400)
 
     try:
@@ -557,11 +558,11 @@ async def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if Game == "Towers":
         payout = bet_amount * (row + 1) * (23 + len(mines)) // 23
-        pipe = redis.pipeline()
-        pipe.incrby(SessionId + "Cashout", payout)
-        pipe.set("ClickData." + SessionId, json.dumps(existing_array))
-        pipe.incrby(SessionId + "Row", 1)
-        await pipe.execute()
+        await asyncio.gather(
+            redis.incrby(SessionId + "Cashout", payout),
+            redis.set("ClickData." + SessionId, json.dumps(existing_array)),
+            redis.incrby(SessionId + "Row", 1)
+        )
         return JSONResponse({"ismine": False, "betamount": bet_amount, "minescount": len(mines)})
 
     elif Game == "Mines":
