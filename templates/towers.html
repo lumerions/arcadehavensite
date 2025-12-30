@@ -620,7 +620,7 @@ function setMaxBet() {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
                                             const betAmount = Number(result.betamount) || 0;
-                                            const Payout = Math.floor(betAmount * (row + 1) * (23 + result.mines.length) / 23);
+                                            const Payout = Math.floor(betAmount * (r + 1) * (23 + result.mines.length) / 23);
                                             payoutEl.textContent = Payout;
                                         }
                                     }
@@ -739,7 +739,7 @@ function setMaxBet() {
                                         cellEl.classList.add('reveal');
                                         if (payoutEl) {
                                             const bet = Number(result.betamount) || 0;
-                                            const cashAmount = Math.floor(bet * (row + 1) * (23 + data.minecount) / 23);
+                                            const cashAmount = Math.floor(bet * (r + 1) * (23 + data.minecount) / 23);
                                             payoutEl.textContent = cashAmount;
                                         }
                                     }
@@ -983,7 +983,7 @@ function setMaxBet() {
                     const r = Number(cell.dataset.row);       
                     const payoutEl = cell.querySelector('.payout-value');
                     if (payoutEl) {
-                        const PayoutCash = Math.floor(betAmount * (row + 1) * (23 + data.minecount) / 23);
+                        const PayoutCash = Math.floor(betAmount * (r + 1) * (23 + data.minecount) / 23);
                         payoutEl.textContent = PayoutCash;
                     }
             });
@@ -991,6 +991,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
