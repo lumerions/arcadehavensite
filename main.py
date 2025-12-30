@@ -371,7 +371,14 @@ def depositearnings(data: deposit):
 def get(SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
+    keys = [
+        "ClickData." + SessionId,
+        #SessionId + "TowersActive"
+    ]
+
+    #data_raw, towersactive = redis.mget(*keys)
     data_raw = redis.get("ClickData." + SessionId)
+
     existing_array = json.loads(data_raw) if data_raw else []
     return existing_array
 
@@ -458,26 +465,37 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
             {"error": "Unknown error"},
             status_code=400
         )
+    
+    cashed_key = SessionId + ":cashed"
+
+    keys = [
+       SessionId + "minesdata",
+       SessionId + "TowersActive",
+       SessionId + "GameActive",
+       SessionId + "Row",
+       SessionId + ":cashed",
+       SessionId + "BetAmount",
+       "ClickData." + SessionId,
+       SessionId + "Cleared"
+    ]
+
+    mines_raw,towers_active,GameActive,currentRow,cashedAlready,bet_amount,data_raw,tilescleared = redis.mget(*keys)
 
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
-    mines_raw = redis.get(SessionId + "minesdata")
     if mines_raw is None:
         return JSONResponse({"error": "No mines found"}, status_code=400)
 
-
-    towers_active = redis.get(SessionId + "TowersActive")
     if towers_active == "1" and Game != "Towers" :
         return JSONResponse({"error": "Towers game is currently ongoing!"}, status_code=400)
 
-    GameActive = redis.exists(SessionId + "GameActive")
-    if not GameActive:
+    if GameActive is None:
         return JSONResponse({"error": "No active game"}, status_code=400)
     if tile_index < 0 or tile_index > currentMaxTileIndex:
         return JSONResponse({"error": "Invalid tile"}, status_code=400)
     if Game == "Towers":
         row = 7 - (tile_index // 3)
-        currentRow = int(redis.get(SessionId + "Row"))
+        currentRow = int(currentRow)
         if row > currentRow:
             return JSONResponse(
                 {"error": "Row cannot be higher then row argument!"},
@@ -487,23 +505,19 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     added = redis.sadd(clicks_key, tile_index)  
     if added == 0:
         return JSONResponse({"error": "Tile already clicked"}, status_code=400)
-
-    
-    cashed_key = SessionId + ":cashed"
-    if redis.get(cashed_key):
+    if cashedAlready:
         return JSONResponse(
             {"error": "Game already cashed out"},
             status_code=400
         )
 
-    bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
-
     if isinstance(mines_raw, bytes):
         mines_raw = mines_raw.decode()
 
+    bet_amount = redis_int(bet_amount)
+
     mines = json.loads(mines_raw)
     is_mine = tile_index in mines
-
 
     if is_mine:
         redis.delete(
@@ -517,8 +531,6 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         )
         return JSONResponse({"ismine": True, "mines": mines,"betamount":bet_amount})
 
-
-    data_raw = redis.get("ClickData." + SessionId)
     if data_raw:
         if isinstance(data_raw, bytes):
             data_raw = data_raw.decode()
@@ -528,15 +540,19 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     existing_array.append(tile_index)
 
-    tilescleared = redis.incrby(SessionId + "Cleared", 1)
+    RedisPipe = redis.pipeline()
+    tilescleared += 1
+    RedisPipe.incrby(SessionId + "Cleared", 1)
 
     total_tiles = None
 
     if Game == "Towers":
         payout = bet_amount * (row + 1) * (23 + len(mines)) // 23
-        redis.incrby(SessionId + "Cashout", payout)
-        redis.set("ClickData." + SessionId, json.dumps(existing_array))
-        redis.incrby(SessionId + "Row", 1)
+        pipe = redis.pipeline()
+        pipe.incrby(SessionId + "Cashout", payout)
+        pipe.set("ClickData." + SessionId, json.dumps(existing_array))
+        pipe.incrby(SessionId + "Row", 1)
+        pipe.execute()
         return JSONResponse({"ismine": False,"betamount":bet_amount,"minescount":len(mines)})
     elif Game == "Mines":
         total_tiles = 25
@@ -548,13 +564,14 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     multiplier_per_click = total_tiles / (total_tiles - len(mines))
     total_multiplier = multiplier_per_click ** tilescleared
-
-    bet_amount = redis_int(redis.get(SessionId + "BetAmount"))
-
     winnings = int(bet_amount * total_multiplier)
 
-    redis.set(SessionId + "Cashout", winnings)
-    redis.set("ClickData." + SessionId, json.dumps(existing_array))
+    RedisPipe.mset({
+        SessionId + "Cashout": winnings,
+        "ClickData." + SessionId : json.dumps(existing_array)
+    })
+
+    RedisPipe.execute()
 
     return JSONResponse({"ismine": False})
 
@@ -882,6 +899,36 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
