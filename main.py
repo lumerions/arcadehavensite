@@ -531,7 +531,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     is_mine = tile_index in mines
     if is_mine:
-         redis.delete(
+        redis.delete(
             "ClickData." + SessionId,
             SessionId + "Cashout",
             SessionId + "BetAmount",
@@ -574,7 +574,6 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
             SessionId + "Cleared": tilescleared
         })
         return JSONResponse({"ismine": False})
-
     else:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
