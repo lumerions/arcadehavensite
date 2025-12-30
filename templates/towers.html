@@ -939,14 +939,11 @@ function setMaxBet() {
 
             window.location.href = `/withdraw?amount=${encodeURIComponent(amount)}&page=${encodeURIComponent("towers")}`;
         };
-            
-                             
         window.onload = async function () {
             let row = -1;
         
             async function restoreRevealedTiles() {
                 const response = await fetch('/games/getCurrentData', { credentials: 'include' });
-        
                 if (!response.ok) return;
         
                 const revealedIndices = await response.json();
@@ -977,24 +974,25 @@ function setMaxBet() {
         
             const currentamount = Number(data.amount) || 0;
             document.getElementById('currentAmount').textContent = currentamount;
-
+        
             document.querySelectorAll('.payout').forEach(cell => {
                 const payoutEl = cell.querySelector('.payout-value');
-            
-                if (!isNaN(ro) && payoutEl) {
-                    const row = Number(cell.dataset.row); 
-                    const betamount = Number(result.betamount) || 0; 
-                    const mineCount = Number(result.minescount) || 0; 
+                if (payoutEl) {
+                    const row = Number(cell.dataset.row);
+                    const betamount = Number(data.betamount) || 0;
+                    const mineCount = Number(data.minescount) || 0;
                     const cashAmount = Math.floor(betamount * (row + 1) * (23 + mineCount) / 23);
                     payoutEl.textContent = cashAmount;
                 } else {
-                    payoutEl.textContent = 0;
-                    console.warn('Invalid row or payout element', ro, payoutEl);
+                    console.warn('Invalid payout element', cell);
                 }
             });
+        }; 
+
     </script>
 </body>
 </html>
+
 
 
 
