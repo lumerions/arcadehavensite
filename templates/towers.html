@@ -576,118 +576,103 @@ function setMaxBet() {
 
        
           <script>
-
+            
+            async function getData() {
+                try {
+                    const response = await fetch('/getbalance');
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const data = await response.text(); 
+                    const number = parseFloat(data);
+                    if (isNaN(number)) {
+                        console.error('Error: The response is not a valid number');
+                        return "Something went wrong!";
+                    }
+                    return number;
+                } catch (error) {
+                    console.error('There was a problem with the fetch operation:', error);
+                }
+            }
+            
+            function formatWithCommas(num) {
+                return num.toLocaleString();
+            }
+            
+            async function updateBalance() {
+                let balance = await getData();
+                if (typeof balance === 'number') {
+                    document.querySelector('.balance-btn').textContent = `$${balance.toLocaleString()}`;
+                } else {
+                    document.querySelector('.balance-btn').textContent = "Error loading balance";
+                }
+            }
+            
             document.getElementById('playTowersBtn').addEventListener('click', async () => {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
                 const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
                 const playBtn = document.getElementById('playTowersBtn');
-
+            
                 if (playBtn.textContent.includes('Cashout')) {
-                      try {
+                    try {
                         const response = await fetch('/games/cashout', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({  Game: "Towers"})
+                            body: JSON.stringify({ Game: "Towers" })
                         });
-                
+            
                         if (!response.ok) throw new Error('Request failed');
-                
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        }
-      
+            
+                        if (response.redirected) window.location.href = response.url;
+            
                         const result = await response.json();
                         const mines = result.mines;
-
-                                
+            
                         if (Array.isArray(mines)) {
-                                document.querySelectorAll('.payout').forEach(cellEl => {
-                                    const index = Number(cellEl.dataset.index);
-                                    const r = Number(cellEl.dataset.row);
-                                    const payoutEl = cellEl.querySelector('.payout-value');
-                                    const dollarEl = cellEl.querySelector('span'); 
-
-                                    cellEl.classList.remove('mine', 'reveal');
-                            
-                                    if (mines.includes(index)) {
-                                        cellEl.classList.add('mine');
-                                        if (dollarEl) dollarEl.style.display = 'none'; 
-                                        if (payoutEl) payoutEl.textContent = '💣';
-                                    } else if (cellEl.classList.contains('clicked')) {
-                                        cellEl.classList.add('reveal');
-                                        if (payoutEl) {
-                                            const betA = Number(result.betamount) || 0;
-                                            const Payout = Math.floor(betA * (r + 1) * (23 + result.mines.length) / 23);
-                                            payoutEl.textContent = Payout;
-                                        }
+                            document.querySelectorAll('.payout').forEach(cellEl => {
+                                const index = Number(cellEl.dataset.index);
+                                const r = Number(cellEl.dataset.row);
+                                const payoutEl = cellEl.querySelector('.payout-value');
+                                const dollarEl = cellEl.querySelector('span'); 
+            
+                                cellEl.classList.remove('mine', 'reveal');
+            
+                                if (mines.includes(index)) {
+                                    cellEl.classList.add('mine');
+                                    if (dollarEl) dollarEl.style.display = 'none'; 
+                                    if (payoutEl) payoutEl.textContent = '💣';
+                                } else if (cellEl.classList.contains('clicked')) {
+                                    cellEl.classList.add('reveal');
+                                    if (payoutEl) {
+                                        const betA = Number(result.betamount) || 0;
+                                        const Payout = Math.floor(betA * (r + 1) * (23 + result.mines.length) / 23);
+                                        payoutEl.textContent = Payout;
                                     }
-                                });
-                            }
-            
-
-                    async function getData() {
-                        try {
-                            const response = await fetch('/getbalance');
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                                const data = await response.text(); 
-                                const number = parseFloat(data);
-                        
-                                if (isNaN(number)) {
-                                    console.error('Error: The response is not a valid number');
-                                    return "Something went wrong!";
                                 }
-            
-                                return number
-                        } catch (error) {
-                            console.error('There was a problem with the fetch operation:', error);
+                            });
                         }
-                    }
             
-                    function formatWithCommas(num) {
-                        return num.toLocaleString();
-                    }
+                        await updateBalance();
+                        playBtn.style.backgroundColor = '';
+                        playBtn.textContent = 'Play Towers';
             
-                    async function updateBalance() {
-                        let balance = await getData();
-                        if (typeof balance === 'number') {
-                            balance = balance.toLocaleString(); 
-                            document.querySelector('.balance-btn').textContent = `$${balance}`;
-                        } else {
-                            document.querySelector('.balance-btn').textContent = "Error loading balance";
-                        }
-                    }
-
-                    updateBalance();
-                    playBtn.style.backgroundColor = '';
-                    playBtn.textContent = 'Play Towers';
-
                     } catch (err) {
                         console.error('Error starting Towers:', err);
                         alert('Failed to start Towers. Please try again.');
                     }
                 } else {
                     try {
-                        const Game = "Towers"
+                        const Game = "Towers";
                         const response = await fetch('/games/start', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({ betAmount, mineCount, Game})
+                            body: JSON.stringify({ betAmount, mineCount, Game })
                         });
-                
+            
                         if (!response.ok) throw new Error('Request failed');
-                
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        }
-                
+            
+                        if (response.redirected) window.location.href = response.url;
+            
                     } catch (err) {
                         console.error('Error starting Towers:', err);
                         alert('Failed to start Towers. Please try again.');
@@ -695,7 +680,6 @@ function setMaxBet() {
                 }
             });
 
-              
             document.querySelectorAll('.payout').forEach(cell => {
                 cell.addEventListener('click', async () => {
                     if (cell.classList.contains('revealed')) return;
@@ -993,6 +977,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
