@@ -449,7 +449,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
 
 
 @app.post("/games/click")
-def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
+async def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
 
@@ -477,7 +477,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         SessionId + "Cleared"
     ]
 
-    mines_raw, towers_active, GameActive, currentRow, cashedAlready, bet_amount, data_raw, tilescleared = redis.mget(*keys)
+    mines_raw, towers_active, GameActive, currentRow, cashedAlready, bet_amount, data_raw, tilescleared = await redis.mget(*keys)
 
     def decode(value):
         if value is None:
@@ -514,7 +514,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
             )
 
     clicks_key = SessionId + ":clicks"
-    added = redis.sadd(clicks_key, tile_index)
+    added = await redis.sadd(clicks_key, tile_index)
     if added == 0:
         return JSONResponse({"error": "Tile already clicked"}, status_code=400)
 
@@ -530,7 +530,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     is_mine = tile_index in mines
     if is_mine:
-        redis.delete(
+        await redis.delete(
             "ClickData." + SessionId,
             SessionId + "Cashout",
             SessionId + "BetAmount",
@@ -554,7 +554,6 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     existing_array.append(tile_index)
 
     tilescleared += 1
-    RedisPipe = redis.pipeline()
 
     if Game == "Towers":
         payout = bet_amount * (row + 1) * (23 + len(mines)) // 23
@@ -562,7 +561,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         pipe.incrby(SessionId + "Cashout", payout)
         pipe.set("ClickData." + SessionId, json.dumps(existing_array))
         pipe.incrby(SessionId + "Row", 1)
-        pipe.execute()
+        await pipe.execute()
         return JSONResponse({"ismine": False, "betamount": bet_amount, "minescount": len(mines)})
 
     elif Game == "Mines":
@@ -570,13 +569,11 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         multiplier_per_click = total_tiles / (total_tiles - len(mines))
         total_multiplier = multiplier_per_click ** tilescleared
         winnings = int(bet_amount * total_multiplier)
-
-        RedisPipe.mset({
+        await redis.mset({
             SessionId + "Cashout": winnings,
             "ClickData." + SessionId: json.dumps(existing_array),
             SessionId + "Cleared": tilescleared
         })
-        RedisPipe.execute()
         return JSONResponse({"ismine": False})
 
     else:
