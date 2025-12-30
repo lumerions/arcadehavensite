@@ -739,7 +739,7 @@ function setMaxBet() {
                                         if (payoutEl) {
                                             const row = Number(cellEl.dataset.row);
                                             const bet = Number(result.betamount) || 0;
-                                            const cashAmount = Math.floor(bet * (row + 1) * (23 + result.minecount) / 23);
+                                            const cashAmount = Math.floor(bet * (row + 1) * (23 + result.minescount) / 23);
                                             payoutEl.textContent = cashAmount;
                                         }
                                     }
@@ -975,19 +975,18 @@ function setMaxBet() {
         
             const data = await reply.json();
         
-            const betamount = Number(data.betamount) || 0;
             const currentamount = Number(data.amount) || 0;
             document.getElementById('currentAmount').textContent = currentamount;
 
             document.querySelectorAll('.payout').forEach(cell => {
-                const ro = Number(cell.dataset.row);
                 const payoutEl = cell.querySelector('.payout-value');
-                const betAmount = Number(data.betamount) || 0;
-                const mineCount = Number(data.minecount) || 0;
             
                 if (!isNaN(ro) && payoutEl) {
-                    const PayoutCash = Math.floor(betAmount * (ro + 1) * (23 + mineCount) / 23);
-                    payoutEl.textContent = PayoutCash;
+                    const row = Number(cell.dataset.row); 
+                    const betamount = Number(result.betamount) || 0; 
+                    const mineCount = Number(result.minescount) || 0; 
+                    const cashAmount = Math.floor(betamount * (row + 1) * (23 + mineCount) / 23);
+                    payoutEl.textContent = cashAmount;
                 } else {
                     payoutEl.textContent = 0;
                     console.warn('Invalid row or payout element', ro, payoutEl);
@@ -996,6 +995,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
