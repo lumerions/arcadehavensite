@@ -461,11 +461,10 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
-    mines_raw = redis.exists(SessionId + "minesdata")
-    if not mines_raw:
+    mines_raw = redis.get(SessionId + "minesdata")
+    if mines_raw is None:
         return JSONResponse({"error": "No mines found"}, status_code=400)
-    else:
-        mines_raw = redis.get(SessionId + "minesdata")
+
 
     towers_active = redis.get(SessionId + "TowersActive")
     if towers_active == "1" and Game != "Towers" :
@@ -707,20 +706,17 @@ def cashout(SessionId: str = Cookie(None)):
     keys = [
         SessionId + "Cashout",
         SessionId + "minesdata",
-        SessionId + "BetAmount"
+        SessionId + "BetAmount",
+        SessionId + "GameActive"
     ]
 
-    tocashout,mines_raw,betamount = redis.mget(*keys)
+    tocashout,mines_raw,betamount,GameActive = redis.mget(*keys)
 
-    GameActive = redis.exists(SessionId + "GameActive")
     if not GameActive:
         return JSONResponse({"error": "No active game"}, status_code=400)
     
-    mines_raw = redis.exists(SessionId + "minesdata")
-    if not mines_raw:
+    if mines_raw is None:
         return JSONResponse({"error": "No mines found"}, status_code=400)
-    else:
-        mines_raw = redis.get(SessionId + "minesdata")
 
     cashed_key = SessionId + ":cashed"
     if not redis.set(cashed_key, "1", nx=True,ex = 4):
