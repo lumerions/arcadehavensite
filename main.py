@@ -1,4 +1,5 @@
 
+
 from fastapi import FastAPI, Form, Request, Response, Cookie,status,Query
 from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse,FileResponse
 from fastapi.templating import Jinja2Templates
@@ -411,8 +412,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     if Game == "Towers":
         return {
             "amount": CurrentUserAmount,
-            "betamount": bet_amount,
-            "minescount": len(mines)
+            "betamount": bet_amount
         }
     elif Game == "Mines":
         total_tiles = 25
@@ -863,6 +863,21 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
