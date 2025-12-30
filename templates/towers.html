@@ -978,19 +978,25 @@ function setMaxBet() {
             const betamount = Number(data.betamount) || 0;
             const currentamount = Number(data.amount) || 0;
             document.getElementById('currentAmount').textContent = currentamount;
-        
+
             document.querySelectorAll('.payout').forEach(cell => {
-                    const ro = Number(cell.dataset.row);       
-                    const payoutEl = cell.querySelector('.payout-value');
-                    if (payoutEl) {
-                        const PayoutCash = Math.floor(betamount * (ro + 1) * (23 + data.minecount) / 23);
-                        payoutEl.textContent = PayoutCash;
-                    }
+                const ro = Number(cell.dataset.row);
+                const payoutEl = cell.querySelector('.payout-value');
+                const betAmount = Number(data.betamount) || 0;
+                const mineCount = Number(data.minecount) || 0;
+            
+                if (!isNaN(ro) && payoutEl) {
+                    const PayoutCash = Math.floor(betAmount * (ro + 1) * (23 + mineCount) / 23);
+                    payoutEl.textContent = PayoutCash;
+                } else {
+                    payoutEl.textContent = 0;
+                    console.warn('Invalid row or payout element', ro, payoutEl);
+                }
             });
-        }; 
     </script>
 </body>
 </html>
+
 
 
 
