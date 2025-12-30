@@ -722,30 +722,31 @@ function setMaxBet() {
                         const mines = result.mines;
                             
                                         
-                            if (result.ismine && Array.isArray(mines)) {
-                                document.querySelectorAll('.payout').forEach(cellEl => {
-                                    const index = Number(cellEl.dataset.index);
-                                    const payoutEl = cellEl.querySelector('.payout-value');
-                                    const dollarEl = cellEl.querySelector('span'); 
-
-                                    cellEl.classList.remove('mine', 'reveal');
-                            
-                                    if (mines.includes(index)) {
-                                        cellEl.classList.add('mine');
-                                        if (dollarEl) dollarEl.style.display = 'none'; 
-                                        if (payoutEl) payoutEl.textContent = '💣';
-                                    } else if (cellEl.classList.contains('clicked')) {
-                                        cellEl.classList.add('reveal');
-                                        if (payoutEl) {
-                                            const row = Number(cellEl.dataset.row);
-                                            const bet = Number(result.betamount) || 0;
-                                            const cashAmount = Math.floor(bet * (row + 1) * (23 + result.minescount) / 23);
-                                            payoutEl.textContent = cashAmount;
+                                if (result.ismine && Array.isArray(mines)) {
+                                    document.querySelectorAll('.payout').forEach(cellEl => {
+                                        const index = Number(cellEl.dataset.index);
+                                        const payoutEl = cellEl.querySelector('.payout-value');
+                                        const dollarEl = cellEl.querySelector('span'); 
+                                
+                                        cellEl.classList.remove('mine', 'reveal');
+                                
+                                        if (mines.includes(index)) {
+                                            cellEl.classList.add('mine');
+                                            if (dollarEl) dollarEl.style.display = 'none'; 
+                                            if (payoutEl) payoutEl.textContent = '💣';
+                                        } else if (cellEl.classList.contains('clicked') && index == tileIndex) {
+                                            cellEl.classList.add('reveal');
+                                            if (payoutEl) {
+                                                const row = Number(cellEl.dataset.row);
+                                                const bet = Number(result.betamount) || 0;
+                                                const mineCount = Number(result.minescount) || 0;
+                                                const cashAmount = Math.floor(bet * (row + 1) * (23 + mineCount) / 23);
+                                                payoutEl.textContent = cashAmount;
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
 
-  
                                 playBtn.style.backgroundColor = '';
                                 playBtn.textContent = 'Play Towers';
                                 document.getElementById('currentAmount').textContent = '0';
@@ -992,6 +993,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
