@@ -22,7 +22,7 @@ from pymongo import MongoClient
 import certifi
 import base64
 import asyncio
-import Math
+import math
 
 
 app = FastAPI(
@@ -559,7 +559,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if Game == "Towers":
         payout = bet_amount * (row + 1) * (23 + len(mines)) // 23 * 0.3
-        payout = Math.floor(payout)
+        payout = math.floor(payout)
         redis.incrby(SessionId + "Cashout", payout),
         redis.set("ClickData." + SessionId, json.dumps(existing_array)),
         redis.incrby(SessionId + "Row", 1)
