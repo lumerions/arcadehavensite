@@ -416,6 +416,13 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
             "minescount":len(mines)
         }
     elif Game == "Mines":
+        towers_active = redis.get(SessionId + "TowersActive")
+        if towers_active == "1":
+            return {
+                "amount": 0,
+                "amountafter": 0,
+                "multiplier": 0
+            }
         total_tiles = 25
     else:
         return JSONResponse({"error": "Unknown game"}, status_code=400)
@@ -460,6 +467,10 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     else:
         mines_raw = redis.get(SessionId + "minesdata")
 
+    towers_active = redis.get(SessionId + "TowersActive")
+        if towers_active == "1":
+            return JSONResponse({"error": "Towers game is currently ongoing!"}, status_code=400)
+
     GameActive = redis.exists(SessionId + "GameActive")
     if not GameActive:
         return JSONResponse({"error": "No active game"}, status_code=400)
@@ -502,7 +513,8 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
             SessionId + "BetAmount",
             SessionId + "Cleared",
             SessionId + ":clicks",
-            SessionId + "GameActive"
+            SessionId + "GameActive",
+            SessionId + "TowersActive"
         )
         return JSONResponse({"ismine": True, "mines": mines,"betamount":bet_amount})
 
@@ -659,17 +671,25 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
         "ClickData." + SessionId
     )
 
-    redis.mset({
-        SessionId + "GameActive": "1",
-        SessionId + "Cleared": 0,
-        SessionId + "Cashout": 0,
-        SessionId + "BetAmount": bet_amount,
-        SessionId + "minesdata": json.dumps(mines),
-    })
 
     if Game == "Towers":
+        redis.mset({
+            SessionId + "GameActive": "1",
+            SessionId + "Cleared": 0,
+            SessionId + "Cashout": 0,
+            SessionId + "BetAmount": bet_amount,
+            SessionId + "minesdata": json.dumps(mines),
+            SessionId + "TowersActive": "1",
+        })
         return RedirectResponse(url="/towers", status_code=303)
     elif Game == "Mines":
+        redis.mset({
+            SessionId + "GameActive": "1",
+            SessionId + "Cleared": 0,
+            SessionId + "Cashout": 0,
+            SessionId + "BetAmount": bet_amount,
+            SessionId + "minesdata": json.dumps(mines),
+        })
         return RedirectResponse(url="/mines", status_code=303)
     else:
         return templates.TemplateResponse(
@@ -739,7 +759,8 @@ def cashout(SessionId: str = Cookie(None)):
         SessionId + "Cashout",
         SessionId + "BetAmount",
         "ClickData." + SessionId,
-        SessionId + ":clicks"
+        SessionId + ":clicks",
+        SessionId + "TowersActive"
     )
 
     return JSONResponse({"success": True, "amount": tocashout,"mines": mines,"betamount":betamount})
