@@ -644,7 +644,7 @@ function setMaxBet() {
                                     cellEl.classList.add('reveal');
                                     if (payoutEl) {
                                         const betA = Number(result.betamount) || 0;
-                                        const Payout = Math.floor(betA * (r + 1) * (23 + result.mines.length) / 23 * 0.2);
+                                        const Payout = Math.floor(Math.floor(betA * (r + 1) * (23 + result.mines.length) / 23) * 0.2);
                                         payoutEl.textContent = Payout;
                                     }
                                 }
@@ -723,7 +723,7 @@ function setMaxBet() {
                                         const row = Number(cellEl.dataset.row);
                                         const bet = Number(result.betamount) || 0;
                                         const mineCount = Number(result.minescount) || 0;
-                                        const cashAmount = Math.floor(bet * (row + 1) * (23 + mineCount) / 23 * 0.2);
+                                        const cashAmount = Math.floor(Math.floor(bet * (row + 1) * (23 + mineCount) / 23) * 0.2);
                                         payoutEl.textContent = cashAmount;
                                     }
                                 }
@@ -962,7 +962,7 @@ function setMaxBet() {
                     const row = Number(cell.dataset.row);
                     const betamount = Number(data.betamount) || 0;
                     const mineCount = Number(data.minescount) || 0;
-                    const cashAmount = Math.floor(betamount * (row + 1) * (23 + mineCount) / 23 * 0.2);
+                    const cashAmount = Math.floor(Math.floor(betamount * (row + 1) * (23 + mineCount) / 23) * 0.2);
                     payoutEl.textContent = cashAmount;
                 } else {
                     console.warn('Invalid payout element', cell);
@@ -973,6 +973,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
