@@ -468,8 +468,8 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         mines_raw = redis.get(SessionId + "minesdata")
 
     towers_active = redis.get(SessionId + "TowersActive")
-        if towers_active == "1":
-            return JSONResponse({"error": "Towers game is currently ongoing!"}, status_code=400)
+    if towers_active == "1":
+        return JSONResponse({"error": "Towers game is currently ongoing!"}, status_code=400)
 
     GameActive = redis.exists(SessionId + "GameActive")
     if not GameActive:
