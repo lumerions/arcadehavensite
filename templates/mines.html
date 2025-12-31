@@ -614,9 +614,11 @@ function setMaxBet() {
                                 const index = Number(cellEl.dataset.index);
                         
                                 if (mines.includes(index)) {
+                                    cellEl.textContent = '💣';
                                     cellEl.classList.add('mine');
                                 } else if (!cellEl.classList.contains('clicked')) {
                                     cellEl.classList.add('reveal');
+                                     cellEl.textContent = '$';
                                 }
                             });
                         }
@@ -739,8 +741,10 @@ function setMaxBet() {
                             document.querySelectorAll('.cell').forEach(cellEl => {
                                 const index = Number(cellEl.dataset.index);
                                 if (mines.includes(index)) {
+                                    cellEl.textContent = '💣';
                                     cellEl.classList.add('mine');
                                 } else if (!cellEl.classList.contains('clicked')) {
+                                    cellEl.textContent = '$';
                                     cellEl.classList.add('reveal');
                                 }
                             });
@@ -991,6 +995,7 @@ function setMaxBet() {
                             const index = Number(cell.dataset.index);
                 
                             if (revealedIndices.includes(index)) {
+                                cell.textContent = '$';
                                 cell.classList.add('clicked', 'revealed'); 
                             }
                         });
@@ -1016,6 +1021,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
