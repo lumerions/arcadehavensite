@@ -147,7 +147,7 @@ def loadmines(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","mines.html")
 
 
-@app.get("/towers",response_class =  HTMLResponse)
+@app.get("/towersgdrgdrererwrwerwer",response_class =  HTMLResponse)
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
