@@ -132,7 +132,15 @@
             background: #222;
             border: 1px solid #333;
             touch-action: manipulation;
+            display: flex;             
+            justify-content: center;   
+            align-items: center;      
+            font-size: 2.5em;          
+            font-weight: bold;      
+            color: #fff;              
+            text-align: center;       
         }
+
         
 
 
@@ -618,7 +626,8 @@ function setMaxBet() {
                                     cellEl.classList.add('mine');
                                 } else if (!cellEl.classList.contains('clicked')) {
                                     cellEl.classList.add('reveal');
-                                     cellEl.textContent = '$';
+                                } else {
+                                    cellEl.textContent = '$';
                                 }
                             });
                         }
@@ -744,7 +753,6 @@ function setMaxBet() {
                                     cellEl.textContent = '💣';
                                     cellEl.classList.add('mine');
                                 } else if (!cellEl.classList.contains('clicked')) {
-                                    cellEl.textContent = '$';
                                     cellEl.classList.add('reveal');
                                 }
                             });
@@ -758,6 +766,7 @@ function setMaxBet() {
                             grid.classList.add('gamedone');
             
                         } else { 
+                            cell.textContent = '$';
                             cell.classList.add('clicked');
                             cell.classList.add('revealed');
             
@@ -1021,6 +1030,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
