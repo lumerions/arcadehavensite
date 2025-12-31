@@ -589,7 +589,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     mine_count = data.get("mineCount")
     Game = data.get("Game")
 
-    if game == "Towers":
+    if Game == "Towers":
         return {"error": "Offline"}
 
 
