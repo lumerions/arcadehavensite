@@ -589,6 +589,10 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     mine_count = data.get("mineCount")
     Game = data.get("Game")
 
+    if game == "Towers":
+        return {"error": "Offline"}
+
+
     def CheckGame():
         if Game == "Towers":
             return RedirectResponse(url="/towers", status_code=303)
