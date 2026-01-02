@@ -147,7 +147,7 @@ def loadmines(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","mines.html")
 
 
-@app.get("/towersgdrgdrererwrwerwer",response_class =  HTMLResponse)
+@app.get("/towers",response_class =  HTMLResponse)
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
@@ -560,11 +560,12 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if Game == "Towers":
         payout = bet_amount * (row + 1) * (23 + len(mines)) // 23 * 0.2
         payout = math.floor(payout)
-        redis.incrby(SessionId + "Cashout", payout),
-        redis.set("ClickData." + SessionId, json.dumps(existing_array)),
-        redis.incrby(SessionId + "Row", 1)
+        pipeline = redis.pipeline()  
+        pipeline.incrby(SessionId + "Cashout", payout)
+        pipeline.set("ClickData." + SessionId, json.dumps(existing_array))
+        pipeline.incrby(SessionId + "Row", 1)
+        pipeline.execute()
         return JSONResponse({"ismine": False, "betamount": bet_amount, "minescount": len(mines)})
-
     elif Game == "Mines":
         total_tiles = 25
         multiplier_per_click = total_tiles / (total_tiles - len(mines))
@@ -588,10 +589,6 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     bet_amount = data.get("betAmount")
     mine_count = data.get("mineCount")
     Game = data.get("Game")
-
-    if Game == "Towers":
-        return {"error": "Offline"}
-
 
     def CheckGame():
         if Game == "Towers":
@@ -655,7 +652,6 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     if Game == "Towers":
         total_tiles = 24
-        redis.set(SessionId + "Row", 0)
     elif Game == "Mines":
         total_tiles = 25
     else:
@@ -689,31 +685,35 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     multiplier_per_click = total_tiles / (total_tiles - mine_count)
 
-    redis.delete(
-        SessionId + ":clicks",
-        SessionId + ":cashed",
-        "ClickData." + SessionId
+    redispipeline = redis.pipeline()
+    redispipeline.delete(
+            SessionId + ":clicks",
+            SessionId + ":cashed",
+            "ClickData." + SessionId
+
     )
 
-
     if Game == "Towers":
-        redis.mset({
+        redispipeline.mset({
             SessionId + "GameActive": "1",
             SessionId + "Cleared": 0,
             SessionId + "Cashout": 0,
             SessionId + "BetAmount": bet_amount,
             SessionId + "minesdata": json.dumps(mines),
             SessionId + "TowersActive": "1",
+            SessionId + "Row": 0,
         })
+        redispipeline.execute()
         return RedirectResponse(url="/towers", status_code=303)
     elif Game == "Mines":
-        redis.mset({
+        redispipeline.mset({
             SessionId + "GameActive": "1",
             SessionId + "Cleared": 0,
             SessionId + "Cashout": 0,
             SessionId + "BetAmount": bet_amount,
             SessionId + "minesdata": json.dumps(mines),
         })
+        redispipeline.execute()
         return RedirectResponse(url="/mines", status_code=303)
     else:
         return templates.TemplateResponse(
@@ -907,6 +907,34 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
