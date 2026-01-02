@@ -964,7 +964,7 @@ function setMaxBet() {
                     const betamount = Number(data.betamount) || 0;
                     const mineCount = Number(data.minescount) || 0;
                     let mine_multiplier = mineCount / 23 ** 1.5 + 0.1
-                    let cashAmount = betamount * (row + 1) * mine_multiplier * 0.05
+                    let cashAmount = Math.floor(betamount * (row + 1) * mine_multiplier * 0.05)
                     payoutEl.textContent = cashAmount;
                 } else {
                     console.warn('Invalid payout element', cell);
@@ -975,6 +975,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
