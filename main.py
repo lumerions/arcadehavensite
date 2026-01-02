@@ -558,7 +558,8 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     tilescleared += 1
 
     if Game == "Towers":
-        payout = bet_amount * (row + 1) * (23 + len(mines)) // 23 * 0.05
+        mine_multiplier = ((len(mines) / 23) ** 1.5) + 0.1
+        payout = bet_amount * (row + 1) * mine_multiplier * 0.5
         payout = math.floor(payout)
         redis.incrby(SessionId + "Cashout", payout)
         redis.set("ClickData." + SessionId, json.dumps(existing_array))
@@ -902,6 +903,25 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
