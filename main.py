@@ -23,6 +23,8 @@ import certifi
 import base64
 import asyncio
 import math
+place_id = 97090711812957
+
 
 
 app = FastAPI(
@@ -213,8 +215,6 @@ async def depositget(amount: float, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
-    place_id = 97090711812957
-
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cursor:
@@ -248,7 +248,6 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
     if not SessionId:
         return {"error": "No cookie provided"}
     
-    place_id = 97090711812957
 
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -925,7 +924,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     data = await request.json()
     coinflipData = data.get("coinflipData")
     
-    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","home.html")
+    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
 
     try:
         UserCheck = str(UserCheck)
@@ -963,9 +962,108 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
 
+@app.post("/deposititems")
+async def depositget(request : Request, SessionId: str = Cookie(None)):
+    if not SessionId:
+        return {"error": "No cookie provided"}
+    
+    data = await request.json()
+    itemdata = data.get("itemdata")
+    
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                result = cursor.fetchone()  
+                sitename = result[0]
+
+    except Exception as error:
+        return error
+
+    launch_data = {
+        "sitename": str(sitename),
+        "sessionid": SessionId,
+        "items": itemdata,
+        "deposit" : True,
+        "itemdeposit" : True,
+    }
+
+    json_data = json.dumps(launch_data)
+    b64_data = base64.b64encode(json_data.encode()).decode()
+
+    roblox_url = (
+        f"https://www.roblox.com/games/start"
+        f"?placeId={place_id}"
+        f"&launchData={urllib.parse.quote(b64_data)}"
+    )
+
+    return RedirectResponse(roblox_url)
+
+@app.post("/withdrawitems",response_class =  HTMLResponse)
+async def withdrawget(amount: float, page: str, request: Request, SessionId: str = Cookie(None)):
+    if not SessionId:
+        return {"error": "No cookie provided"}
+    
+    try:
+        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                result = cursor.fetchone()  
+                sitename = result[0]
+
+    except Exception as error:
+        return {"error": error}
+
+    mainMongo = getMainMongo()
+    mainCollection = mainMongo["collection"]
+    
+    doc = mainCollection.find_one({"username": sitename})
+
+    def MoreWithdraw(pagetype):
+        if pagetype == "towers":
+            return templates.TemplateResponse(
+                "towers.html",
+                {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        if pagetype == "mines":
+            return templates.TemplateResponse(
+                "mines.html",
+                {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+    if not doc:
+        return MoreWithdraw(page)
+
+    if amount > int(doc["balance"]):
+        return MoreWithdraw(page)
+
+    launch_data = {
+        "sitename": str(sitename),
+        "sessionid": SessionId,
+        "amount": amount,
+        "deposit" : False,
+        "itemdeposit" : True
+    }
+
+    json_data = json.dumps(launch_data)
+    b64_data = base64.b64encode(json_data.encode()).decode()
+
+    roblox_url = (
+        f"https://www.roblox.com/games/start"
+        f"?placeId={place_id}"
+        f"&launchData={urllib.parse.quote(b64_data)}"
+    )
+
+    return RedirectResponse(roblox_url)
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
 
 
 
