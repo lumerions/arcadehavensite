@@ -50,6 +50,16 @@ def getMainMongo():
     collection = db["main"]
     return {"db": db,"collection":collection}
 
+def getCoinflipMongo():
+    db = Mongo_Client["main"]
+    collection = db["coinflips"]
+    return {"db": db,"collection":collection}
+
+def getSiteItemsMongo():
+    db = Mongo_Client["main"]
+    collection = db["siteitems"]
+    return {"db": db,"collection":collection}
+
 def redis_int(val, default=0):
     if val is None:
         return default
@@ -81,7 +91,7 @@ redis = Redis(
 
 templates = Jinja2Templates(directory="templates")
 
-def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2):
+def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
     SessionId = request.cookies.get('SessionId')  
     if not SessionId:
         return templates.TemplateResponse(htmlfile, {"request": request})
@@ -90,12 +100,15 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2):
             with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
 
                 with conn.cursor() as cursor:
-                    cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (SessionId,))
+                    cursor.execute("SELECT sessionid,robloxusername FROM accounts WHERE sessionid = %s", (SessionId,))
                     
                     result = cursor.fetchone()  
                     
                     if result and result[0] == SessionId:
-                        return templates.TemplateResponse(htmlfile2, {"request": request})
+                        if returnusername is None:
+                            return templates.TemplateResponse(htmlfile2, {"request": request})
+                        else:
+                            return result[1]
                     else:
                         response = templates.TemplateResponse(htmlfile, {"request": request})
                         response.delete_cookie("SessionId")
@@ -898,11 +911,61 @@ def login_post(
             {"request": request, "error": f"{error}"},
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@app.post("/createcoinflip", response_class=HTMLResponse)
+async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
+    if not SessionId:
+        return JSONResponse({"error": "No session"}, status_code=400)
+    was_set = redis.set("CoinflipActive" + SessionId, True, nx=True)
     
+    if not was_set:
+        return JSONResponse({"error": "Coinflip already active"}, status_code=400)
+    
+    data = await request.json()
+    coinflipData = data.get("coinflipData")
+    
+    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","home.html")
+
+    try:
+        UserCheck = str(UserCheck)
+    except Exception as e:
+        return UserCheck
+    
+    SiteItemsCollection = getSiteItemsMongo()["collection"]
+
+    try:
+        document = SiteItemsCollection.find_one({"sessionid": SessionId})
+        if document:
+            return JSONResponse({"error": "You do not own any items!"}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+    
+    if len(coinflipData) != len(document.items):
+        return JSONResponse({"error": "You do not own the items required to create a coinflip!"}, status_code=400)
+    
+    itemset = set(document["items"])
+    coinflipDataSet = set(coinflipData)
+
+    if not coinflipDataSet.issubset(itemset):
+        return JSONResponse({"error": "You do not own the items required to create a coinflip!"}, status_code=400)
+
+    CoinflipCollection = getCoinflipMongo()["collection"]
+
+    try:
+        result = CoinflipCollection.update_one(
+            {"SessionId": SessionId,"Username":UserCheck}, 
+            {"$set": {"CoinflipItems": coinflipData}},  
+            upsert=True
+        )
+        return JSONResponse({"success": True}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
 
 
 
