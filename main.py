@@ -685,10 +685,10 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     multiplier_per_click = total_tiles / (total_tiles - mine_count)
 
     redis.delete(
-            SessionId + ":clicks",
-            SessionId + ":cashed",
-            "ClickData." + SessionId
-             )
+        SessionId + ":clicks",
+        SessionId + ":cashed",
+        "ClickData." + SessionId
+    )
 
     if Game == "Towers":
         redis.mset({
@@ -709,7 +709,6 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
             SessionId + "BetAmount": bet_amount,
             SessionId + "minesdata": json.dumps(mines),
         })
-        redis.execute()
         return RedirectResponse(url="/mines", status_code=303)
     else:
         return templates.TemplateResponse(
@@ -903,6 +902,19 @@ def login_post(
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
