@@ -644,8 +644,9 @@ function setMaxBet() {
                                     cellEl.classList.add('reveal');
                                     if (payoutEl) {
                                         const betA = Number(result.betamount) || 0;
-                                        const Payout = Math.floor(Math.floor(betA * (r + 1) * (23 + result.mines.length) / 23) * 0.05);
-                                        payoutEl.textContent = Payout;
+                                        let mine_multiplier = (result.mines.length / 23) ** 1.5 + 0.1;  
+                                        let cashAmount = Math.floor(betA * (r + 1) * mine_multiplier * 0.05);
+                                        payoutEl.textContent = cashAmount;
                                     }
                                 }
                             });
@@ -723,7 +724,8 @@ function setMaxBet() {
                                         const row = Number(cellEl.dataset.row);
                                         const bet = Number(result.betamount) || 0;
                                         const mineCount = Number(result.minescount) || 0;
-                                        const cashAmount = Math.floor(Math.floor(bet * (row + 1) * (23 + mineCount) / 23) * 0.05);
+                                        let mine_multiplier = (mineCount / 23) ** 1.5 + 0.1;  
+                                        let cashAmount = Math.floor(bet * (row + 1) * mine_multiplier * 0.05);
                                         payoutEl.textContent = cashAmount;
                                     }
                                 }
@@ -736,7 +738,6 @@ function setMaxBet() {
                             document.querySelector('.payout-grid').classList.add('gamedone');
                     
                         } else { 
-                            // Non-mine case
                             cell.classList.add('clicked', 'revealed');
                             const rowValue = cell.dataset.row;
                             const playBtn = document.getElementById('playTowersBtn');
@@ -962,7 +963,8 @@ function setMaxBet() {
                     const row = Number(cell.dataset.row);
                     const betamount = Number(data.betamount) || 0;
                     const mineCount = Number(data.minescount) || 0;
-                    const cashAmount = Math.floor(Math.floor(betamount * (row + 1) * (23 + mineCount) / 23) * 0.1);
+                    let mine_multiplier = mineCount / 23 ** 1.5 + 0.1
+                    let cashAmount = betamount * (row + 1) * mine_multiplier * 0.05
                     payoutEl.textContent = cashAmount;
                 } else {
                     console.warn('Invalid payout element', cell);
@@ -973,6 +975,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
