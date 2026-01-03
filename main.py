@@ -234,6 +234,10 @@ async def depositget(amount: float, SessionId: str = Cookie(None)):
             with conn.cursor() as cursor:
                 cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
                 result = cursor.fetchone()  
+
+                if result is None:
+                    return {"error": "Invalid session"}
+
                 sitename = result[0]
 
     except Exception as error:
@@ -268,6 +272,10 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
             with conn.cursor() as cursor:
                 cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
                 result = cursor.fetchone()  
+
+                if result is None:
+                    return {"error": "Invalid session"}
+
                 sitename = result[0]
 
     except Exception as error:
@@ -990,10 +998,11 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
             with conn.cursor() as cursor:
                 cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
                 result = cursor.fetchone()  
-                sitename = result[0]
 
-                if not sitename:
-                    return {"error": error}
+                if result is None:
+                    return {"error": "Invalid session"}
+
+                sitename = result[0]
 
     except Exception as error:
         return error
@@ -1017,7 +1026,7 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
         "sitename": str(sitename),
         "sessionid": SessionId,
         "items": itemdata,
-        "itemdeposit" : True
+        "itemdeposit" : False
     }
 
     json_data = json.dumps(launch_data)
@@ -1045,10 +1054,11 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
             with conn.cursor() as cursor:
                 cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
                 result = cursor.fetchone()  
-                sitename = result[0]
 
-                if not sitename:
-                    return {"error": error}
+                if result is None:
+                    return {"error": "Invalid session"}
+
+                sitename = result[0]
 
     except Exception as error:
         return {"error": error}
