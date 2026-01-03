@@ -69,6 +69,20 @@ def redis_int(val, default=0):
         val = val.decode()
     return int(val)
 
+def MoreWithdraw(pagetype,request):
+    if pagetype == "towers":
+        return templates.TemplateResponse(
+            "towers.html",
+            {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    if pagetype == "mines":
+        return templates.TemplateResponse(
+            "mines.html",
+            {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
 
 class deposit(BaseModel):
     robloxusername: str
@@ -969,6 +983,7 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
     
     data = await request.json()
     itemdata = data.get("itemdata")
+    page = data.get("page")
     
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
@@ -977,15 +992,32 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
                 result = cursor.fetchone()  
                 sitename = result[0]
 
+                if not sitename:
+                    return {"error": error}
+
     except Exception as error:
         return error
+    
+    SiteItemsCollection = getSiteItemsMongo()["collection"]
+
+    try:
+        document = SiteItemsCollection.find_one({"sessionid": SessionId})
+        if not document:
+            return MoreWithdraw(page,request)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+
+    itemset = set(document["items"])
+    WithdrawSet = set(itemdata)
+
+    if not WithdrawSet.issubset(itemset):
+        return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
 
     launch_data = {
         "sitename": str(sitename),
         "sessionid": SessionId,
         "items": itemdata,
-        "deposit" : True,
-        "itemdeposit" : True,
+        "itemdeposit" : True
     }
 
     json_data = json.dumps(launch_data)
@@ -1000,10 +1032,14 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
     return RedirectResponse(roblox_url)
 
 @app.post("/withdrawitems",response_class =  HTMLResponse)
-async def withdrawget(amount: float, page: str, request: Request, SessionId: str = Cookie(None)):
+async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
+    data = await request.json()
+    itemdata = data.get("itemdata")
+    page = data.get("page")
+
     try:
         with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
             with conn.cursor() as cursor:
@@ -1011,40 +1047,32 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
                 result = cursor.fetchone()  
                 sitename = result[0]
 
+                if not sitename:
+                    return {"error": error}
+
     except Exception as error:
         return {"error": error}
 
-    mainMongo = getMainMongo()
-    mainCollection = mainMongo["collection"]
-    
-    doc = mainCollection.find_one({"username": sitename})
+    SiteItemsCollection = getSiteItemsMongo()["collection"]
 
-    def MoreWithdraw(pagetype):
-        if pagetype == "towers":
-            return templates.TemplateResponse(
-                "towers.html",
-                {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
-        if pagetype == "mines":
-            return templates.TemplateResponse(
-                "mines.html",
-                {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
+    try:
+        document = SiteItemsCollection.find_one({"sessionid": SessionId})
+        if not document:
+            return MoreWithdraw(page,request)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
 
-    if not doc:
-        return MoreWithdraw(page)
+    itemset = set(document["items"])
+    WithdrawSet = set(itemdata)
 
-    if amount > int(doc["balance"]):
-        return MoreWithdraw(page)
+    if not WithdrawSet.issubset(itemset):
+        return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
 
     launch_data = {
         "sitename": str(sitename),
         "sessionid": SessionId,
-        "amount": amount,
-        "deposit" : False,
-        "itemdeposit" : True
+        "items": itemdata,
+        "itemdeposit" : False
     }
 
     json_data = json.dumps(launch_data)
@@ -1061,6 +1089,7 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
