@@ -403,6 +403,16 @@ def depositearnings(data: deposit):
 
         return {"success": True, "type": "withdraw", "amount": amount}
 
+@app.get("/api/GetUniverseId")
+def GetUniverseId(GameId: int):
+    RedisGet = reply.json()
+    if RedisGet:
+        return RedisGet
+    reply = requests.get("https://apis.roblox.com/universes/v1/places/" + GameId + "/universe")
+    replyjson = reply.json()
+    redis.set(replyjson)
+    return JSONResponse({"data": replyjson}, status_code=200)
+
 @app.get("/games/getCurrentData")
 def get(SessionId: str = Cookie(None)):
     if not SessionId:
