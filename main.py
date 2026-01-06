@@ -410,14 +410,13 @@ def GetUniverseId(GameId: int):
         return RedisGet
     reply = requests.get(f"https://apis.roblox.com/universes/v1/places/{GameId}/universe")
 
-      if reply.status_code == 200:
-            replyjson = reply.json()
+    if reply.status_code == 200:
+        replyjson = reply.json()
+        redis.set(str(GameId), replyjson)
 
-            redis.set(str(GameId), replyjson)
-
-            return JSONResponse({"data": replyjson}, status_code=200)
-        else:
-            return JSONResponse({"error": "Failed to fetch data from the API"}, status_code=500)
+        return JSONResponse({"data": replyjson}, status_code=200)
+    else:
+        return JSONResponse({"error": "Failed to fetch data from the API"}, status_code=500)
 
 @app.get("/games/getCurrentData")
 def get(SessionId: str = Cookie(None)):
