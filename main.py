@@ -21,7 +21,6 @@ import uvicorn
 from pymongo import MongoClient
 import certifi
 import base64
-import asyncio
 import math
 place_id = 97090711812957
 
