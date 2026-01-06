@@ -404,7 +404,7 @@ def depositearnings(data: deposit):
 
 @app.get("/api/GetUniverseId")
 def GetUniverseId(GameId: int):
-    reply = requests.get(f"https://apis.roblox.com/universes/v1/places/{GameId}/universe"
+    reply = requests.get(f"https://apis.roblox.com/universes/v1/places/{GameId}/universe")
     replyjson = reply.json()
     return JSONResponse({"data": replyjson}, status_code=200)
 
