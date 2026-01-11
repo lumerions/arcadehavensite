@@ -474,27 +474,29 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
-
+            
         .app-container {
             display: flex;
-            flex: 1;
+            min-height: calc(100vh - 60px); 
         }
         
         .sidebar {
             width: 240px;
-            background: #0b0b0b;
-            border-right: 1px solid #333;
-            padding: 2rem 1rem;
+            background-color: #0b0b0b;
+            border-right: 1px solid #333333;
+            padding: 1.5rem 1rem;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
         
         .sidebar-label {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             color: #666;
-            margin: 1.5rem 0 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+            letter-spacing: 0.05em;
         }
         
         .sidebar-link {
@@ -504,18 +506,41 @@
             color: #9ca3af;
             text-decoration: none;
             border-radius: 8px;
-            transition: all 0.2s;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-link:hover {
+            background-color: #1a1a1a;
+            color: #ffffff;
         }
         
         .sidebar-link.active {
-            background: #2563eb; 
-            color: #fff;
-            font-weight: 600;
+            background-color: #2563eb;
+            color: #ffffff;
         }
         
-        .sidebar-link:hover:not(.active) {
-            background: #1a1a1a;
-            color: #fff;
+        main {
+            flex: 1; 
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #333;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 0.5rem;
+            }
+            .sidebar-label { display: none; }
         }
 
     </style>
@@ -1101,6 +1126,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
