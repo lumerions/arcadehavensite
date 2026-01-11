@@ -556,7 +556,34 @@ function setMaxBet() {
 </nav>
 </header>
 
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="sidebar-label">Games</div>
+        <a href="/" class="sidebar-link active">Home</a>
+        <a href="/towers" class="sidebar-link">Towers</a>
+        <a href="/mines" class="sidebar-link">Mines</a>
+        
+        <div class="sidebar-label" style="margin-top: 1rem;">Account</div>
+        <a href="#" id="sideDeposit" class="sidebar-link">Deposit</a>
+        <a href="#" id="sideWithdraw" class="sidebar-link">Withdraw</a>
+    </aside>
 
+    <main>
+        <div class="cards">
+            <div class="card"> 
+                <h3>Towers</h3>
+                <p>Climb a tower by selecting safe blocks while avoiding traps.</p> 
+                <a href="/towers">Open →</a> 
+            </div> 
+
+            <div class="card">
+                <h3>Mines</h3>
+                <p>Navigate a field of mines to multiply your bet.</p>
+                <a href="/mines">Open →</a>
+            </div>
+        </div>
+    </main>
+</div>
     
 <div class="modal" id="walletModal">
     <div class="wallet">
@@ -592,16 +619,7 @@ function setMaxBet() {
 
 <main>
     <main class="game-layout">
-        <div class="app-container">
-        <aside class="sidebar">
-            <div class="sidebar-label">Navigation</div>
-            <a href="/" class="sidebar-link">Home</a>
-            
-            <div class="sidebar-label">Games</div>
-            <a href="/towers" class="sidebar-link">Towers</a>
-            <a href="/mines" class="sidebar-link active">Mines</a> <div class="sidebar-label">Account</div>
-        </aside>
-    </div>
+
     <aside class="side-panel">
         <div class="panel-card">
             <!-- <div class="mode-toggle"> -->
@@ -1083,6 +1101,7 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
 
 
 
