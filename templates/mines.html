@@ -474,74 +474,6 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
-            
-        .app-container {
-            display: flex;
-            min-height: calc(100vh - 60px); 
-        }
-        
-        .sidebar {
-            width: 240px;
-            background-color: #0b0b0b;
-            border-right: 1px solid #333333;
-            padding: 1.5rem 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .sidebar-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: #666;
-            margin-bottom: 0.5rem;
-            padding-left: 0.75rem;
-            letter-spacing: 0.05em;
-        }
-        
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            color: #9ca3af;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
-        }
-        
-        .sidebar-link:hover {
-            background-color: #1a1a1a;
-            color: #ffffff;
-        }
-        
-        .sidebar-link.active {
-            background-color: #2563eb;
-            color: #ffffff;
-        }
-        
-        main {
-            flex: 1; 
-            padding: 3rem 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid #333;
-                flex-direction: row;
-                overflow-x: auto;
-                padding: 0.5rem;
-            }
-            .sidebar-label { display: none; }
-        }
 
     </style>
 </head>
@@ -581,19 +513,7 @@ function setMaxBet() {
 </nav>
 </header>
 
-<div class="app-container">
-    <aside class="sidebar">
-        <div class="sidebar-label">Games</div>
-        <a href="/" class="sidebar-link active">Home</a>
-        <a href="/towers" class="sidebar-link">Towers</a>
-        <a href="/mines" class="sidebar-link">Mines</a>
-        
-        <div class="sidebar-label" style="margin-top: 1rem;">Account</div>
-        <a href="#" id="sideDeposit" class="sidebar-link">Deposit</a>
-        <a href="#" id="sideWithdraw" class="sidebar-link">Withdraw</a>
-    </aside>
 
-</div>
     
 <div class="modal" id="walletModal">
     <div class="wallet">
@@ -629,7 +549,6 @@ function setMaxBet() {
 
 <main>
     <main class="game-layout">
-
     <aside class="side-panel">
         <div class="panel-card">
             <!-- <div class="mode-toggle"> -->
@@ -1111,6 +1030,115 @@ function setMaxBet() {
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
