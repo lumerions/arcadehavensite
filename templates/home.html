@@ -9,6 +9,82 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+
+                    .layout {
+                display: flex;
+                flex: 1;
+                width: 100%;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            
+            .sidebar {
+                width: 220px;
+                background: #0d0d0d;
+                border-right: 1px solid #333;
+                padding: 1.5rem 1rem;
+            }
+            
+            .sidebar h3 {
+                font-size: 0.85rem;
+                color: #9ca3af;
+                text-transform: uppercase;
+                margin-bottom: 1rem;
+                letter-spacing: 0.05em;
+            }
+            
+            .sidebar a {
+                display: block;
+                padding: 0.6rem 0.75rem;
+                margin-bottom: 0.4rem;
+                border-radius: 6px;
+                text-decoration: none;
+                color: #ffffff;
+                font-size: 0.95rem;
+                border: 1px solid transparent;
+                transition: all 0.2s ease;
+            }
+            
+            .sidebar a:hover {
+                background: #1f1f1f;
+                border-color: #333;
+            }
+            
+            .sidebar a.active {
+                background: #2a3448;
+                border-color: #3b82f6;
+            }
+            
+            .content {
+                flex: 1;
+                padding: 3rem 2rem;
+                text-align: center;
+            }
+            
+            @media (max-width: 768px) {
+                .layout {
+                    flex-direction: column;
+                }
+            
+                .sidebar {
+                    width: 100%;
+                    border-right: none;
+                    border-bottom: 1px solid #333;
+                    display: flex;
+                    gap: 0.5rem;
+                    overflow-x: auto;
+                }
+            
+                .sidebar h3 {
+                    display: none;
+                }
+            
+                .sidebar a {
+                    white-space: nowrap;
+                }
+            }
+
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
                 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
@@ -545,26 +621,25 @@
 </div>
 
 
-<main>
-    <div class="cards">
-          <div class="card"> 
-            <h3>Towers</h3>
-            <p> 
-              Climb a tower by selecting safe blocks while avoiding traps. Each step raises your multiplier cash out or risk it all. 
-            </p> 
-              <a href="/towers">Open →</a> 
-     </div> 
+<main class="layout">
+    <aside class="sidebar">
+        <h3>Games</h3>
 
-        <div class="card">
-            <!-- <img src="https://example.com/mines-image.jpg" alt="Mines Game Image"> -->
-            <h3>Mines</h3>
-            <p>
-               Navigate a field of mines to multiply your bet. Pick your difficulty and uncover safe tiles to increase your winnings.
-            </p>
-            <a href="/mines">Open →</a>
-        </div>
-    </div>
+        <a href="/towers" class="active">🏗 Towers</a>
+        <a href="/mines">💣 Mines</a>
+        <!-- future games -->
+        <!-- <a href="/crash">📈 Crash</a> -->
+        <!-- <a href="/roulette">🎡 Roulette</a> -->
+    </aside>
+
+    <section class="content">
+        <h1>Welcome to AH Gambling</h1>
+        <p style="color:#9ca3af; margin-top:1rem;">
+            Select a game from the sidebar to start playing.
+        </p>
+    </section>
 </main>
+
 
 </body>
 
