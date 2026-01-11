@@ -18,42 +18,46 @@
             flex-direction: column;
         }
 
-        header { border-bottom: 1px solid #333; }
+        header { 
+            border-bottom: 1px solid #333333; 
+            background: #000;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
         nav {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 1rem 1.25rem;
+            padding: 1rem 2rem;
             display: flex;
             align-items: center;
+            gap: 2rem;
         }
 
         .logo {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
             font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-decoration: none;
         }
 
+        /* Balance dropdown */
         .balance-wrapper {
             margin-left: auto;
             position: relative;
         }
 
         .balance-btn {
-            background: #111;
-            border: 1px solid #333;
-            color: #fff;
+            background-color: #111111;
+            border: 1px solid #333333;
+            color: #ffffff;
             padding: 0.5rem 1.25rem;
             border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
             cursor: pointer;
-        }
-
-
-
-        .balance-btn:hover {
-            background: #222;
-            border-color: #555;
+            transition: all 0.2s ease;
         }
 
         .balance-menu {
@@ -75,292 +79,75 @@
             color: #fff;
             text-decoration: none;
             font-size: 0.875rem;
+            cursor: pointer;
         }
 
-        .balance-menu a:hover {
-            background: #222;
+        .balance-wrapper.open .balance-menu { display: block; }
+
+        .divider { height: 1px; background: #333; margin: 0.4rem 0; }
+
+        .app-container {
+            display: flex;
+            flex: 1;
         }
 
-        .divider {
-            height: 1px;
-            background: #333;
-            margin: 0.4rem 0;
+        .sidebar {
+            width: 240px;
+            background: #0b0b0b;
+            border-right: 1px solid #333333;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: sticky;
+            top: 61px;
+            height: calc(100vh - 61px);
         }
 
-        .balance-wrapper.open .balance-menu {
-            display: block;
+        .sidebar-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+            margin: 1.5rem 0 0.5rem 0.75rem;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #9ca3af;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-link:hover { background: #1a1a1a; color: #fff; }
+        
+        .sidebar-link.active {
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 500;
         }
 
         main {
             flex: 1;
             display: flex;
             justify-content: center;
-            padding: 3rem 1rem;
-        }
-
-        .card {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            max-width: 520px;
-            width: 100%;
-        }
-
-        h1 {
-            font-size: clamp(1.6rem, 4vw, 2rem);
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #fff, #888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-rows: repeat(5, clamp(33px, 7.5vw, 83px));
-            grid-auto-flow: column;
-            gap: clamp(5px, 1.7vw, 13px);
-            justify-content: center;
-            margin: 1.25rem 0;
-        }
-        
-        .cell {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            border-radius: 8px;
-            background: #222;
-            border: 1px solid #333;
-            touch-action: manipulation;
-            display: flex;             
-            justify-content: center;   
-            align-items: center;      
-            font-size: 2.5em;          
-            font-weight: bold;      
-            color: #fff;              
-            text-align: center;       
-        }
-
-        
-
-
-        .cell.mine { background: #b91c1c; }
-        .cell.empty { background: #555; }
-
-        .cell.clicked {
-            background: #22c55e;
-        }
-
-        .cell.reveal {
-            background: #22c55e;
-            filter: brightness(0.4);
-        }
-
-        button {
-            padding: 0.7rem 1.5rem;
-            background: #222;
-            border: 1px solid #333;
-            color: #fff;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            width: 100%;
-            max-width: 260px;
-            margin-top: 0.5rem;
-        }
-
-        button:hover {
-            background: #333;
-            border-color: #555;
-        }
-
-        .error-message {
-            color: #ff5555;
-            font-weight: bold;
-            margin-bottom: 0.75rem;
-        }
-
-        @media (max-width: 420px) {
-            .card {
-                padding: 1.25rem 1rem;
-            }
-        }
-       
-        .action-btn {
-            position: relative;  
-            padding: 0.65rem 1.5rem;
-            border: 1px solid #333;
-            color: transparent;  
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            width: 100%;  
-            max-width: 100%; 
-        }
-
-        .action-btn.deposit {
-            background: #16a34a;
-        }
-
-        .action-btn.deposit::after {
-            content: "Initiate Deposit"; 
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);  
-            color: #000;  
-            font-size: 1rem;
-        }
-
-        .action-btn.withdraw {
-            background: #2563eb;
-        }
-
-        .action-btn.withdraw::after {
-            content: "Initiate Withdrawal";  
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);  
-            color: #000;  
-            font-size: 1rem;
-        }
-
-
-        
-        .error-message {
-            background: #2a3448; 
-            color: #f87171;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-top: 16px;
-            text-align: left;
-            border: 1px solid #7c3aed; 
-            font-weight: 500;
-        }
-        
-        .error-message strong {
-            font-weight: 600; 
-        }
-        
-                
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.75);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-        }
-        
-        .modal.open {
-            display: flex;
-        }
-        
-        .wallet {
-            background: #1c2433;
-            border-radius: 14px;
-            width: 420px;
-            padding: 20px;
-            position: relative;
-        }
-        
-        .wallet-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .wallet-header h2 {
-            font-size: 1.2rem;
-        }
-        
-        .close {
-            cursor: pointer;
-            font-size: 1.4rem;
-            color: #9ca3af;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 8px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            background: #2a3448;
-            color: #cbd5f5;
-        }
-        
-        .tab.active.deposit { background: #16a34a; color:#fff; }
-        .tab.active.withdraw { background: #2563eb; color:#fff; }
-        
-        label {
-            display: block;
-            font-size: .85rem;
-            margin-bottom: 6px;
-            color: #cbd5f5;
-        }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #2a3448;
-            border: 2px solid #7c3aed;
-            border-radius: 8px;
-            color: #fff;
-            margin-bottom: 14px;
-        
-        }
-
-        .input2 {
-            width: 100%;
-            padding: 12px;
-            background: #2a3448;
-            border: 2px solid #7c3aed;
-            border-radius: 8px;
-            color: #fff;
-            margin-bottom: 14px;
-            position: relative;
-            top: 4px;
-            -moz-appearance: textfield;
-        }
-        
-        .input2::-webkit-inner-spin-button,
-        .input2::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        
-        .instructions {
-            background: #2a3448;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: .85rem;
-            text-align: left;
-            color: #cbd5f5;
-            margin-bottom: 16px;
+            padding: 2rem;
+            background-color: #000;
         }
 
         .game-layout {
             display: flex;
             gap: 24px;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1100px;
+            align-items: flex-start;
         }
 
-        .side-panel {
-            width: 300px;
-        }
+        .side-panel { width: 300px; }
 
         .panel-card {
             background: linear-gradient(180deg, #1e2140, #15162b);
@@ -369,33 +156,7 @@
             border: 1px solid #2e2f55;
         }
 
-        .mode-toggle {
-            display: flex;
-            background: #2a2d52;
-            border-radius: 10px;
-            padding: 4px;
-            margin-bottom: 16px;
-        }
-
-        .mode {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #c7c9ff;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .mode.active {
-            background: #8b2cff;
-            color: #fff;
-        }
-
-        .field {
-            margin-bottom: 3px;
-        }
-
+        .field { margin-bottom: 12px; }
         .field-header {
             display: flex;
             justify-content: space-between;
@@ -404,632 +165,380 @@
             color: #c7c9ff;
         }
 
-        .muted {
-            opacity: 0.6;
-        }
-
         .bet-input {
             display: flex;
             align-items: center;
             background: #2a2d52;
             border-radius: 10px;
-            padding: 6px 10px; 
+            padding: 0 12px;
             gap: 6px;
-            margin-top: 10px; 
+            border: 2px solid transparent;
         }
+
+        .bet-input:focus-within { border-color: #7c3aed; }
 
         .bet-input input {
             background: transparent;
             border: none;
             outline: none;
             color: #fff;
-            font-size: 0.95rem;
+            font-size: 1rem;
             width: 100%;
-            padding: 8px 0 4px 0; 
+            padding: 12px 0;
         }
 
-        
-        .currency,
-        .emoji {
-            opacity: 0.7;
-            font-size: 0.9rem; 
-        }
-
-        .bet-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
+        .bet-actions { display: flex; gap: 8px; margin-top: 8px; }
         .bet-actions button {
-            flex: 1;
-            background: #343769;
-            border: none;
-            border-radius: 8px;
-            padding: 6px;
-            color: #fff;
-            cursor: pointer;
+            flex: 1; background: #343769; border: none;
+            border-radius: 8px; padding: 8px; color: #fff; cursor: pointer;
         }
 
-        .bet-actions button:hover {
-            background: #4a4ee8;
+        #playMinesBtn {
+            width: 100%; padding: 14px; border-radius: 10px; border: none;
+            background: #2563eb; color: #fff; font-weight: 600; cursor: pointer;
+            margin-top: 12px; font-size: 1rem;
         }
+
+        .card {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 2rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            margin: 1.5rem auto;
+        }
+
+        .cell {
+            aspect-ratio: 1/1;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: background 0.2s;
+        }
+
+        .cell:hover { background: #2a2a2a; }
+        .cell.clicked { background: #22c55e; color: #fff; }
+        .cell.mine { background: #ef4444; }
+        .cell.reveal { background: #22c55e; opacity: 0.4; }
+
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,.85);
+            display: none; align-items: center; justify-content: center; z-index: 9999;
+        }
+        .modal.open { display: flex; }
+        .wallet { background: #1c2433; border-radius: 14px; width: 400px; padding: 24px; }
+        .tab { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; background: #2a3448; color: #cbd5f5; }
+        .tab.active.deposit { background: #16a34a; color: #fff; }
+        .tab.active.withdraw { background: #2563eb; color: #fff; }
+        .action-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; margin-top: 10px; }
 
         @media (max-width: 900px) {
-            .game-layout {
-                flex-direction: column;
+            .app-container { flex-direction: column; }
+            .sidebar {
+                width: 100%; height: auto; position: static;
+                flex-direction: row; overflow-x: auto; padding: 0.75rem;
+                border-right: none; border-bottom: 1px solid #333;
             }
-
-            .side-panel {
-                width: 100%;
-            }
+            .sidebar-label { display: none; }
+            .game-layout { flex-direction: column; }
+            .side-panel { width: 100%; }
         }
-
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-
     </style>
 </head>
 
-<script>
-function adjustBet(multiplier) {
-    const input = document.getElementById('betAmount');
-    const value = parseFloat(input.value) || 0;
-    input.value = Math.max(1, Math.floor(value * multiplier));
-}
-
-function setMaxBet() {
-    const input = document.getElementById('betAmount');
-    const balanceBtn = document.querySelector('.balance-btn');
-
-    const balanceText = balanceBtn.textContent.replace(/\$|,/g, '');
-    const balanceNumber = parseFloat(balanceText) || 0;
-
-    input.value = balanceNumber;
-}
-</script>
-
 <body>
 <header>
-<nav>
-    <a href="/" class="logo">AH Gambling</a>
-
-    <div class="balance-wrapper">
-        <button class="balance-btn">$1,000</button>
-        <div class="balance-menu">
-            <a id="openDeposit">Deposit</a>
-            <a id="openWithdraw">Withdraw</a>
-            <div class="divider"></div>
-            <a href="/logout">Log out</a>
+    <nav>
+        <a href="/" class="logo">AH Gambling</a>
+        <div class="balance-wrapper">
+            <button class="balance-btn">$1,000</button>
+            <div class="balance-menu">
+                <a id="openDeposit">Deposit</a>
+                <a id="openWithdraw">Withdraw</a>
+                <div class="divider"></div>
+                <a href="/logout">Log out</a>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 </header>
 
-
-    
-<div class="modal" id="walletModal">
-    <div class="wallet">
-        <div class="wallet-header">
-            <h2>Wallet</h2>
-            <span class="close">&times;</span>
-        </div>
-
-        <div class="tabs">
-            <button class="tab deposit active">Deposit</button>
-            <button class="tab withdraw">Withdraw</button>
-        </div>
-
-        {% if wallet_error %}
-            <p class="error-message">
-                <strong>Error:</strong> {{ wallet_error }}
-            </p>
-        {% endif %}
-
-
-        <label>Amount</label>
-        <input type="text" id="amount" value="">
-        <div class="instructions" id="instructions"></div>
-
-        <button class="action-btn deposit" id="depositBtn">
-            Initiate Deposit
-        </button>
-        <button class="action-btn withdraw" id="withdrawBtn">
-            Initiate Withdrawal
-        </button>
-    </div>
-</div>
-
-<main>
-    <main class="game-layout">
-    <aside class="side-panel">
-        <div class="panel-card">
-            <!-- <div class="mode-toggle"> -->
-               <!--   <button class="mode active">Manual</button>  -->
-             <!-- </div> -->
-
-            <div class="field">
-                <div class="field-header">
-                    <span>Bet Amount</span>
-                    <span class="muted">Tokens</span>
-                </div>
-
-                <div class="bet-input">
-                    <span class="currency">$</span>
-                        <input type="number" id="betAmount" value="10" min="1" class="input2">
-                </div>
-
-                <div class="bet-actions">
-                    <button onclick="adjustBet(0.5)">½</button>
-                    <button onclick="adjustBet(2)">2×</button>
-                    <button onclick="setMaxBet()">MAX</button>
-                </div>
-            </div>
-
-            <div class="field">
-                <div class="field-header">
-                    <span>Mines</span>
-                </div>
-
-                <div class="bet-input">
-                    <span class="emoji">💣</span>
-                    <input type="number" id="mineCount" value="3"class="input2">
-                </div>
-            </div>
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="sidebar-label">Navigation</div>
+        <a href="/" class="sidebar-link">Home</a>
         
-            <div id="cashoutInfo" style="margin-bottom: 10px; text-align: center; font-size: 0.95rem; color: #cbd5f5;">
-                <div>Multiplier: <span id="multiplier">1x</span></div>
-                <div>Current Amount: $<span id="currentAmount">0</span></div>
-                <div>Amount After Next Tile: $<span id="amountAfter">0</span></div>
-            </div>
-
-            <button id="playMinesBtn">Play Mines</button>
-           
-            <script>
-            document.getElementById('playMinesBtn').addEventListener('click', async () => {
-                const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
-                const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
-                const playBtn = document.getElementById('playMinesBtn');
-
-                if (playBtn.textContent.includes('Cashout')) {
-                      try {
-                        const response = await fetch('/games/cashout', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            credentials: 'include',
-                        });
-                
-                        if (!response.ok) throw new Error('Request failed');
-                
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        }
-      
-                        const result = await response.json();
-                        const mines = result.mines;
-
-                        if (Array.isArray(mines)) {
-                            document.querySelectorAll('.cell').forEach(cellEl => {
-                                const index = Number(cellEl.dataset.index);
-                        
-                                if (mines.includes(index)) {
-                                    cellEl.textContent = '💣';
-                                    cellEl.classList.add('mine');
-                                } else if (!cellEl.classList.contains('clicked')) {
-                                    cellEl.classList.add('reveal');
-                                } else {
-                                    cellEl.textContent = '$';
-                                }
-                            });
-                        }
-
-                    async function getData() {
-                        try {
-                            const response = await fetch('/getbalance');
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                                const data = await response.text(); 
-                                const number = parseFloat(data);
-                        
-                                if (isNaN(number)) {
-                                    console.error('Error: The response is not a valid number');
-                                    return "Something went wrong!";
-                                }
-            
-                                return number
-                        } catch (error) {
-                            console.error('There was a problem with the fetch operation:', error);
-                        }
-                    }
-            
-                    function formatWithCommas(num) {
-                        return num.toLocaleString();
-                    }
-            
-                    async function updateBalance() {
-                        let balance = await getData();
-                        if (typeof balance === 'number') {
-                            balance = balance.toLocaleString(); 
-                            document.querySelector('.balance-btn').textContent = `$${balance}`;
-                        } else {
-                            document.querySelector('.balance-btn').textContent = "Error loading balance";
-                        }
-                    }
-
-                    updateBalance();
-                    playBtn.style.backgroundColor = '';
-                    playBtn.textContent = 'Play Mines';
-
-                    } catch (err) {
-                        console.error('Error starting Mines:', err);
-                        alert('Failed to start Mines. Please try again.');
-                    }
-                } else {
-                    try {
-                        const Game = "Mines"
-                        const response = await fetch('/games/start', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            credentials: 'include',
-                            body: JSON.stringify({ betAmount, mineCount, Game})
-                        });
-                
-                        if (!response.ok) throw new Error('Request failed');
-                
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        }
-                
-                    } catch (err) {
-                        console.error('Error starting Mines:', err);
-                        alert('Failed to start Mines. Please try again.');
-                    }
-
-                }
-               
-            });
-            </script>
-        </div>
+        <div class="sidebar-label">Games</div>
+        <a href="/towers" class="sidebar-link">Towers</a>
+        <a href="/mines" class="sidebar-link active">Mines</a> <div class="sidebar-label">Account</div>
+        <a id="sideDeposit" class="sidebar-link" style="cursor:pointer">Deposit</a>
+        <a id="sideWithdraw" class="sidebar-link" style="cursor:pointer">Withdraw</a>
     </aside>
 
-    <div class="card">
+    <main>
+        <div class="game-layout">
+            <aside class="side-panel">
+                <div class="panel-card">
+                    <div class="field">
+                        <div class="field-header"><span>Bet Amount</span><span style="opacity:0.5">$</span></div>
+                        <div class="bet-input">
+                            <input type="number" id="betAmount" value="10" min="1">
+                        </div>
+                        <div class="bet-actions">
+                            <button onclick="adjustBet(0.5)">½</button>
+                            <button onclick="adjustBet(2)">2×</button>
+                            <button onclick="setMaxBet()">MAX</button>
+                        </div>
+                    </div>
 
-        <h1>Mines</h1>
+                    <div class="field">
+                        <div class="field-header"><span>Mines</span><span>💣</span></div>
+                        <div class="bet-input">
+                            <input type="number" id="mineCount" value="3" min="1" max="24">
+                        </div>
+                    </div>
 
-        <div class="grid">
-            {% for i in range(25) %}
-                <div class="cell" data-index="{{ i }}"></div>
-            {% endfor %}
+                    <div id="cashoutInfo" style="margin: 15px 0; text-align: center; font-size: 0.9rem; color: #cbd5f5;">
+                        <div>Multiplier: <span id="multiplier">1.00x</span></div>
+                        <div>Profit: $<span id="currentAmount">0.00</span></div>
+                    </div>
+
+                    <button id="playMinesBtn">Play Mines</button>
+                </div>
+            </aside>
+
+            <div class="card">
+                <h1 style="background: none; -webkit-text-fill-color: white; margin-bottom: 0;">Mines</h1>
+                <div class="grid" id="mineGrid">
+                    {% for i in range(25) %}
+                        <div class="cell" data-index="{{ i }}"></div>
+                    {% endfor %}
+                </div>
+                {% if mines_error %}
+                    <div class="error-message" style="color: #f87171;"><strong>Error:</strong> {{ mines_error }}</div>
+                {% endif %}
+            </div>
         </div>
-        
-        {% if mines_error %}
-            <p class="error-message">
-                <strong>Error:</strong> {{ mines_error }}
-            </p>
-        {% endif %}
+    </main>
+</div>
 
-        <script>
-            
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.addEventListener('click', async () => {
-                    if (cell.classList.contains('revealed')) return;
-            
-                    const grid = document.querySelector('.grid');
-                    if (grid.classList.contains('gamedone')) return;
-            
-                    const tileIndex = cell.dataset.index;
-                    const playBtn = document.getElementById('playMinesBtn');
-                    const Game = "Mines";
-
-                    try {
-                        const response = await fetch('/games/click', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ tileIndex,Game })
-                        });
-            
-                        if (!response.ok) throw new Error('Request failed');
-            
-                        const result = await response.json();
-                        const mines = result.mines;
-            
-                        if (result.ismine && Array.isArray(mines)) {
-                            document.querySelectorAll('.cell').forEach(cellEl => {
-                                const index = Number(cellEl.dataset.index);
-                                if (mines.includes(index)) {
-                                    cellEl.textContent = '💣';
-                                    cellEl.classList.add('mine');
-                                } else if (!cellEl.classList.contains('clicked')) {
-                                    cellEl.classList.add('reveal');
-                                }
-                            });
-            
-                            playBtn.style.backgroundColor = '';
-                            playBtn.textContent = 'Play Mines';
-                            document.getElementById('multiplier').textContent = '1x';
-                            document.getElementById('currentAmount').textContent = '0';
-                            document.getElementById('amountAfter').textContent = '0';
-            
-                            grid.classList.add('gamedone');
-            
-                        } else { 
-                            cell.textContent = '$';
-                            cell.classList.add('clicked');
-                            cell.classList.add('revealed');
-            
-                            const game = "Mines"; 
-                            
-                            const cashoutResponse = await fetch(`/games/cashoutamount?Game=${encodeURIComponent(game)}`, {
-                                method: 'GET',
-                                headers: { 'Content-Type': 'application/json' },
-                                credentials: 'include',
-                            });
-            
-                            if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
-            
-                            const data = await cashoutResponse.json();
-            
-                            const currentAmount = data.amount;
-                            const amountAfterNextTile = data.amountafter;
-                            const multiplier = data.multiplier;
-            
-                            document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
-                            document.getElementById('currentAmount').textContent = currentAmount;
-                            document.getElementById('amountAfter').textContent = amountAfterNextTile;
-            
-                            playBtn.style.backgroundColor = '#16a34a';
-                            playBtn.textContent = 'Cashout';
-                        }
-            
-                    } catch (err) {
-                        console.error('Error handling tile click:', err);
-                    }
-                });
-            });
-
-        </script>
-    </div>
-</main>
-
-    <div class="modal" id="walletModal">
+<div class="modal" id="walletModal">
     <div class="wallet">
-        <div class="wallet-header">
-            <h2>Wallet</h2>
-            <span class="close">&times;</span>
-        </div>
-
+        <div class="wallet-header"><h2>Wallet</h2><span class="close">&times;</span></div>
         <div class="tabs">
             <button class="tab deposit active">Deposit</button>
             <button class="tab withdraw">Withdraw</button>
         </div>
-
-        {% if error %}
-            <p class="error-message">
-                <strong>Error:</strong> {{ error }}
-            </p>
-        {% endif %}
-
-
-
-        <label>Amount</label>
-        <input type="text" id="amount" value="">
+        <input type="number" id="amount" placeholder="Enter amount">
         <div class="instructions" id="instructions"></div>
-
-        <button class="action-btn deposit" id="depositBtn">
-            Initiate Deposit
-        </button>
-        <button class="action-btn withdraw" id="withdrawBtn">
-            Initiate Withdrawal
-        </button>
+        <button class="action-btn deposit" id="depositBtn" style="background:#16a34a; color:#fff;">Initiate Deposit</button>
+        <button class="action-btn withdraw" id="withdrawBtn" style="background:#2563eb; color:#fff; display:none;">Initiate Withdrawal</button>
     </div>
 </div>
 
+<script>
+    function adjustBet(m) {
+        let val = document.getElementById('betAmount');
+        val.value = Math.max(1, Math.floor(parseFloat(val.value) * m));
+    }
 
-    <script>
-        
-            const wrapper = document.querySelector('.balance-wrapper');
-            const modal = document.getElementById('walletModal');
-            const closeBtn = document.querySelector('.close');
-            const tabs = document.querySelectorAll('.tab');
-            const depositBtn = document.getElementById('depositBtn');
-            const withdrawBtn = document.getElementById('withdrawBtn');
-            const instructions = document.getElementById('instructions');
-            const inputField = document.getElementById('amount');
-    
-            async function getData() {
-                try {
-                    const response = await fetch('/getbalance');
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                        const data = await response.text(); 
-                        const number = parseFloat(data);
-                
-                        if (isNaN(number)) {
-                            console.error('Error: The response is not a valid number');
-                            return "Something went wrong!";
-                        }
-    
-                        return number
-                } catch (error) {
-                    console.error('There was a problem with the fetch operation:', error);
-                }
-            }
-            let count = 0;
-    
-            function formatWithCommas(num) {
-                return num.toLocaleString();
-            }
-    
-            async function updateBalance() {
-                let balance = await getData();
-                if (typeof balance === 'number') {
-                    balance = balance.toLocaleString(); 
-                    document.querySelector('.balance-btn').textContent = `$${balance}`;
-                } else {
-                    document.querySelector('.balance-btn').textContent = "Error loading balance";
-                }
-            }
-    
-            updateBalance();
-    
-            document.querySelector('.balance-btn').onclick = () => {
-                wrapper.classList.toggle('open');
-            };
-    
-            document.getElementById('openDeposit').onclick = () => openWallet('deposit');
-            document.getElementById('openWithdraw').onclick = () => openWallet('withdraw');
-    
-            closeBtn.onclick = () => modal.classList.remove('open');
-            modal.onclick = e => e.target === modal && modal.classList.remove('open');
-    
-            function openWallet(type) {
-                modal.classList.add('open');
-                switchTab(type);
-            }
-    
-            function switchTab(type) {
-                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    
-                const tab = document.querySelector('.tab.' + type);
-                tab.classList.add('active');
-    
-                if (type === 'deposit') {
-                    depositBtn.style.display = 'inline-block';
-                    withdrawBtn.style.display = 'none';
-    
-                    instructions.innerHTML =
-                        `How to deposit:<br>1. Enter the amount you want to deposit<br>2. Click "Initiate Deposit"<br>3. Complete deposit in-game`;
-                    inputField.value = '';
-                    inputField.placeholder = 'Enter amount to deposit';
-                } else {
-                    const errorMessage = document.querySelector('.error-message');
-    
-                    if (errorMessage) { 
-                        if (count === 0) {
-                            count = count + 1;  
-                        } else { 
-                            errorMessage.remove();
-                        }
-                    }
-    
-                    withdrawBtn.style.display = 'inline-block';
-                    depositBtn.style.display = 'none';
-    
-                    instructions.innerHTML =
-                        `How to withdraw:<br>1. Enter the amount you want to withdraw<br>2. Click "Initiate Withdrawal"<br>3. Complete withdrawal in-game`;
-                    inputField.value = '';
-                    inputField.placeholder = 'Enter amount to withdraw';
-                }
-            }
-    
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const type = tab.classList.contains('deposit') ? 'deposit' : 'withdraw';
-                    switchTab(type);
-                });
+    function setMaxBet() {
+        const balanceText = document.querySelector('.balance-btn').textContent.replace(/[$,]/g, '');
+        document.getElementById('betAmount').value = parseFloat(balanceText);
+    }
+
+    document.getElementById('playMinesBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('playMinesBtn');
+        const bet = document.getElementById('betAmount').value;
+        const mines = document.getElementById('mineCount').value;
+
+        if (btn.textContent === 'Cashout') {
+            const resp = await fetch('/games/cashout', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ Game: "Mines" }) 
             });
-    
-            depositBtn.onclick = async () => {
-                const amount = parseFloat(inputField.value);
+            const res = await resp.json();
+            revealMines(res.mines);
+            resetGameUI();
+            updateBalance();
+        } else {
+            const resp = await fetch('/games/start', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ betAmount: bet, mineCount: mines, Game: "Mines" })
+            });
+            if (resp.ok) {
+                document.getElementById('mineGrid').classList.remove('gamedone');
+                document.querySelectorAll('.cell').forEach(c => { c.textContent = ''; c.className = 'cell'; });
+                btn.textContent = 'Play Mines';
+            }
+        }
+    });
+
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.addEventListener('click', async () => {
+            if (cell.classList.contains('revealed') || document.getElementById('mineGrid').classList.contains('gamedone')) return;
+
+            const resp = await fetch('/games/click', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tileIndex: cell.dataset.index, Game: "Mines" })
+            });
+            const res = await resp.json();
+
+            if (res.ismine) {
+                revealMines(res.mines);
+                resetGameUI();
+            } else {
+                cell.textContent = '$';
+                cell.classList.add('clicked', 'revealed');
+                const info = await fetch('/games/cashoutamount?Game=Mines');
+                const data = await info.json();
+                document.getElementById('multiplier').textContent = data.multiplier.toFixed(2) + 'x';
+                document.getElementById('currentAmount').textContent = data.amount;
+                document.getElementById('playMinesBtn').textContent = 'Cashout';
+                document.getElementById('playMinesBtn').style.background = '#16a34a';
+            }
+        });
+    });
+
+    function revealMines(mines) {
+        document.querySelectorAll('.cell').forEach(c => {
+            const idx = parseInt(c.dataset.index);
+            if (mines.includes(idx)) {
+                c.textContent = '💣';
+                c.classList.add('mine');
+            } else if (!c.classList.contains('clicked')) {
+                c.classList.add('reveal');
+            }
+        });
+        document.getElementById('mineGrid').classList.add('gamedone');
+    }
+
+    function resetGameUI() {
+        const btn = document.getElementById('playMinesBtn');
+        btn.textContent = 'Play Mines';
+        btn.style.background = '#2563eb';
+        document.getElementById('multiplier').textContent = '1.00x';
+        document.getElementById('currentAmount').textContent = '0.00';
+    }
+
+    const modal = document.getElementById('walletModal');
+    const wrapper = document.querySelector('.balance-wrapper');
+
+    document.querySelector('.balance-btn').onclick = (e) => { e.stopPropagation(); wrapper.classList.toggle('open'); };
+    window.onclick = () => wrapper.classList.remove('open');
+
+    const openWallet = (t) => { modal.classList.add('open'); switchTab(t); };
+    document.getElementById('openDeposit').onclick = () => openWallet('deposit');
+    document.getElementById('openWithdraw').onclick = () => openWallet('withdraw');
+    document.getElementById('sideDeposit').onclick = () => openWallet('deposit');
+    document.getElementById('sideWithdraw').onclick = () => openWallet('withdraw');
+    document.querySelector('.close').onclick = () => modal.classList.remove('open');
+
+    function switchTab(type) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('.tab.' + type).classList.add('active');
+        document.getElementById('depositBtn').style.display = type === 'deposit' ? 'block' : 'none';
+        document.getElementById('withdrawBtn').style.display = type === 'withdraw' ? 'block' : 'none';
+    }
+
+    async function updateBalance() {
+        const r = await fetch('/getbalance');
+        const b = await r.text();
+        document.querySelector('.balance-btn').textContent = `$${parseFloat(b).toLocaleString()}`;
+    }
+    updateBalance();
+
+    document.getElementById('depositBtn').onclick = () => {
+        const a = document.getElementById('amount').value;
+        if(a > 0) window.location.href = `/deposit?amount=${a}`;
+    };
+    document.getElementById('withdrawBtn').onclick = () => {
+        const a = document.getElementById('amount').value;
+        if(a > 0) window.location.href = `/withdraw?amount=${a}&page=mines`;
+    };
+
+
+        window.onload = async function() {
+            const errorMessage = document.querySelector('.error-message');
+            if (errorMessage) {
+                openWallet('withdraw');
+            }
+
+            const cashoutResponse = await fetch('/games/cashoutamount?Game=Mines', {
+                method: 'GET',
+                credentials: 'include', 
+            });
+
+            if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
+
+            const data = await cashoutResponse.json();
+
+            const currentAmount = data.amount;
+            const amountAfterNextTile = data.amountafter;
+            const multiplier = data.multiplier;
+
+            document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+            document.getElementById('currentAmount').textContent = currentAmount;
+            document.getElementById('amountAfter').textContent = amountAfterNextTile;
+
+           
+
+            async function restoreRevealedTiles() {
+                try {
+                    const response = await fetch('/games/getCurrentData', {
+                        credentials: 'include' 
+                    });
             
-                if (isNaN(amount) || amount <= 0) {
-                    alert('Please enter a valid amount');
-                    return;
-                }
+                    if (!response.ok) throw new Error('Failed to fetch current mines data');
             
-                window.location.href = `/deposit?amount=${encodeURIComponent(amount)}`;
-            };
-    
-            withdrawBtn.onclick = () => {
-                const amount = parseFloat(inputField.value);
-    
-                if (isNaN(amount) || amount <= 0) {
-                    alert('Please enter a valid amount');
-                    return;
-                }
-    
-                window.location.href = `/withdraw?amount=${encodeURIComponent(amount)}&page=${encodeURIComponent("mines")}`;
-            };
-    
-            window.onload = async function() {
-                const errorMessage = document.querySelector('.error-message');
-                if (errorMessage) {
-                    openWallet('withdraw');
-                }
-
-                const cashoutResponse = await fetch('/games/cashoutamount?Game=Mines', {
-                    method: 'GET',
-                    credentials: 'include', 
-                });
-
-                if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
-
-                const data = await cashoutResponse.json();
-
-                const currentAmount = data.amount;
-                const amountAfterNextTile = data.amountafter;
-                const multiplier = data.multiplier;
-
-                document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
-                document.getElementById('currentAmount').textContent = currentAmount;
-                document.getElementById('amountAfter').textContent = amountAfterNextTile;
-
-               
-
-                async function restoreRevealedTiles() {
-                    try {
-                        const response = await fetch('/games/getCurrentData', {
-                            credentials: 'include' 
-                        });
-                
-                        if (!response.ok) throw new Error('Failed to fetch current mines data');
-                
-                        const revealedIndices = await response.json(); 
-                
-                        document.querySelectorAll('.cell').forEach(cell => {
-                            const index = Number(cell.dataset.index);
-                
-                            if (revealedIndices.includes(index)) {
-                                cell.textContent = '$';
-                                cell.classList.add('clicked', 'revealed'); 
-                            }
-                        });
-
-                        const playBtn = document.getElementById('playMinesBtn');
-
-                        if (revealedIndices.length > 0) {
-                            playBtn.style.backgroundColor = '#16a34a';
-                            playBtn.textContent = 'Cashout';
-                        } else {
-                            playBtn.style.backgroundColor = ''; 
-                            playBtn.textContent = 'Play Mines';
+                    const revealedIndices = await response.json(); 
+            
+                    document.querySelectorAll('.cell').forEach(cell => {
+                        const index = Number(cell.dataset.index);
+            
+                        if (revealedIndices.includes(index)) {
+                            cell.textContent = '$';
+                            cell.classList.add('clicked', 'revealed'); 
                         }
-                
-                    } catch (err) {
-                        console.error('Error restoring revealed tiles:', err);
-                    }
-                }
+                    });
 
-                restoreRevealedTiles()
+                    const playBtn = document.getElementById('playMinesBtn');
+
+                    if (revealedIndices.length > 0) {
+                        playBtn.style.backgroundColor = '#16a34a';
+                        playBtn.textContent = 'Cashout';
+                    } else {
+                        playBtn.style.backgroundColor = ''; 
+                        playBtn.textContent = 'Play Mines';
+                    }
             
-            };
+                } catch (err) {
+                    console.error('Error restoring revealed tiles:', err);
+                }
+            }
+
+            restoreRevealedTiles()
+        
+        };
     </script>
 </body>
 </html>
+
 
 
 
