@@ -331,10 +331,6 @@
         <div class="sidebar-label">Games</div>
         <a href="/towers" class="sidebar-link">Towers</a>
         <a href="/mines" class="sidebar-link">Mines</a>
-
-        <div class="sidebar-label">Account</div>
-        <a id="sideDeposit" class="sidebar-link" style="cursor:pointer">Deposit</a>
-        <a id="sideWithdraw" class="sidebar-link" style="cursor:pointer">Withdraw</a>
     </aside>
 
     <main>
@@ -407,8 +403,6 @@
 
     document.getElementById('openDeposit').onclick = openDeposit;
     document.getElementById('openWithdraw').onclick = openWithdraw;
-    document.getElementById('sideDeposit').onclick = openDeposit;
-    document.getElementById('sideWithdraw').onclick = openWithdraw;
 
     closeBtn.onclick = () => modal.classList.remove('open');
     modal.onclick = e => e.target === modal && modal.classList.remove('open');
