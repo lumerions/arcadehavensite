@@ -40,8 +40,9 @@
             font-weight: 600;
             color: #ffffff;
             text-decoration: none;
-            margin-left: -16rem; 
+            margin-left: 0; 
         }
+
 
         .balance-wrapper {
             margin-left: auto;
@@ -239,6 +240,19 @@
             .sidebar-link { white-space: nowrap; padding: 0.5rem 1rem; }
             main { padding: 2rem 1rem; }
             .cards { grid-template-columns: 1fr; }
+            nav {
+                justify-content: center; /* This centers the logo and balance on mobile */
+                padding: 1rem;
+            }
+
+            .logo {
+                margin-left: 0 !important; 
+                font-size: 1.1rem; 
+            }
+            
+            .balance-wrapper {
+                margin-left: auto; 
+            }
         }
     </style>
 </head>
@@ -269,6 +283,10 @@
         <a href="/towers" class="sidebar-link">Towers</a>
         <a href="/mines" class="sidebar-link">Mines</a>
     </aside>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 </div>
 
 <div class="modal" id="walletModal">
