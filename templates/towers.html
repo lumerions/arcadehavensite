@@ -132,61 +132,6 @@ nav {
     transition: background 0.3s, transform 0.2s;
 }
 
-.balance-wrapper {
-    margin-left: auto;
-    position: relative;
-}
-
-.balance-btn {
-    background: #111;
-    border: 1px solid #333;
-    color: #fff;
-    padding: 0.5rem 1.25rem;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.balance-menu {
-    position: absolute;
-    right: 0;
-    top: 120%;
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 8px;
-    min-width: 160px;
-    padding: 0.5rem 0;
-    display: none;
-    z-index: 100;
-}
-
-.balance-menu a {
-    display: block;
-    padding: 0.5rem 1rem;
-    color: #fff;
-    text-decoration: none;
-    font-size: 0.875rem;
-    cursor: pointer;
-}
-
-.balance-menu a:hover {
-    background: #222;
-}
-
-.divider {
-    height: 1px;
-    background: #333;
-    margin: 0.4rem 0;
-}
-
-.balance-wrapper.open .balance-menu {
-    display: block;
-}
-
-.tab.active {
-    background-color: #2a3448; 
-    color: #fff; 
-}
-
 main {
     display: flex;
     justify-content: center;
@@ -204,63 +149,6 @@ main {
 }
 
 
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.75);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-}
-
-.modal.open {
-    display: flex;
-}
-
-.wallet {
-    background: #1c2433;
-    border-radius: 14px;
-    width: 420px;
-    padding: 20px;
-    position: relative;
-}
-
-.wallet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.wallet-header h2 {
-    font-size: 1.2rem;
-}
-
-.close {
-    cursor: pointer;
-    font-size: 1.4rem;
-    color: #9ca3af;
-}
-
-.tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.tab {
-    flex: 1;
-    padding: 8px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background: #2a3448;
-    color: #cbd5f5;
-}
-
-.tab.active.deposit { background: #16a34a; color:#fff; }
-.tab.active.withdraw { background: #2563eb; color:#fff; }
 
 label {
     display: block;
@@ -278,32 +166,48 @@ input {
     color: #fff;
     margin-bottom: 14px;
 }
-    
+
 .game-layout {
     display: flex;
+    flex-direction: row; 
+    align-items: flex-start; 
     gap: 24px;
     width: 100%;
     max-width: 1200px;
+    margin: 0 auto; 
 }
 
-.instructions {
-    background: #2a3448;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: .85rem;
-    text-align: left;
-    color: #cbd5f5;
-    margin-bottom: 16px;
+.side-panel {
+    width: 300px;
+    flex-shrink: 0; 
 }
 
-.action-btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
+.card {
+    flex-grow: 1;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
 }
+
+@media (max-width: 900px) {
+    .game-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .side-panel {
+        width: 100%;
+        max-width: 520px; 
+    }
+    
+    .card {
+        width: 100%;
+        max-width: 520px;
+    }
+}
+    
 
 button {
     padding: 0.65rem 1.5rem;
@@ -319,69 +223,6 @@ button:hover {
     background: #333;
     border-color: #555;
 }
-
-
-.action-btn {
-    position: relative;  
-    padding: 0.65rem 1.5rem;
-    border: 1px solid #333;
-    color: transparent;  
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem; 
-    font-family: Arial, sans-serif; 
-    font-weight: normal; 
-}
-
-.action-btn.deposit {
-    background: #16a34a;
-}
-
-.action-btn.deposit::after {
-    content: "Initiate Deposit"; 
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);  
-    color: #000;  
-    font-size: 1rem;
-    font-family: Arial, sans-serif; 
-    font-weight: normal;
-}
-
-.action-btn.withdraw {
-    background: #2563eb;
-}
-
-.action-btn.withdraw::after {
-    content: "Initiate Withdrawal";  
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);  
-    color: #000;  
-    font-size: 1rem;
-    font-family: Arial, sans-serif; 
-    font-weight: normal; 
-}
-
-.error-message {
-    background: #2a3448; 
-    color: #f87171;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    margin-top: 16px;
-    text-align: left;
-    border: 1px solid #7c3aed; 
-    font-weight: 500;
-}
-
-.error-message strong {
-    font-weight: 600; 
-}
-
-
 
 .field {
     margin-bottom: 3px;
@@ -446,19 +287,6 @@ button:hover {
     background: #4a4ee8;
 }
 
-@media (max-width: 900px) {
-    .game-layout {
-        flex-direction: column;
-    }
-
-    .side-panel {
-        width: 100%;
-    }
-}
-    
-.side-panel {
-    width: 300px;
-}
 
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -476,14 +304,6 @@ input[type=number] {
     padding: 16px;
     border: 1px solid #2e2f55;
 }
-
-.game-layout {
-    display: flex;
-    gap: 24px;
-    width: 100%;
-    max-width: 1200px;
-}
-
 
 
 
@@ -734,30 +554,31 @@ input[type=number] {
                 playBtn.style.backgroundColor = revealedIndices.length ? '#16a34a' : '';
             }
         
-             restoreRevealedTiles();
+            restoreRevealedTiles();
         
             const reply =  fetch(`/games/cashoutamount?Game=Towers&Row=${row}`, { credentials: 'include' });
-            if (!reply.ok) return;
-        
-            const data =  reply.json();
-        
-            const currentamount = Number(data.amount) || 0;
-            document.getElementById('currentAmount').textContent = currentamount;
-        
-            document.querySelectorAll('.payout').forEach(cell => {
-                const payoutEl = cell.querySelector('.payout-value');
-                if (payoutEl) {
-                    const row = Number(cell.dataset.row);
-                    const betamount = Number(data.betamount) || 0;
-                    const mineCount = Number(data.minescount) || 0;
-                    let mine_multiplier = mineCount / 23 ** 1.5 + 0.1
-                    let cashAmount = Math.floor(betamount * (row + 1) * mine_multiplier * 0.4)
-                    payoutEl.textContent = cashAmount;
-                } else {
-                    console.warn('Invalid payout element', cell);
-                }
-            });
 
+            if (reply) {
+                const data =  reply.json();
+            
+                const currentamount = Number(data.amount) || 0;
+                document.getElementById('currentAmount').textContent = currentamount;
+            
+                document.querySelectorAll('.payout').forEach(cell => {
+                    const payoutEl = cell.querySelector('.payout-value');
+                    if (payoutEl) {
+                        const row = Number(cell.dataset.row);
+                        const betamount = Number(data.betamount) || 0;
+                        const mineCount = Number(data.minescount) || 0;
+                        let mine_multiplier = mineCount / 23 ** 1.5 + 0.1
+                        let cashAmount = Math.floor(betamount * (row + 1) * mine_multiplier * 0.4)
+                        payoutEl.textContent = cashAmount;
+                    } else {
+                        console.warn('Invalid payout element', cell);
+                    }
+                });
+            }
+        
     </script>
 {% endblock %}
 
