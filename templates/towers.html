@@ -345,7 +345,7 @@ input[type=number] {
             
                 if (playBtn.textContent.includes('Cashout')) {
                     try {
-                        const response =  fetch('/games/cashout', {
+                        const response = await fetch('/games/cashout', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
@@ -356,7 +356,7 @@ input[type=number] {
             
                         if (response.redirected) window.location.href = response.url;
             
-                        const result =  response.json();
+                        const result =  await response.json();
                         const mines = result.mines;
             
                         if (Array.isArray(mines)) {
@@ -395,7 +395,7 @@ input[type=number] {
                 } else {
                     try {
                         const Game = "Towers";
-                        const response =  fetch('/games/start', {
+                        const response =  await fetch('/games/start', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
@@ -474,10 +474,10 @@ input[type=number] {
                             const rowValue = cell.dataset.row;
                             const playBtn = document.getElementById('playTowersBtn');
                     
-                            const cashoutResponse =  fetch(`/games/cashoutamount?Game=Towers&Row=${rowValue}`, { method: 'GET', credentials: 'include' });
+                            const cashoutResponse = await fetch(`/games/cashoutamount?Game=Towers&Row=${rowValue}`, { method: 'GET', credentials: 'include' });
                             if (!cashoutResponse.ok) return;
                     
-                            const data =  cashoutResponse.json();
+                            const data =  await cashoutResponse.json();
                             const currentAmount = data.amount;
                             cell.classList.add('reveal'); 
                             document.getElementById('currentAmount').textContent = currentAmount;
@@ -495,10 +495,10 @@ input[type=number] {
             let row = -1;
         
             async function restoreRevealedTiles() {
-                const response =  fetch('/games/getCurrentData', { credentials: 'include' });
+                const response =  await fetch('/games/getCurrentData', { credentials: 'include' });
                 if (!response.ok) return;
         
-                const revealedIndices =  response.json();
+                const revealedIndices = await response.json();
         
                 document.querySelectorAll('.payout').forEach(cell => {
                     const index = Number(cell.dataset.index);
