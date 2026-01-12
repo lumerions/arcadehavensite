@@ -30,13 +30,6 @@ nav {
     align-items: center;
 }
 
-.logo {
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1.25rem;
-}
-
 .input2 {
     width: 100%;
     padding: 12px;
@@ -130,12 +123,6 @@ nav {
     color: #f87171; 
     font-weight: 700;
     transition: background 0.3s, transform 0.2s;
-}
-
-main {
-    display: flex;
-    justify-content: center;
-    padding: 3rem 1.5rem;
 }
 
 .card {
@@ -242,25 +229,25 @@ button:hover {
     opacity: 0.6;
 }
 
-  .bet-input {
-            display: flex;
-            align-items: center;
-            background: #2a2d52;
-            border-radius: 10px;
-            padding: 6px 10px; 
-            gap: 6px;
-            margin-top: 10px; 
-        }
-
-    .bet-input input {
-        background: transparent;
-        border: none;
-        outline: none;
-        color: #fff;
-        font-size: 0.95rem;
-        width: 100%;
-        padding: 8px 0 4px 0; 
+.bet-input {
+        display: flex;
+        align-items: center;
+        background: #2a2d52;
+        border-radius: 10px;
+        padding: 6px 10px; 
+        gap: 6px;
+        margin-top: 10px; 
     }
+
+.bet-input input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 0.95rem;
+    width: 100%;
+    padding: 8px 0 4px 0; 
+}
 
 
 .currency,
@@ -312,37 +299,11 @@ input[type=number] {
 </style>
 
 <div class="game-container">
-    <div class="side-panel">
-        <div class="panel-card">
-            <div class="field">
-                <div class="field-header" style="display:flex; justify-content:space-between; font-size:0.8rem; color:#9ca3af;">
-                    <span>Bet Amount</span>
-                    <span>Tokens</span>
-                </div>
-                <div class="bet-input">
-                    <span>$</span>
-                    <input type="number" id="betAmount" value="10" min="1">
-                </div>
-                <div class="bet-actions">
-                    <button onclick="adjustBet(0.5)">½</button>
-                    <button onclick="adjustBet(2)">2×</button>
-                    <button onclick="setMaxBet()">MAX</button>
-                </div>
-            </div>
+    {% include "sidepanel.html" %}
 
-            <div class="field" style="margin-top: 20px;">
-                <label style="font-size:0.8rem; color:#9ca3af;">Mines per Row</label>
-                <div class="bet-input">
-                    <span>💣</span>
-                    <input type="number" id="mineCount" value="1" min="1" max="2">
-                </div>
-            </div>
-
-            <div id="cashoutInfo" style="margin-top: 20px; text-align: center; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
-                <div style="font-size: 0.8rem; color: #9ca3af;">Profit Potential</div>
-                <div style="font-size: 1.2rem; font-weight: bold; color: #22c55e;">$<span id="currentAmount">0</span></div>
-            </div>
-        </div>
+    <div id="cashoutInfo" style="margin-top: 20px; text-align: center; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+        <div style="font-size: 0.8rem; color: #9ca3af;">Profit Potential</div>
+        <div style="font-size: 1.2rem; font-weight: bold; color: #22c55e;">$<span id="currentAmount">0</span></div>
     </div>
 
     <div class="card">
@@ -465,7 +426,7 @@ input[type=number] {
                     const Game = "Towers";
             
                     try {
-                        const response =  fetch('/games/click', {
+                        const response =  await fetch('/games/click', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
@@ -474,7 +435,7 @@ input[type=number] {
                     
                         if (!response.ok) throw new Error('Request failed');
                     
-                        const result =  response.json();
+                        const result = await response.json();
                         const mines = result.mines;
                     
                         if (result.ismine && Array.isArray(mines)) {
