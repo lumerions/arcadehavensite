@@ -9,17 +9,21 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .sidebar-logo {
-            font-size: 1.3rem;
+        .app-title {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 0.5rem 2rem;
+        }
+        
+        .app-title a {
+            display: inline-block;
+            font-size: 1.5rem;
             font-weight: 600;
             color: #ffffff;
             text-decoration: none;
-            padding: 0 0.75rem 1.5rem 0.75rem;
-            margin-bottom: 1rem;
-            border-bottom: 1px solid #333333;
-            display: block;
+            padding-left: 0.5rem;
         }
-        
+
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
@@ -282,6 +286,13 @@
 
         input:focus { border-color: #7c3aed; }
 
+         @media (min-width: 769px) {
+            .app-title a {
+                margin-left: 0.75rem;
+            }
+        }
+
+
         .instructions {
             background: rgba(0,0,0,0.2); padding: 12px;
             border-radius: 8px; font-size: .85rem;
@@ -334,9 +345,13 @@
 </nav>
 </header>
 
+<div class="app-title">
+    <a href="/">AH Gambling</a>
+</div>
+
+
 <div class="app-container">
     <aside class="sidebar">
-        <a href="/" class="sidebar-logo">AH Gambling</a>
         <div class="sidebar-label">Navigation</div>
         <a href="/" class="sidebar-link active">Home</a>
         
