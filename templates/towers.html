@@ -298,14 +298,18 @@ input[type=number] {
 </style>
 
 <div class="game-container">
-    {% extends "sidepanel.html" %}
 
-    {% block sidebar_content %}
-        <div id="cashoutInfo" style="margin-top: 20px; text-align: center; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
-            <div style="font-size: 0.8rem; color: #9ca3af;">Profit Potential</div>
-            <div style="font-size: 1.2rem; font-weight: bold; color: #22c55e;">$<span id="currentAmount">0</span></div>
+    <div class="side-panel">
+        {% include "sidepanel.html" %}
+
+        <div class="panel-card" id="cashoutInfo" style="margin-top: 15px; text-align: center;">
+            <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 4px;">Profit Potential</div>
+            <div style="font-size: 1.2rem; font-weight: bold; color: #22c55e;">
+                $<span id="currentAmount">0</span>
+            </div>
         </div>
-    {% endblock %}
+    </div>
+
     
     <div class="card">
         <h2 style="margin-bottom: 10px;">Towers</h2>
