@@ -167,20 +167,24 @@ input {
     margin-bottom: 14px;
 }
 
-.game-layout {
+.game-container {
     display: flex;
     flex-direction: row; 
     align-items: flex-start; 
     gap: 24px;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto; 
+    margin: 0 auto;
+    padding: 2rem 1.5rem; 
 }
 
 .side-panel {
     width: 300px;
     flex-shrink: 0; 
+    order: 1; 
 }
+
+
 
 .card {
     flex-grow: 1;
@@ -553,34 +557,76 @@ input[type=number] {
                 playBtn.textContent = revealedIndices.length ? 'Cashout' : 'Play Towers';
                 playBtn.style.backgroundColor = revealedIndices.length ? '#16a34a' : '';
             }
-        
-            restoreRevealedTiles();
-        
-            const reply =  fetch(`/games/cashoutamount?Game=Towers&Row=${row}`, { credentials: 'include' });
 
-            if (reply) {
-                const data =  reply.json();
-            
-                const currentamount = Number(data.amount) || 0;
-                document.getElementById('currentAmount').textContent = currentamount;
-            
-                document.querySelectorAll('.payout').forEach(cell => {
-                    const payoutEl = cell.querySelector('.payout-value');
-                    if (payoutEl) {
-                        const row = Number(cell.dataset.row);
-                        const betamount = Number(data.betamount) || 0;
-                        const mineCount = Number(data.minescount) || 0;
-                        let mine_multiplier = mineCount / 23 ** 1.5 + 0.1
-                        let cashAmount = Math.floor(betamount * (row + 1) * mine_multiplier * 0.4)
-                        payoutEl.textContent = cashAmount;
-                    } else {
-                        console.warn('Invalid payout element', cell);
+            async function initGame() {
+                await restoreRevealedTiles();
+
+                try {
+                    const response = await fetch(`/games/cashoutamount?Game=Towers&Row=${row}`, { 
+                        credentials: 'include' 
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json(); 
+                        
+                        const currentamount = Number(data.amount) || 0;
+                        document.getElementById('currentAmount').textContent = currentamount;
+
+                        document.querySelectorAll('.payout').forEach(cell => {
+                            const payoutEl = cell.querySelector('.payout-value');
+                            if (payoutEl) {
+                                const row = Number(cell.dataset.row);
+                                const betamount = Number(data.betamount) || 0;
+                                const mineCount = Number(data.minescount) || 0;
+                                let mine_multiplier = mineCount / 23 ** 1.5 + 0.1
+                                let cashAmount = Math.floor(betamount * (row + 1) * mine_multiplier * 0.4)
+                                payoutEl.textContent = cashAmount;
+                            } else {
+                                console.warn('Invalid payout element', cell);
+                            }
+                        });
                     }
-                });
+                } catch (err) {
+                    console.error("Initialization error:", err);
+                }
             }
-        
+
+            initGame();
     </script>
 {% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
