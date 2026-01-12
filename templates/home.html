@@ -9,10 +9,19 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        header {
+            height: var(--header-height);
+        }
+        
         .app-title {
             max-width: 1400px;
-            margin: 61px auto 0 auto;
+            margin: var(--header-height) auto 0 auto;
             padding: 1.5rem 2rem 0.5rem 2rem;
+        }
+        
+        .sidebar {
+            top: var(--header-height);
+            height: calc(100vh - var(--header-height));
         }
 
         
