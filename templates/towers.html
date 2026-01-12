@@ -4,6 +4,7 @@
 
 {% block extra_styles %}
 
+
 <style>
 * {
     margin: 0;
@@ -28,6 +29,13 @@ nav {
     padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
+}
+
+.logo {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.25rem;
 }
 
 .input2 {
@@ -125,11 +133,6 @@ nav {
     transition: background 0.3s, transform 0.2s;
 }
 
-.tab.active {
-    background-color: #2a3448; 
-    color: #fff; 
-}
-
 main {
     display: flex;
     justify-content: center;
@@ -145,9 +148,6 @@ main {
     width: 100%;
     text-align: center;
 }
-
-
-
 
 label {
     display: block;
@@ -174,7 +174,6 @@ input {
 }
 
 
-
 button {
     padding: 0.65rem 1.5rem;
     background: #222;
@@ -190,8 +189,6 @@ button:hover {
     border-color: #555;
 }
 
-
-
 .field {
     margin-bottom: 3px;
 }
@@ -204,29 +201,25 @@ button:hover {
     color: #c7c9ff;
 }
 
-.muted {
-    opacity: 0.6;
-}
-
-  .bet-input {
-            display: flex;
-            align-items: center;
-            background: #2a2d52;
-            border-radius: 10px;
-            padding: 6px 10px; 
-            gap: 6px;
-            margin-top: 10px; 
-        }
-
-    .bet-input input {
-        background: transparent;
-        border: none;
-        outline: none;
-        color: #fff;
-        font-size: 0.95rem;
-        width: 100%;
-        padding: 8px 0 4px 0; 
+.bet-input {
+        display: flex;
+        align-items: center;
+        background: #2a2d52;
+        border-radius: 10px;
+        padding: 6px 10px; 
+        gap: 6px;
+        margin-top: 10px; 
     }
+
+.bet-input input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 0.95rem;
+    width: 100%;
+    padding: 8px 0 4px 0; 
+}
 
 
 .currency,
