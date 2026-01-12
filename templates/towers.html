@@ -2,7 +2,7 @@
 
 {% block title %}Towers - AH Gambling{% endblock %}
 
-{% block extra_css %}
+{% block content %}
 <style>
 * {
     margin: 0;
@@ -285,71 +285,54 @@ input[type=number] {
 }
 
 </style>
-{% endblock %}
 
-
-{% block content %}
-<main>
-    <div class="game-layout">
-        <div class="side-panel">
-
-            <div class="panel-card">
-                <div class="field">
-                    <div class="field-header">
-                        <span>Bet Amount</span>
-                        <span class="muted">Tokens</span>
-                    </div>
-
-                    <div class="bet-input">
-                        <span class="currency">$</span>
-                        <input type="number" id="betAmount" value="10" min="1" class="input2">
-                    </div>
-
-                    <div class="bet-actions">
-                        <button onclick="adjustBet(0.5)">½</button>
-                        <button onclick="adjustBet(2)">2×</button>
-                        <button onclick="setMaxBet()">MAX</button>
-                    </div>
+<div class="game-container">
+    <div class="side-panel">
+        <div class="panel-card">
+            <div class="field">
+                <div class="field-header" style="display:flex; justify-content:space-between; font-size:0.8rem; color:#9ca3af;">
+                    <span>Bet Amount</span>
+                    <span>Tokens</span>
                 </div>
-
-                <div class="field">
-                    <div class="field-header">
-                        <span>Towers</span>
-                    </div>
-
-                    <div class="bet-input">
-                        <span class="emoji">💣</span>
-                        <input type="number" id="mineCount" value="3" class="input2">
-                    </div>
+                <div class="bet-input">
+                    <span>$</span>
+                    <input type="number" id="betAmount" value="10" min="1">
                 </div>
-
-                <div id="cashoutInfo" style="margin-bottom: 10px; text-align: center; font-size: 0.95rem; color: #cbd5f5;">
-                    <div>Current Amount: $<span id="currentAmount">0</span></div>
+                <div class="bet-actions">
+                    <button onclick="adjustBet(0.5)">½</button>
+                    <button onclick="adjustBet(2)">2×</button>
+                    <button onclick="setMaxBet()">MAX</button>
                 </div>
             </div>
-        </div>
 
-        <div class="card">
-            <h1>Towers</h1>
-
-            <div class="payout-grid">
-                
-                {% for i in range(24) %}
-                    {% set row = 7 - (i // 3) %}
-                
-                    <div class="payout" data-index="{{ i }}" data-row="{{ row }}">
-                        <span>$</span><span class="payout-value">0</span>
-                    </div>
-                {% endfor %}
+            <div class="field" style="margin-top: 20px;">
+                <label style="font-size:0.8rem; color:#9ca3af;">Mines per Row</label>
+                <div class="bet-input">
+                    <span>💣</span>
+                    <input type="number" id="mineCount" value="1" min="1" max="2">
+                </div>
             </div>
 
-            <button id="playTowersBtn">Play Towers</button>
+            <div id="cashoutInfo" style="margin-top: 20px; text-align: center; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                <div style="font-size: 0.8rem; color: #9ca3af;">Profit Potential</div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: #22c55e;">$<span id="currentAmount">0</span></div>
+            </div>
         </div>
     </div>
-</main>
-{% endblock %}
 
-{% block scripts %}
+    <div class="card">
+        <h2 style="margin-bottom: 10px;">Towers</h2>
+        <div class="payout-grid">
+            {% for i in range(24) %}
+                {% set row = 7 - (i // 3) %}
+                <div class="payout" data-index="{{ i }}" data-row="{{ row }}">
+                    <span>$</span><span class="payout-value">0</span>
+                </div>
+            {% endfor %}
+        </div>
+        <button id="playTowersBtn" class="primary-btn">Play Towers</button>
+    </div>
+</div>
 
     <script>
 
@@ -574,9 +557,6 @@ input[type=number] {
 
     </script>
 {% endblock %}
-
-
-
 
 
 
