@@ -48,10 +48,6 @@ nav {
         font-size: 1.7rem;
     }
 
-    .card {
-        padding: 1.5rem;
-    }
-
     .payout-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 16px 32px;
@@ -126,13 +122,19 @@ nav {
 }
 
 .card {
-    flex-grow: 1;
     background: #111;
     border: 1px solid #333;
-    border-radius: 12px;
-    padding: 2rem;
+    border-radius: 10px;
+    padding: 1.5rem;
     text-align: center;
-    min-height: 600px; 
+    max-width: 520px;
+    width: 100%;
+}
+
+@media (max-width: 420px) {
+    .card {
+        padding: 1.25rem 1rem;
+    }
 }
 
 
@@ -169,6 +171,9 @@ input {
     flex-shrink: 0;
     position: sticky; 
     top: 20px;
+    z-index: 100;          
+    background-color: #000;
+    height: fit-content;   
 }
 
 .card {
@@ -192,9 +197,6 @@ input {
         position: static;
     }
     
-    .card {
-        width: 100%;
-    }
 }
 
 button {
