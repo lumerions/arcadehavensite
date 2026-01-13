@@ -391,6 +391,18 @@
     window.onload = () => {
         if (document.querySelector('.error-message')) openWallet('withdraw');
     };
+    document.addEventListener("DOMContentLoaded", function() {
+        const currentPath = window.location.pathname;
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    });
 </script>
 
 </body>

@@ -120,13 +120,6 @@
             width: 100%;
         }
 
-        h1 {
-            font-size: clamp(1.6rem, 4vw, 2rem);
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #fff, #888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
 
         .grid {
             display: grid;
@@ -349,7 +342,6 @@
 
     
     <div class="card">
-        <h2 style="margin-bottom: 10px;">Towers</h2>
         <div class="payout-grid">
             {% for i in range(24) %}
                 {% set row = 7 - (i // 3) %}

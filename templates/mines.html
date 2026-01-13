@@ -60,13 +60,6 @@
             width: 100%;
         }
 
-        h1 {
-            font-size: clamp(1.6rem, 4vw, 2rem);
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #fff, #888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
 
         .grid {
             display: grid;
@@ -289,7 +282,6 @@
                     <strong>Error:</strong> {{ mines_error }}
                 </p>
             {% endif %}
-            <h1>Mines</h1>
             <div class="grid">
                 {% for i in range(25) %}
                     <div class="cell" data-index="{{ i }}"></div>
