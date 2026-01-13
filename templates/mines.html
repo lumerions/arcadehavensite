@@ -18,6 +18,14 @@
             flex-direction: column;
         }
 
+        .panel-card {
+            background: linear-gradient(180deg, #1e2140, #15162b);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid #2e2f55;
+        }
+
+
         header { border-bottom: 1px solid #333; }
 
         nav {
@@ -49,7 +57,27 @@
             cursor: pointer;
         }
 
+        @media (max-width: 900px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                padding: 10px 10px; 
+            }
 
+            .side-panel {
+                width: 100%;
+                max-width: 520px;
+                position: sticky; 
+                top: 0;           
+                padding: 10px 0;
+                z-index: 101;     
+            }
+
+            .card {
+                width: 100%;
+                margin-top: 10px; 
+            }
+        }
 
         .balance-btn:hover {
             background: #222;
@@ -360,6 +388,12 @@
 
         .side-panel {
             width: 300px;
+            flex-shrink: 0;
+            position: sticky; 
+            top: 20px;
+            z-index: 100;          
+            background-color: #000;
+            height: fit-content;   
         }
 
         .panel-card {
@@ -548,51 +582,23 @@ function setMaxBet() {
 </div>
 
 <main>
-    <main class="game-layout">
-    <aside class="side-panel">
-        <div class="panel-card">
-            <!-- <div class="mode-toggle"> -->
-               <!--   <button class="mode active">Manual</button>  -->
-             <!-- </div> -->
+    <div class="side-panel">
+        {% include "sidepanel.html" %}
 
-            <div class="field">
-                <div class="field-header">
-                    <span>Bet Amount</span>
-                    <span class="muted">Tokens</span>
-                </div>
 
-                <div class="bet-input">
-                    <span class="currency">$</span>
-                        <input type="number" id="betAmount" value="10" min="1" class="input2">
-                </div>
 
-                <div class="bet-actions">
-                    <button onclick="adjustBet(0.5)">½</button>
-                    <button onclick="adjustBet(2)">2×</button>
-                    <button onclick="setMaxBet()">MAX</button>
-                </div>
-            </div>
+        <div class="panel-card" id="cashoutInfo" style="margin-top: 15px; text-align: center;">
+            <div>Multiplier: <span id="multiplier">1x</span></div>
+            <div>Current Amount: $<span id="currentAmount">0</span></div>
+            <div>Amount After Next Tile: $<span id="amountAfter">0</span></div>
+        </div>
+        <button id="playMinesBtn">Play Mines</button>
+    </div>
 
-            <div class="field">
-                <div class="field-header">
-                    <span>Mines</span>
-                </div>
 
-                <div class="bet-input">
-                    <span class="emoji">💣</span>
-                    <input type="number" id="mineCount" value="3"class="input2">
-                </div>
-            </div>
-        
-            <div id="cashoutInfo" style="margin-bottom: 10px; text-align: center; font-size: 0.95rem; color: #cbd5f5;">
-                <div>Multiplier: <span id="multiplier">1x</span></div>
-                <div>Current Amount: $<span id="currentAmount">0</span></div>
-                <div>Amount After Next Tile: $<span id="amountAfter">0</span></div>
-            </div>
 
-            <button id="playMinesBtn">Play Mines</button>
-           
-            <script>
+
+          <script>
             document.getElementById('playMinesBtn').addEventListener('click', async () => {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
                 const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
@@ -701,8 +707,6 @@ function setMaxBet() {
                
             });
             </script>
-        </div>
-    </aside>
 
     <div class="card">
 
