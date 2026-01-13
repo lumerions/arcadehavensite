@@ -9,13 +9,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .panel-card {
-            background: linear-gradient(180deg, #1e2140, #15162b);
-            border-radius: 14px;
-            padding: 16px;
-            border: 1px solid #2e2f55;
-        }
-
         header { border-bottom: 1px solid #333; }
 
         @media (max-width: 900px) {
@@ -161,6 +154,7 @@
             filter: brightness(0.4);
         }
 
+        
         button {
             padding: 0.7rem 1.5rem;
             background: #222;
@@ -169,9 +163,10 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.95rem;
-            width: 100%;
-            max-width: 260px;
-            margin-top: 0.5rem;
+            width: 100%;           
+            max-width: none;       
+            box-sizing: border-box; 
+            margin-top: 12px;      
         }
 
         button:hover {
