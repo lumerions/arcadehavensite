@@ -152,10 +152,11 @@
 
         main {
             flex: 1;
-            padding: 3rem 2rem;
-            background-color: #000;
+            display: flex;
+            justify-content: center;
+            padding: 3rem 1rem;
+            width: 100%; 
         }
-
 
         .modal {
             position: fixed;
@@ -275,8 +276,7 @@
 <div class="app-container">
     <aside class="sidebar">
         <div class="sidebar-label">Navigation</div>
-        <a href="/" class="sidebar-link active">Home</a>
-        
+        <a href="/" class="sidebar-link">Home</a>
         <div class="sidebar-label">Games</div>
         <a href="/towers" class="sidebar-link">Towers</a>
         <a href="/mines" class="sidebar-link">Mines</a>
