@@ -31,22 +31,6 @@ nav {
 }
 
 
-@media (max-width: 768px) {
-    h1 {
-        font-size: 1.7rem;
-    }
-
-    .payout-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px 32px;
-        padding: 20px;
-    }
-
-    .payout {
-        font-size: 0.95rem;
-    }
-}
-
 @media (max-width: 420px) {
     .payout-grid {
         grid-template-columns: 1fr;
@@ -151,9 +135,8 @@ input {
     width: 100%;
     max-width: 1100px;
     margin: 0 auto; 
-    padding: 20px;
+    padding: 40px 20px;
 }
-
 
 .side-panel {
     width: 300px;
@@ -161,9 +144,12 @@ input {
     position: sticky; 
     top: 20px;
     z-index: 100;          
-    background-color: #000;
-    height: fit-content;   
+    display: flex;
+    flex-direction: column;
+    gap: 12px; 
 }
+
+
 
 .card {
     flex-grow: 1;
