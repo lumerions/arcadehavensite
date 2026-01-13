@@ -1,22 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mines - AH Gambling</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+
+
+    {% extends "main.html" %}
+
+    {% block title %}Mines - AH Gambling{% endblock %}
+
+    {% block content %}
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #000;
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
 
         .panel-card {
             background: linear-gradient(180deg, #1e2140, #15162b);
@@ -25,37 +16,7 @@
             border: 1px solid #2e2f55;
         }
 
-
         header { border-bottom: 1px solid #333; }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 1.25rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .logo {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.25rem;
-        }
-
-        .balance-wrapper {
-            margin-left: auto;
-            position: relative;
-        }
-
-        .balance-btn {
-            background: #111;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 0.5rem 1.25rem;
-            border-radius: 6px;
-            cursor: pointer;
-        }
 
         @media (max-width: 900px) {
             .game-container {
@@ -79,45 +40,7 @@
             }
         }
 
-        .balance-btn:hover {
-            background: #222;
-            border-color: #555;
-        }
 
-        .balance-menu {
-            position: absolute;
-            right: 0;
-            top: 120%;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            min-width: 160px;
-            padding: 0.5rem 0;
-            display: none;
-            z-index: 100;
-        }
-
-        .balance-menu a {
-            display: block;
-            padding: 0.5rem 1rem;
-            color: #fff;
-            text-decoration: none;
-            font-size: 0.875rem;
-        }
-
-        .balance-menu a:hover {
-            background: #222;
-        }
-
-        .divider {
-            height: 1px;
-            background: #333;
-            margin: 0.4rem 0;
-        }
-
-        .balance-wrapper.open .balance-menu {
-            display: block;
-        }
 
         main {
             flex: 1;
@@ -214,49 +137,7 @@
                 padding: 1.25rem 1rem;
             }
         }
-       
-        .action-btn {
-            position: relative;  
-            padding: 0.65rem 1.5rem;
-            border: 1px solid #333;
-            color: transparent;  
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            width: 100%;  
-            max-width: 100%; 
-        }
 
-        .action-btn.deposit {
-            background: #16a34a;
-        }
-
-        .action-btn.deposit::after {
-            content: "Initiate Deposit"; 
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);  
-            color: #000;  
-            font-size: 1rem;
-        }
-
-        .action-btn.withdraw {
-            background: #2563eb;
-        }
-
-        .action-btn.withdraw::after {
-            content: "Initiate Withdrawal";  
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);  
-            color: #000;  
-            font-size: 1rem;
-        }
-
-
-        
         .error-message {
             background: #2a3448; 
             color: #f87171;
@@ -272,65 +153,6 @@
         .error-message strong {
             font-weight: 600; 
         }
-        
-                
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.75);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-        }
-        
-        .modal.open {
-            display: flex;
-        }
-        
-        .wallet {
-            background: #1c2433;
-            border-radius: 14px;
-            width: 420px;
-            padding: 20px;
-            position: relative;
-        }
-        
-        .wallet-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .wallet-header h2 {
-            font-size: 1.2rem;
-        }
-        
-        .close {
-            cursor: pointer;
-            font-size: 1.4rem;
-            color: #9ca3af;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 8px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            background: #2a3448;
-            color: #cbd5f5;
-        }
-        
-        .tab.active.deposit { background: #16a34a; color:#fff; }
-        .tab.active.withdraw { background: #2563eb; color:#fff; }
         
         label {
             display: block;
@@ -370,16 +192,6 @@
         }
 
         
-        .instructions {
-            background: #2a3448;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: .85rem;
-            text-align: left;
-            color: #cbd5f5;
-            margin-bottom: 16px;
-        }
-
         .game-layout {
             display: flex;
             gap: 24px;
@@ -404,29 +216,6 @@
             border: 1px solid #2e2f55;
         }
 
-        .mode-toggle {
-            display: flex;
-            background: #2a2d52;
-            border-radius: 10px;
-            padding: 4px;
-            margin-bottom: 16px;
-        }
-
-        .mode {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #c7c9ff;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .mode.active {
-            background: #8b2cff;
-            color: #fff;
-        }
-
         .field {
             margin-bottom: 3px;
         }
@@ -443,51 +232,10 @@
             opacity: 0.6;
         }
 
-        .bet-input {
-            display: flex;
-            align-items: center;
-            background: #2a2d52;
-            border-radius: 10px;
-            padding: 6px 10px; 
-            gap: 6px;
-            margin-top: 10px; 
-        }
-
-        .bet-input input {
-            background: transparent;
-            border: none;
-            outline: none;
-            color: #fff;
-            font-size: 0.95rem;
-            width: 100%;
-            padding: 8px 0 4px 0; 
-        }
-
-        
         .currency,
         .emoji {
             opacity: 0.7;
             font-size: 0.9rem; 
-        }
-
-        .bet-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .bet-actions button {
-            flex: 1;
-            background: #343769;
-            border: none;
-            border-radius: 8px;
-            padding: 6px;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        .bet-actions button:hover {
-            background: #4a4ee8;
         }
 
         @media (max-width: 900px) {
@@ -523,75 +271,6 @@
     </style>
 </head>
 
-<script>
-function adjustBet(multiplier) {
-    const input = document.getElementById('betAmount');
-    const value = parseFloat(input.value) || 0;
-    input.value = Math.max(1, Math.floor(value * multiplier));
-}
-
-function setMaxBet() {
-    const input = document.getElementById('betAmount');
-    const balanceBtn = document.querySelector('.balance-btn');
-
-    const balanceText = balanceBtn.textContent.replace(/\$|,/g, '');
-    const balanceNumber = parseFloat(balanceText) || 0;
-
-    input.value = balanceNumber;
-}
-</script>
-
-<body>
-<header>
-<nav>
-    <a href="/" class="logo">AH Gambling</a>
-
-    <div class="balance-wrapper">
-        <button class="balance-btn">$1,000</button>
-        <div class="balance-menu">
-            <a id="openDeposit">Deposit</a>
-            <a id="openWithdraw">Withdraw</a>
-            <div class="divider"></div>
-            <a href="/logout">Log out</a>
-        </div>
-    </div>
-</nav>
-</header>
-
-
-    
-<div class="modal" id="walletModal">
-    <div class="wallet">
-        <div class="wallet-header">
-            <h2>Wallet</h2>
-            <span class="close">&times;</span>
-        </div>
-
-        <div class="tabs">
-            <button class="tab deposit active">Deposit</button>
-            <button class="tab withdraw">Withdraw</button>
-        </div>
-
-        {% if wallet_error %}
-            <p class="error-message">
-                <strong>Error:</strong> {{ wallet_error }}
-            </p>
-        {% endif %}
-
-
-        <label>Amount</label>
-        <input type="text" id="amount" value="">
-        <div class="instructions" id="instructions"></div>
-
-        <button class="action-btn deposit" id="depositBtn">
-            Initiate Deposit
-        </button>
-        <button class="action-btn withdraw" id="withdrawBtn">
-            Initiate Withdrawal
-        </button>
-    </div>
-</div>
-
 <main>
     <div class="game-container">
         <div class="side-panel">
@@ -620,7 +299,24 @@ function setMaxBet() {
     </div>
 </main>
 
-          <script>
+    <script>
+
+            function adjustBet(multiplier) {
+                const input = document.getElementById('betAmount');
+                const value = parseFloat(input.value) || 0;
+                input.value = Math.max(1, Math.floor(value * multiplier));
+            }
+
+            function setMaxBet() {
+                const input = document.getElementById('betAmount');
+                const balanceBtn = document.querySelector('.balance-btn');
+
+                const balanceText = balanceBtn.textContent.replace(/\$|,/g, '');
+                const balanceNumber = parseFloat(balanceText) || 0;
+
+                input.value = balanceNumber;
+            }
+
             document.getElementById('playMinesBtn').addEventListener('click', async () => {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
                 const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
@@ -807,171 +503,8 @@ function setMaxBet() {
             });
         });
 
-    </script>
-
-    <div class="modal" id="walletModal">
-    <div class="wallet">
-        <div class="wallet-header">
-            <h2>Wallet</h2>
-            <span class="close">&times;</span>
-        </div>
-
-        <div class="tabs">
-            <button class="tab deposit active">Deposit</button>
-            <button class="tab withdraw">Withdraw</button>
-        </div>
-
-        {% if error %}
-            <p class="error-message">
-                <strong>Error:</strong> {{ error }}
-            </p>
-        {% endif %}
-
-
-
-        <label>Amount</label>
-        <input type="text" id="amount" value="">
-        <div class="instructions" id="instructions"></div>
-
-        <button class="action-btn deposit" id="depositBtn">
-            Initiate Deposit
-        </button>
-        <button class="action-btn withdraw" id="withdrawBtn">
-            Initiate Withdrawal
-        </button>
-    </div>
-</div>
-
-
-    <script>
-        
-            const wrapper = document.querySelector('.balance-wrapper');
-            const modal = document.getElementById('walletModal');
-            const closeBtn = document.querySelector('.close');
-            const tabs = document.querySelectorAll('.tab');
-            const depositBtn = document.getElementById('depositBtn');
-            const withdrawBtn = document.getElementById('withdrawBtn');
-            const instructions = document.getElementById('instructions');
-            const inputField = document.getElementById('amount');
-    
-            async function getData() {
-                try {
-                    const response = await fetch('/getbalance');
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                        const data = await response.text(); 
-                        const number = parseFloat(data);
-                
-                        if (isNaN(number)) {
-                            console.error('Error: The response is not a valid number');
-                            return "Something went wrong!";
-                        }
-    
-                        return number
-                } catch (error) {
-                    console.error('There was a problem with the fetch operation:', error);
-                }
-            }
-            let count = 0;
-    
-            function formatWithCommas(num) {
-                return num.toLocaleString();
-            }
-    
-            async function updateBalance() {
-                let balance = await getData();
-                if (typeof balance === 'number') {
-                    balance = balance.toLocaleString(); 
-                    document.querySelector('.balance-btn').textContent = `$${balance}`;
-                } else {
-                    document.querySelector('.balance-btn').textContent = "Error loading balance";
-                }
-            }
-    
-            updateBalance();
-    
-            document.querySelector('.balance-btn').onclick = () => {
-                wrapper.classList.toggle('open');
-            };
-    
-            document.getElementById('openDeposit').onclick = () => openWallet('deposit');
-            document.getElementById('openWithdraw').onclick = () => openWallet('withdraw');
-    
-            closeBtn.onclick = () => modal.classList.remove('open');
-            modal.onclick = e => e.target === modal && modal.classList.remove('open');
-    
-            function openWallet(type) {
-                modal.classList.add('open');
-                switchTab(type);
-            }
-    
-            function switchTab(type) {
-                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    
-                const tab = document.querySelector('.tab.' + type);
-                tab.classList.add('active');
-    
-                if (type === 'deposit') {
-                    depositBtn.style.display = 'inline-block';
-                    withdrawBtn.style.display = 'none';
-    
-                    instructions.innerHTML =
-                        `How to deposit:<br>1. Enter the amount you want to deposit<br>2. Click "Initiate Deposit"<br>3. Complete deposit in-game`;
-                    inputField.value = '';
-                    inputField.placeholder = 'Enter amount to deposit';
-                } else {
-                    const errorMessage = document.querySelector('.error-message');
-    
-                    if (errorMessage) { 
-                        if (count === 0) {
-                            count = count + 1;  
-                        } else { 
-                            errorMessage.remove();
-                        }
-                    }
-    
-                    withdrawBtn.style.display = 'inline-block';
-                    depositBtn.style.display = 'none';
-    
-                    instructions.innerHTML =
-                        `How to withdraw:<br>1. Enter the amount you want to withdraw<br>2. Click "Initiate Withdrawal"<br>3. Complete withdrawal in-game`;
-                    inputField.value = '';
-                    inputField.placeholder = 'Enter amount to withdraw';
-                }
-            }
-    
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const type = tab.classList.contains('deposit') ? 'deposit' : 'withdraw';
-                    switchTab(type);
-                });
-            });
-    
-            depositBtn.onclick = async () => {
-                const amount = parseFloat(inputField.value);
-            
-                if (isNaN(amount) || amount <= 0) {
-                    alert('Please enter a valid amount');
-                    return;
-                }
-            
-                window.location.href = `/deposit?amount=${encodeURIComponent(amount)}`;
-            };
-    
-            withdrawBtn.onclick = () => {
-                const amount = parseFloat(inputField.value);
-    
-                if (isNaN(amount) || amount <= 0) {
-                    alert('Please enter a valid amount');
-                    return;
-                }
-    
-                window.location.href = `/withdraw?amount=${encodeURIComponent(amount)}&page=${encodeURIComponent("mines")}`;
-            };
-    
-            window.onload = async function() {
-                const errorMessage = document.querySelector('.error-message');
+        async function Initiate() {
+             const errorMessage = document.querySelector('.error-message');
                 if (errorMessage) {
                     openWallet('withdraw');
                 }
@@ -992,8 +525,6 @@ function setMaxBet() {
                 document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
                 document.getElementById('currentAmount').textContent = currentAmount;
                 document.getElementById('amountAfter').textContent = amountAfterNextTile;
-
-               
 
                 async function restoreRevealedTiles() {
                     try {
@@ -1029,15 +560,12 @@ function setMaxBet() {
                     }
                 }
 
-                restoreRevealedTiles()
-            
-            };
+            restoreRevealedTiles()
+        }     
+
+        Initiate();          
     </script>
-</body>
-</html>
-
-
-
+{% endblock %}
 
 
 

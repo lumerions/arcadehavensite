@@ -178,7 +178,8 @@ input {
     .game-container {
         flex-direction: column;
         align-items: center;
-        padding: 10px 10px; 
+        padding: 10px;
+        height: auto; 
     }
 
     .side-panel {
@@ -187,29 +188,42 @@ input {
         position: sticky; 
         top: 0;           
         padding: 10px 0;
-        z-index: 101;     
+        z-index: 1000; 
+        background-color: #000; 
     }
 
     .card {
         width: 100%;
-        margin-top: 10px; 
+        margin-top: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+
+    .payout-grid {
+        gap: 10px;
+        padding: 15px;
     }
 }
 
 button {
-    padding: 0.65rem 1.5rem;
+    padding: 0.7rem 1.5rem;
     background: #222;
     border: 1px solid #333;
     color: #fff;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.95rem;
+    width: 100%;
+    max-width: 260px;
+    margin-top: 0.5rem;
 }
 
 button:hover {
     background: #333;
     border-color: #555;
 }
+
 
 .field {
     margin-bottom: 3px;
