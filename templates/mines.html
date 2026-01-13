@@ -40,67 +40,7 @@
             }
         }
 
-        @media (max-width: 420px) {
-            .payout-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-                padding: 18px;
-            }
 
-            .payout {
-                font-size: 0.9rem;
-            }
-
-            button {
-                width: 100%;
-            }
-        }
-
-        .payout {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #d1d5db;
-            user-select: none;
-        }
-
-        .payout span {
-            color: #22c55e; 
-            font-size: 1.1rem;
-        }
-
-        .payout.reveal {
-            background-color: #272727; 
-            border: 2px solid #22c55e; 
-            border-radius: 8px;
-            color: #22c55e; 
-            font-weight: 600;
-            transition: background 0.3s, transform 0.2s;
-        }
-
-        .payout.mine {
-            background-color: #b91c1c; 
-            border: 2px solid #f87171; 
-            border-radius: 8px;
-            color: #f87171; 
-            font-weight: 700;
-            transition: background 0.3s, transform 0.2s;
-        }
-
-
-        .payout-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px 60px;
-            background: #1c1c1c;
-            border: 1px solid #2e2e2e;
-            border-radius: 14px;
-            padding: 24px 32px;
-            margin: 1.5rem 0;
-        }
 
         main {
             flex: 1;
@@ -332,37 +272,34 @@
 </head>
 
 <main>
+    <div class="game-container">
+        <div class="side-panel">
+            {% include "sidepanel.html" %}
+            <div class="panel-card" id="cashoutInfo" style="margin-top: 15px; text-align: center;">
+                <div>Multiplier: <span id="multiplier">1x</span></div>
+                <div>Current Amount: $<span id="currentAmount">0</span></div>
+                <div>Amount After Next Tile: $<span id="amountAfter">0</span></div>
+            </div>
+            <button id="playMinesBtn">Play Mines</button>
+        </div>
 
-<div class="game-container">
-
-    <div class="side-panel">
-        {% include "sidepanel.html" %}
-
-        <div class="panel-card" id="cashoutInfo" style="margin-top: 15px; text-align: center;">
-            <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 4px;">Profit Potential</div>
-            <div style="font-size: 1.2rem; font-weight: bold; color: #22c55e;">
-                $<span id="currentAmount">0</span>
+        <div class="card">
+            {% if mines_error %}
+                <p class="error-message">
+                    <strong>Error:</strong> {{ mines_error }}
+                </p>
+            {% endif %}
+            <h1>Mines</h1>
+            <div class="grid">
+                {% for i in range(25) %}
+                    <div class="cell" data-index="{{ i }}"></div>
+                {% endfor %}
             </div>
         </div>
-        <button id="playTowersBtn" class="primary-btn">Play Towers</button>
     </div>
-
-    
-    <div class="card">
-        <h2 style="margin-bottom: 10px;">Towers</h2>
-        <div class="payout-grid">
-            {% for i in range(24) %}
-                {% set row = 7 - (i // 3) %}
-                <div class="payout" data-index="{{ i }}" data-row="{{ row }}">
-                    <span>$</span><span class="payout-value">0</span>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
 </main>
 
- <script>
+    <script>
 
             function adjustBet(multiplier) {
                 const input = document.getElementById('betAmount');
@@ -380,221 +317,548 @@
                 input.value = balanceNumber;
             }
 
-            document.getElementById('playTowersBtn').addEventListener('click', async () => {
+            document.getElementById('playMinesBtn').addEventListener('click', async () => {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
                 const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
-                const playBtn = document.getElementById('playTowersBtn');
-            
+                const playBtn = document.getElementById('playMinesBtn');
+
                 if (playBtn.textContent.includes('Cashout')) {
-                    try {
+                      try {
                         const response = await fetch('/games/cashout', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
                             credentials: 'include',
-                            body: JSON.stringify({ Game: "Towers" })
                         });
-            
+                
                         if (!response.ok) throw new Error('Request failed');
-            
-                        if (response.redirected) window.location.href = response.url;
-            
-                        const result =  await response.json();
+                
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        }
+      
+                        const result = await response.json();
                         const mines = result.mines;
-            
+
                         if (Array.isArray(mines)) {
-                            document.querySelectorAll('.payout').forEach(cellEl => {
+                            document.querySelectorAll('.cell').forEach(cellEl => {
                                 const index = Number(cellEl.dataset.index);
-                                const r = Number(cellEl.dataset.row);
-                                const payoutEl = cellEl.querySelector('.payout-value');
-                                const dollarEl = cellEl.querySelector('span'); 
-            
-                                cellEl.classList.remove('mine', 'reveal');
-            
+                        
                                 if (mines.includes(index)) {
+                                    cellEl.textContent = '💣';
                                     cellEl.classList.add('mine');
-                                    if (dollarEl) dollarEl.style.display = 'none'; 
-                                    if (payoutEl) payoutEl.textContent = '💣';
-                                } else if (cellEl.classList.contains('clicked')) {
+                                } else if (!cellEl.classList.contains('clicked')) {
                                     cellEl.classList.add('reveal');
-                                    if (payoutEl) {
-                                        const betA = Number(result.betamount) || 0;
-                                        let mine_multiplier = (result.mines.length / 23) ** 1.5 + 0.1;  
-                                        let cashAmount = Math.floor(betA * (r + 1) * mine_multiplier * 0.4);
-                                        payoutEl.textContent = cashAmount;
-                                    }
+                                } else {
+                                    cellEl.textContent = '$';
                                 }
                             });
                         }
-            
-                         updateBalance();
-                        playBtn.style.backgroundColor = '';
-                        playBtn.textContent = 'Play Towers';
-            
+
+                    updateBalance();
+                    playBtn.style.backgroundColor = '';
+                    playBtn.textContent = 'Play Mines';
+
                     } catch (err) {
-                        console.error('Error starting Towers:', err);
-                        alert('Failed to start Towers. Please try again.');
+                        console.error('Error starting Mines:', err);
+                        alert('Failed to start Mines. Please try again.');
                     }
                 } else {
                     try {
-                        const Game = "Towers";
-                        const response =  await fetch('/games/start', {
+                        const Game = "Mines"
+                        const response = await fetch('/games/start', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
                             credentials: 'include',
-                            body: JSON.stringify({ betAmount, mineCount, Game })
+                            body: JSON.stringify({ betAmount, mineCount, Game})
                         });
-            
+                
                         if (!response.ok) throw new Error('Request failed');
-            
-                        if (response.redirected) window.location.href = response.url;
-            
-                    } catch (err) {
-                        console.error('Error starting Towers:', err);
-                        alert('Failed to start Towers. Please try again.');
-                    }
-                }
-            });
-
-            document.querySelectorAll('.payout').forEach(cell => {
-                cell.addEventListener('click', async () => {
-                    if (cell.classList.contains('revealed')) return;
-            
-                    const grid = document.querySelector('.payout-grid');
-                    if (grid.classList.contains('gamedone')) return;
-            
-                    const tileIndex = cell.dataset.index;
-                    const Row = cell.dataset.row;
-                    const playBtn = document.getElementById('playTowersBtn');
-                    const Game = "Towers";
-            
-                    try {
-                        const response =  await fetch('/games/click', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ tileIndex, Game })
-                        });
-                    
-                        if (!response.ok) throw new Error('Request failed');
-                    
-                        const result = await response.json();
-                        const mines = result.mines;
-                    
-                        if (result.ismine && Array.isArray(mines)) {
-                            document.querySelectorAll('.payout').forEach(cellEl => {
-                                const index = Number(cellEl.dataset.index);
-                                const payoutEl = cellEl.querySelector('.payout-value');
-                                const dollarEl = cellEl.querySelector('span'); 
-                    
-                                cellEl.classList.remove('mine', 'reveal');
-                    
-                                if (mines.includes(index)) {
-                                    cellEl.classList.add('mine');
-                                    if (dollarEl) dollarEl.style.display = 'none'; 
-                                    if (payoutEl) payoutEl.textContent = '💣';
-                                } else if (cellEl.classList.contains('clicked') && index == tileIndex) {
-                                    cellEl.classList.add('reveal');
-                                    if (payoutEl) {
-                                        const row = Number(cellEl.dataset.row);
-                                        const bet = Number(result.betamount) || 0;
-                                        const mineCount = Number(result.minescount) || 0;
-                                        let mine_multiplier = (mineCount / 23) ** 1.5 + 0.1;  
-                                        let cashAmount = Math.floor(bet * (row + 1) * mine_multiplier * 0.4);
-                                        payoutEl.textContent = cashAmount;
-                                    }
-                                }
-                            });
-                    
-                            const playBtn = document.getElementById('playTowersBtn');
-                            playBtn.style.backgroundColor = '';
-                            playBtn.textContent = 'Play Towers';
-                            document.getElementById('currentAmount').textContent = '0';
-                            document.querySelector('.payout-grid').classList.add('gamedone');
-                    
-                        } else { 
-                            cell.classList.add('clicked', 'revealed');
-                            const rowValue = cell.dataset.row;
-                            const playBtn = document.getElementById('playTowersBtn');
-                    
-                            const cashoutResponse = await fetch(`/games/cashoutamount?Game=Towers&Row=${rowValue}`, { method: 'GET', credentials: 'include' });
-                            if (!cashoutResponse.ok) return;
-                    
-                            const data =  await cashoutResponse.json();
-                            const currentAmount = data.amount;
-                            cell.classList.add('reveal'); 
-                            document.getElementById('currentAmount').textContent = currentAmount;
-                            playBtn.style.backgroundColor = '#16a34a';
-                            playBtn.textContent = 'Cashout';
+                
+                        if (response.redirected) {
+                            window.location.href = response.url;
                         }
-                    
+                
                     } catch (err) {
-                        console.error('Error handling tile click:', err);
+                        console.error('Error starting Mines:', err);
+                        alert('Failed to start Mines. Please try again.');
                     }
 
-                });
+                }
+               
             });
-
-            let row = -1;
         
-            async function restoreRevealedTiles() {
-                const response =  await fetch('/games/getCurrentData', { credentials: 'include' });
-                if (!response.ok) return;
+        document.querySelectorAll('.cell').forEach(cell => {
+            cell.addEventListener('click', async () => {
+                if (cell.classList.contains('revealed')) return;
         
-                const revealedIndices = await response.json();
+                const grid = document.querySelector('.grid');
+                if (grid.classList.contains('gamedone')) return;
         
-                document.querySelectorAll('.payout').forEach(cell => {
-                    const index = Number(cell.dataset.index);
-                    const maxRow = 8;
-                    const currentrow = maxRow - 1 - Math.floor(index / 3);
-        
-                    if (currentrow > row) row = currentrow;
-        
-                    if (revealedIndices.includes(index)) {
-                        cell.classList.add('reveal');
-                    }
-                });
-        
-                const playBtn = document.getElementById('playTowersBtn');
-                playBtn.textContent = revealedIndices.length ? 'Cashout' : 'Play Towers';
-                playBtn.style.backgroundColor = revealedIndices.length ? '#16a34a' : '';
-            }
-
-            async function initGame() {
-                await restoreRevealedTiles();
+                const tileIndex = cell.dataset.index;
+                const playBtn = document.getElementById('playMinesBtn');
+                const Game = "Mines";
 
                 try {
-                    const response = await fetch(`/games/cashoutamount?Game=Towers&Row=${row}`, { 
-                        credentials: 'include' 
+                    const response = await fetch('/games/click', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ tileIndex,Game })
                     });
-
-                    if (response.ok) {
-                        const data = await response.json(); 
-                        
-                        const currentamount = Number(data.amount) || 0;
-                        document.getElementById('currentAmount').textContent = currentamount;
-
-                        document.querySelectorAll('.payout').forEach(cell => {
-                            const payoutEl = cell.querySelector('.payout-value');
-                            if (payoutEl) {
-                                const row = Number(cell.dataset.row);
-                                const betamount = Number(data.betamount) || 0;
-                                const mineCount = Number(data.minescount) || 0;
-                                let mine_multiplier = mineCount / 23 ** 1.5 + 0.1
-                                let cashAmount = Math.floor(betamount * (row + 1) * mine_multiplier * 0.4)
-                                payoutEl.textContent = cashAmount;
-                            } else {
-                                console.warn('Invalid payout element', cell);
+        
+                    if (!response.ok) throw new Error('Request failed');
+        
+                    const result = await response.json();
+                    const mines = result.mines;
+        
+                    if (result.ismine && Array.isArray(mines)) {
+                        document.querySelectorAll('.cell').forEach(cellEl => {
+                            const index = Number(cellEl.dataset.index);
+                            if (mines.includes(index)) {
+                                cellEl.textContent = '💣';
+                                cellEl.classList.add('mine');
+                            } else if (!cellEl.classList.contains('clicked')) {
+                                cellEl.classList.add('reveal');
                             }
                         });
+        
+                        playBtn.style.backgroundColor = '';
+                        playBtn.textContent = 'Play Mines';
+                        document.getElementById('multiplier').textContent = '1x';
+                        document.getElementById('currentAmount').textContent = '0';
+                        document.getElementById('amountAfter').textContent = '0';
+        
+                        grid.classList.add('gamedone');
+        
+                    } else { 
+                        cell.textContent = '$';
+                        cell.classList.add('clicked');
+                        cell.classList.add('revealed');
+        
+                        const game = "Mines"; 
+                        
+                        const cashoutResponse = await fetch(`/games/cashoutamount?Game=${encodeURIComponent(game)}`, {
+                            method: 'GET',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                        });
+        
+                        if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
+        
+                        const data = await cashoutResponse.json();
+        
+                        const currentAmount = data.amount;
+                        const amountAfterNextTile = data.amountafter;
+                        const multiplier = data.multiplier;
+        
+                        document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+                        document.getElementById('currentAmount').textContent = currentAmount;
+                        document.getElementById('amountAfter').textContent = amountAfterNextTile;
+        
+                        playBtn.style.backgroundColor = '#16a34a';
+                        playBtn.textContent = 'Cashout';
                     }
+        
                 } catch (err) {
-                    console.error("Initialization error:", err);
+                    console.error('Error handling tile click:', err);
                 }
-            }
+            });
+        });
 
-            initGame();
+        async function Initiate() {
+             const errorMessage = document.querySelector('.error-message');
+                if (errorMessage) {
+                    openWallet('withdraw');
+                }
+
+                const cashoutResponse = await fetch('/games/cashoutamount?Game=Mines', {
+                    method: 'GET',
+                    credentials: 'include', 
+                });
+
+                if (!cashoutResponse.ok) throw new Error('Failed to fetch cashout info');
+
+                const data = await cashoutResponse.json();
+
+                const currentAmount = data.amount;
+                const amountAfterNextTile = data.amountafter;
+                const multiplier = data.multiplier;
+
+                document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+                document.getElementById('currentAmount').textContent = currentAmount;
+                document.getElementById('amountAfter').textContent = amountAfterNextTile;
+
+                async function restoreRevealedTiles() {
+                    try {
+                        const response = await fetch('/games/getCurrentData', {
+                            credentials: 'include' 
+                        });
+                
+                        if (!response.ok) throw new Error('Failed to fetch current mines data');
+                
+                        const revealedIndices = await response.json(); 
+                
+                        document.querySelectorAll('.cell').forEach(cell => {
+                            const index = Number(cell.dataset.index);
+                
+                            if (revealedIndices.includes(index)) {
+                                cell.textContent = '$';
+                                cell.classList.add('clicked', 'revealed'); 
+                            }
+                        });
+
+                        const playBtn = document.getElementById('playMinesBtn');
+
+                        if (revealedIndices.length > 0) {
+                            playBtn.style.backgroundColor = '#16a34a';
+                            playBtn.textContent = 'Cashout';
+                        } else {
+                            playBtn.style.backgroundColor = ''; 
+                            playBtn.textContent = 'Play Mines';
+                        }
+                
+                    } catch (err) {
+                        console.error('Error restoring revealed tiles:', err);
+                    }
+                }
+
+            restoreRevealedTiles()
+        }     
+
+        Initiate();          
     </script>
 {% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

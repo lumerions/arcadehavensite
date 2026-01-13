@@ -2,7 +2,7 @@
 
     {% extends "main.html" %}
 
-    {% block title %}Mines - AH Gambling{% endblock %}
+    {% block title %}Towers - AH Gambling{% endblock %}
 
     {% block content %}
 
@@ -40,7 +40,67 @@
             }
         }
 
+        @media (max-width: 420px) {
+            .payout-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+                padding: 18px;
+            }
 
+            .payout {
+                font-size: 0.9rem;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        .payout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #d1d5db;
+            user-select: none;
+        }
+
+        .payout span {
+            color: #22c55e; 
+            font-size: 1.1rem;
+        }
+
+        .payout.reveal {
+            background-color: #272727; 
+            border: 2px solid #22c55e; 
+            border-radius: 8px;
+            color: #22c55e; 
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .payout.mine {
+            background-color: #b91c1c; 
+            border: 2px solid #f87171; 
+            border-radius: 8px;
+            color: #f87171; 
+            font-weight: 700;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+
+        .payout-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px 60px;
+            background: #1c1c1c;
+            border: 1px solid #2e2e2e;
+            border-radius: 14px;
+            padding: 24px 32px;
+            margin: 1.5rem 0;
+        }
 
         main {
             flex: 1;
@@ -535,12 +595,6 @@
             initGame();
     </script>
 {% endblock %}
-
-
-
-
-
-
 
 
 
