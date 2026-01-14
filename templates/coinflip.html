@@ -22,7 +22,6 @@ body {
     align-items: center;
 }
 
-/* Stats cards + create match button */
 .coinflip-controls {
     display: flex;
     flex-direction: column;
@@ -73,7 +72,6 @@ body {
     background: #1d4ed8;
 }
 
-/* Coinflip container */
 .coinflip-container {
     width: 100%;
     max-height: 900px;
@@ -93,7 +91,6 @@ body {
     border-radius: 4px;
 }
 
-/* Match card */
 .match-card {
     background: #1e1e2e;
     border: 1px solid #333;
@@ -144,7 +141,6 @@ body {
     color: #fff;
 }
 
-/* Items preview */
 .items-preview {
     display: flex;
     gap: 6px;
@@ -181,7 +177,6 @@ body {
     color: #ccc;
 }
 
-/* Actions buttons */
 .match-actions {
     display: flex;
     gap: 8px;
@@ -224,7 +219,6 @@ body {
 </style>
 
 <div class="coinflip-page">
-    <!-- Controls -->
     <div class="coinflip-controls">
         <div class="stats-cards">
             <div class="stat-card">
@@ -248,45 +242,7 @@ body {
         <button class="create-btn" id="createMatchBtn">Create Match</button>
     </div>
 
-    <!-- Coinflip container -->
     <div class="coinflip-container">
-        <!-- Example match -->
-        <div class="match-card" data-id="1">
-            <div class="players">
-                <div class="player">
-                    <img class="player-avatar" src="/static/images/player1.png" alt="Player 1">
-                    <img class="player-item" src="/static/images/item1.png" alt="Item 1">
-                </div>
-
-                <div class="vs-text">VS</div>
-
-                <div class="player">
-                    <img class="player-avatar" src="/static/images/player2.png" alt="Player 2">
-                    <img class="player-item" src="/static/images/item2.png" alt="Item 2">
-                </div>
-            </div>
-
-            <div class="items-preview">
-                {% set display_items = example_items[:5] %}
-                {% for item in display_items %}
-                <div class="preview-item">
-                    <img src="{{ item.image }}" alt="">
-                </div>
-                {% endfor %}
-                {% if example_items|length > 5 %}
-                <div class="preview-item more">
-                    +{{ example_items|length - 5 }}
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="match-actions">
-                <button class="match-btn join-btn">Join</button>
-                <button class="match-btn view-btn">View</button>
-            </div>
-        </div>
-
-        <!-- Matches from backend -->
         {% for match in matches %}
         <div class="match-card" data-id="{{ match.id }}">
             <div class="players">
