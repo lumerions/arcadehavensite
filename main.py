@@ -178,6 +178,10 @@ def loadmines(request: Request):
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
+@app.get("/coinflipgamer",response_class =  HTMLResponse)
+def towers(request: Request):
+    return CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
+
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","home.html")
