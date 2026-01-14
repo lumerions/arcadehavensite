@@ -107,7 +107,7 @@ redis = Redis(
 def getPostgresConnection():
     global postgresConnection
     if postgresConnection is None or postgresConnection.closed:
-        postgresConnection = psycopg.connect(os.environ["POSTGRES_DATABASE_URL"])
+        postgresConnection = psycopg.connect(os.environ["POSTGRES_DATABASE_URL"], autocommit=True)
     return postgresConnection
 
 templates = Jinja2Templates(directory="templates")
@@ -205,20 +205,9 @@ def get(SessionId: str = Cookie(None)):
     mainCollection = mainMongo["collection"]
 
     try:
-        conn = getPostgresConnection() 
-
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-            result = cursor.fetchone()  
-            if not result:
-                return {"error": "Session not found"}
-            username = result[0]
-    except Exception as error:
-        return {"error": str(error)}
-    
-    try:
-        doc = mainCollection.find_one({"username": username})
+        doc = mainCollection.find_one({"sessionid": SessionId})
         print(doc)
+        
     except Exception as error:
         return {"error": str(error)}
     
@@ -1160,15 +1149,6 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     )
 
     return RedirectResponse(roblox_url)
-
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
-
-
-
 
 
 if __name__ == "__main__":
