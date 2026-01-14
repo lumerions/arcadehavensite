@@ -205,7 +205,19 @@ def get(SessionId: str = Cookie(None)):
     mainCollection = mainMongo["collection"]
 
     try:
-        doc = mainCollection.find_one({"username": SessionId})
+        conn = getPostgresConnection() 
+
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
+            if not result:
+                return {"error": "Session not found"}
+            username = result[0]
+    except Exception as error:
+        return {"error": str(error)}
+    
+    try:
+        doc = mainCollection.find_one({"username": username})
         
     except Exception as error:
         return {"error": str(error)}
@@ -510,10 +522,13 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         SessionId + ":cashed",
         SessionId + "BetAmount",
         "ClickData." + SessionId,
-        SessionId + "Cleared"
+        SessionId + "Cleared",
+        SessionId + "Cashout",
     ]
 
-    mines_raw, towers_active, GameActive, currentRow, cashedAlready, bet_amount, data_raw, tilescleared =  redis.mget(*keys)
+    mines_raw, towers_active, GameActive, currentRow, cashedAlready, bet_amount, data_raw, tilescleared,CashoutAvailable =  redis.mget(*keys)
+
+    CashoutAvailable = CashoutAvailable or 0
 
     def decode(value):
         if value is None:
@@ -595,9 +610,13 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         mine_multiplier = ((len(mines) / 23) ** 1.5) + 0.1
         payout = bet_amount * (row + 1) * mine_multiplier * 0.4
         payout = math.floor(payout)
-        redis.incrby(SessionId + "Cashout", payout)
-        redis.set("ClickData." + SessionId, json.dumps(existing_array))
-        redis.incrby(SessionId + "Row", 1)
+        payoutset = CashoutAvailable + payout
+        rowset = currentRow + 1
+        redis.mset({
+            "ClickData." + SessionId: json.dumps(existing_array),
+            SessionId + "Cashout": payoutset,
+            SessionId + "Row": rowset
+        })
         return JSONResponse({"ismine": False, "betamount": bet_amount, "minescount": len(mines)})
     elif Game == "Mines":
         total_tiles = 25
@@ -1141,6 +1160,15 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     )
 
     return RedirectResponse(roblox_url)
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
+
 
 
 if __name__ == "__main__":
