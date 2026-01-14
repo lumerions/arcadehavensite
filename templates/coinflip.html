@@ -6,96 +6,78 @@
 <style>
     * { box-sizing: border-box; }
 
-    .game-container {
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0b0b0b;
+        color: #fff;
+    }
+
+    .coinflip-container {
+        max-width: 600px;
+        margin: 40px auto;
         display: flex;
-        gap: 24px;
-        width: 100%;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 20px;
+        flex-direction: column;
+        gap: 20px;
     }
 
-    .side-panel {
-        width: 300px;
-        flex-shrink: 0;
-        position: sticky;
-        top: 20px;
-        height: fit-content;
-    }
-
-    .panel-card {
-        background: linear-gradient(180deg, #1e2140, #15162b);
-        border-radius: 14px;
-        padding: 16px;
-        border: 1px solid #2e2f55;
-        margin-bottom: 14px;
-    }
-
-    .panel-title {
-        font-size: 0.85rem;
-        color: #9ca3af;
-        margin-bottom: 6px;
-    }
-
-    .panel-value {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #22c55e;
-        text-align: center;
-    }
-
-    .primary-btn {
-        width: 100%;
-        padding: 12px;
+    .create-btn {
+        padding: 14px;
         background: #2563eb;
         border: none;
         border-radius: 8px;
-        color: #fff;
+        font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
-        margin-top: 10px;
+        transition: background 0.2s;
     }
 
-    .primary-btn:hover {
+    .create-btn:hover {
         background: #1d4ed8;
     }
 
-    .danger-btn {
-        background: #b91c1c;
+    .matches-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 4px; /* For scrollbar spacing */
     }
 
-    .danger-btn:hover {
-        background: #991b1b;
-    }
-
-
-    .card {
-        flex: 1;
-        background: #111;
+    .match-card {
+        background: #1e1e2e;
         border: 1px solid #333;
-        border-radius: 14px;
-        padding: 24px;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
     }
 
-    .coinflip-header {
+    .match-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+    }
+
+    .match-title {
+        font-size: 1.1rem;
+        font-weight: 600;
     }
 
     .coin {
-        width: 110px;
-        height: 110px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
-        background: radial-gradient(circle at top, #facc15, #ca8a04);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2rem;
         font-weight: 700;
+        font-size: 1.2rem;
         color: #000;
-        border: 4px solid #854d0e;
+        border: 3px solid #854d0e;
+        background: radial-gradient(circle at top, #facc15, #ca8a04);
     }
 
     .coin.tails {
@@ -104,21 +86,22 @@
         color: #fff;
     }
 
-    .choice-buttons {
+    .choices {
         display: flex;
         gap: 12px;
-        margin-top: 16px;
     }
 
     .choice {
         flex: 1;
         padding: 10px;
-        background: #222;
-        border: 1px solid #333;
         border-radius: 8px;
+        border: 1px solid #333;
+        background: #222;
         cursor: pointer;
+        text-align: center;
         font-weight: 500;
         color: #d1d5db;
+        transition: all 0.15s;
     }
 
     .choice.active {
@@ -127,27 +110,24 @@
         color: #fff;
     }
 
-
-    .items-title {
-        margin: 24px 0 12px;
-        font-size: 0.9rem;
-        color: #9ca3af;
-    }
-
     .items-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        gap: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     .item {
+        width: 60px;
+        height: 60px;
         background: #1c1c1c;
         border: 1px solid #333;
-        border-radius: 10px;
-        padding: 10px;
-        text-align: center;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        transition: transform .15s, border .15s;
+        transition: all 0.15s;
     }
 
     .item:hover {
@@ -162,77 +142,58 @@
 
     .item img {
         max-width: 100%;
-        height: 48px;
+        max-height: 36px;
         object-fit: contain;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
 
     .item-value {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
         color: #9ca3af;
     }
 
-    @media (max-width: 900px) {
-        .game-container {
-            flex-direction: column;
-        }
-        .side-panel {
-            width: 100%;
-        }
+    /* Scrollbar styling */
+    .matches-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .matches-container::-webkit-scrollbar-thumb {
+        background-color: #555;
+        border-radius: 3px;
     }
 </style>
 
-<div class="game-container">
+<div class="coinflip-container">
+    <!-- Create Match Button -->
+    <button class="create-btn" id="createMatchBtn">Create Match</button>
 
-    <div class="side-panel">
-        {% include "sidepanel.html" %}
-
-        <div class="panel-card">
-            <div class="panel-title">Selected Value</div>
-            <div class="panel-value">$<span id="totalValue">0</span></div>
-        </div>
-
-        <button class="primary-btn" id="createCoinflipBtn">
-            Create Coinflip
-        </button>
-
-        <button class="primary-btn danger-btn" id="cancelCoinflipBtn">
-            Cancel Coinflip
-        </button>
-    </div>
-
-    <div class="card">
-
-        <div class="coinflip-header">
-            <div>
-                <h2>Coinflip</h2>
-                <div style="font-size:0.85rem;color:#9ca3af;">
-                    Pick a side and add items
+    <!-- Scrollable Coinflip Matches -->
+    <div class="matches-container" id="matchesContainer">
+        {% for match in matches %}
+        <div class="match-card">
+            <div class="match-header">
+                <div class="match-title">Coinflip #{{ match.id }}</div>
+                <div class="coin {% if match.side == 'tails' %}tails{% endif %}">
+                    {{ match.side|upper }}
                 </div>
             </div>
 
-            <div class="coin heads" id="coinDisplay">
-                H
+            <div class="choices">
+                <div class="choice {% if match.user_choice == 'heads' %}active{% endif %}" data-choice="heads">Heads</div>
+                <div class="choice {% if match.user_choice == 'tails' %}active{% endif %}" data-choice="tails">Tails</div>
+            </div>
+
+            <div class="items-grid">
+                {% for item in match.items %}
+                <div class="item" data-id="{{ item.id }}" data-value="{{ item.value }}">
+                    <img src="{{ item.image }}" alt="">
+                    <div class="item-value">${{ item.value }}</div>
+                </div>
+                {% endfor %}
             </div>
         </div>
-
-        <div class="choice-buttons">
-            <button class="choice active" data-choice="heads">Heads</button>
-            <button class="choice" data-choice="tails">Tails</button>
-        </div>
-
-        <div class="items-title">Your Items</div>
-
-        <div class="items-grid">
-            {# Example items – replace with your real data #}
-            {% for item in items %}
-            <div class="item" data-id="{{ item.id }}" data-value="{{ item.value }}">
-                <img src="{{ item.image }}" alt="">
-                <div class="item-value">${{ item.value }}</div>
-            </div>
-            {% endfor %}
-        </div>
-
+        {% endfor %}
     </div>
 </div>
+
 {% endblock %}
