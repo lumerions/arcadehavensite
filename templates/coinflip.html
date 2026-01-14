@@ -73,7 +73,7 @@
         background: #1d4ed8;
     }
 
-    /* Scrolling coinflip container */
+    /* Scrollable coinflip container */
     .coinflip-container {
         width: 100%;
         max-height: 900px;
@@ -93,116 +93,98 @@
         border-radius: 4px;
     }
 
-    /* Coinflip card */
+    /* Coinflip Card: player vs player */
     .match-card {
         background: #1e1e2e;
         border: 1px solid #333;
         border-radius: 12px;
         padding: 16px;
         display: flex;
-        flex-direction: column;
-        gap: 12px;
-        cursor: pointer;
-        transition: transform 0.15s, border 0.15s;
-    }
-
-    .match-card:hover {
-        transform: translateY(-2px);
-        border-color: #555;
-    }
-
-    .match-header {
-        display: flex;
+        align-items: center;
         justify-content: space-between;
-        align-items: center;
+        gap: 16px;
     }
 
-    .match-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-
-    .coin {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
+    .players {
         display: flex;
         align-items: center;
-        justify-content: center;
+        gap: 16px;
+    }
+
+    .player {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .player-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #333;
+    }
+
+    .player-item {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        object-fit: cover;
+        background: #000;
+    }
+
+    .vs-text {
         font-weight: 700;
         font-size: 1.2rem;
-        color: #000;
-        border: 3px solid #854d0e;
-        background: radial-gradient(circle at top, #facc15, #ca8a04);
-    }
-
-    .coin.tails {
-        background: radial-gradient(circle at top, #93c5fd, #2563eb);
-        border-color: #1e3a8a;
         color: #fff;
     }
 
-    /* Items split for Heads / Tails */
-    .items-sides {
+    .match-actions {
         display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-        justify-content: space-between;
-    }
-
-    .items-side {
-        flex: 1;
-        background: #111;
-        border: 1px solid #333;
-        border-radius: 12px;
-        padding: 12px;
-        display: flex;
-        flex-wrap: wrap;
         gap: 8px;
-        min-height: 100px;
-        justify-content: flex-start;
     }
 
-    .items-side-title {
-        width: 100%;
-        font-size: 0.85rem;
-        color: #9ca3af;
-        margin-bottom: 6px;
-    }
-
-    .item {
-        width: 60px;
-        height: 60px;
-        background: #1c1c1c;
-        border: 1px solid #333;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .match-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
         cursor: pointer;
-        transition: all 0.15s;
+        font-weight: 600;
+        transition: background 0.2s;
     }
 
-    .item:hover {
-        transform: translateY(-2px);
-        border-color: #555;
+    .join-btn {
+        background: #16a34a;
+        color: #fff;
     }
 
-    .item.selected {
-        border: 2px solid #22c55e;
-        background: #052e1a;
+    .join-btn:hover {
+        background: #15803d;
     }
 
-    .item img {
-        max-width: 100%;
-        max-height: 48px;
-        object-fit: contain;
+    .view-btn {
+        background: #2563eb;
+        color: #fff;
     }
 
-    @media (max-width: 1000px) {
-        .stats-cards {
+    .view-btn:hover {
+        background: #1d4ed8;
+    }
+
+    @media (max-width: 800px) {
+        .match-card {
             flex-direction: column;
+            gap: 12px;
             align-items: center;
+        }
+        .match-actions {
+            width: 100%;
+            justify-content: center;
         }
     }
 </style>
@@ -234,68 +216,52 @@
 
     <!-- Scrollable Coinflips -->
     <div class="coinflip-container">
-        <!-- Sample Active Coinflip -->
+        <!-- Example Match Card -->
         <div class="match-card" data-id="1">
-            <div class="match-header">
-                <div class="match-title">Coinflip #1</div>
-                <div class="coin heads">H</div>
+            <div class="players">
+                <div class="player">
+                    <img class="player-avatar" src="/static/images/player1.png" alt="Player 1">
+                    <img class="player-item" src="/static/images/item1.png" alt="Item 1">
+                </div>
+
+                <div class="vs-text">VS</div>
+
+                <div class="player">
+                    <img class="player-avatar" src="/static/images/player2.png" alt="Player 2">
+                    <img class="player-item" src="/static/images/item2.png" alt="Item 2">
+                </div>
             </div>
 
-            <div class="items-sides">
-                <!-- Heads Side -->
-                <div class="items-side">
-                    <div class="items-side-title">Heads</div>
-                    <div class="item" data-id="101">
-                        <img src="/static/images/item1.png" alt="">
-                    </div>
-                    <div class="item" data-id="102">
-                        <img src="/static/images/item2.png" alt="">
-                    </div>
-                </div>
-
-                <!-- Tails Side -->
-                <div class="items-side">
-                    <div class="items-side-title">Tails</div>
-                    <div class="item" data-id="201">
-                        <img src="/static/images/item3.png" alt="">
-                    </div>
-                    <div class="item" data-id="202">
-                        <img src="/static/images/item4.png" alt="">
-                    </div>
-                </div>
+            <div class="match-actions">
+                <button class="match-btn join-btn">Join</button>
+                <button class="match-btn view-btn">View</button>
             </div>
         </div>
 
         <!-- Other matches from backend -->
         {% for match in matches %}
         <div class="match-card" data-id="{{ match.id }}">
-            <div class="match-header">
-                <div class="match-title">Coinflip #{{ match.id }}</div>
-                <div class="coin {% if match.side == 'tails' %}tails{% endif %}">
-                    {{ match.side|upper }}
+            <div class="players">
+                <div class="player">
+                    <img class="player-avatar" src="{{ match.player1.avatar }}" alt="{{ match.player1.username }}">
+                    {% if match.player1_item %}
+                    <img class="player-item" src="{{ match.player1_item.image }}" alt="Item">
+                    {% endif %}
+                </div>
+
+                <div class="vs-text">VS</div>
+
+                <div class="player">
+                    <img class="player-avatar" src="{{ match.player2.avatar }}" alt="{{ match.player2.username }}">
+                    {% if match.player2_item %}
+                    <img class="player-item" src="{{ match.player2_item.image }}" alt="Item">
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="items-sides">
-                <!-- Heads Side -->
-                <div class="items-side">
-                    <div class="items-side-title">Heads</div>
-                    {% for item in match.heads_items %}
-                    <div class="item" data-id="{{ item.id }}">
-                        <img src="{{ item.image }}" alt="">
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Tails Side -->
-                <div class="items-side">
-                    <div class="items-side-title">Tails</div>
-                    {% for item in match.tails_items %}
-                    <div class="item" data-id="{{ item.id }}">
-                        <img src="{{ item.image }}" alt="">
-                    </div>
-                    {% endfor %}
-                </div>
+            <div class="match-actions">
+                <button class="match-btn join-btn">Join</button>
+                <button class="match-btn view-btn">View</button>
             </div>
         </div>
         {% endfor %}
