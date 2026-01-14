@@ -23,7 +23,7 @@ import certifi
 import base64
 import math
 place_id = 97090711812957
-
+postgresConnection = None
 
 app = FastAPI(
     title="AH Gambling",
@@ -93,7 +93,7 @@ class MinesClick(BaseModel):
     tileIndex: int
     Game : str
 class Config:
-        extra = "allow"
+    extra = "allow"
 
 class Cashout(BaseModel):
     amount: int
@@ -103,6 +103,13 @@ redis = Redis(
     token=os.environ["REDIS_TOKEN"]
 )
 
+
+def getPostgresConnection():
+    global postgresConnection
+    if postgresConnection is None or postgresConnection.closed:
+        postgresConnection = psycopg.connect(os.environ["POSTGRES_DATABASE_URL"])
+    return postgresConnection
+
 templates = Jinja2Templates(directory="templates")
 
 def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
@@ -111,22 +118,21 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
         return templates.TemplateResponse(htmlfile, {"request": request})
     else:
         try:
-            with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-
-                with conn.cursor() as cursor:
-                    cursor.execute("SELECT sessionid,robloxusername FROM accounts WHERE sessionid = %s", (SessionId,))
-                    
-                    result = cursor.fetchone()  
-                    
-                    if result and result[0] == SessionId:
-                        if returnusername is None:
-                            return templates.TemplateResponse(htmlfile2, {"request": request})
-                        else:
-                            return result[1]
+            conn = getPostgresConnection() 
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT sessionid,robloxusername FROM accounts WHERE sessionid = %s", (SessionId,))
+                
+                result = cursor.fetchone()  
+                
+                if result and result[0] == SessionId:
+                    if returnusername is None:
+                        return templates.TemplateResponse(htmlfile2, {"request": request})
                     else:
-                        response = templates.TemplateResponse(htmlfile, {"request": request})
-                        response.delete_cookie("SessionId")
-                        return response
+                        return result[1]
+                else:
+                    response = templates.TemplateResponse(htmlfile, {"request": request})
+                    response.delete_cookie("SessionId")
+                    return response
         
         except Exception as error:
             return templates.TemplateResponse(
@@ -148,19 +154,18 @@ def readlogin(request: Request):
         return templates.TemplateResponse("login.html", {"request": request})
     else:
         try:
-            with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-
-                with conn.cursor() as cursor:
-                    cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (SessionId,))
-                    
-                    result = cursor.fetchone()  
-                    
-                    if result and result[0] == SessionId:
-                        return templates.TemplateResponse("home.html", {"request": request})
-                    else:
-                        response = templates.TemplateResponse("login.html", {"request": request})
-                        response.delete_cookie("SessionId")
-                        return response
+            conn = getPostgresConnection() 
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT sessionid FROM accounts WHERE sessionid = %s", (SessionId,))
+                
+                result = cursor.fetchone()  
+                
+                if result and result[0] == SessionId:
+                    return templates.TemplateResponse("home.html", {"request": request})
+                else:
+                    response = templates.TemplateResponse("login.html", {"request": request})
+                    response.delete_cookie("SessionId")
+                    return response
         
         except Exception as error:
             return templates.TemplateResponse(
@@ -177,10 +182,6 @@ def loadmines(request: Request):
 @app.get("/towers",response_class =  HTMLResponse)
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
-
-@app.get("/coinflipgamer",response_class =  HTMLResponse)
-def towers(request: Request):
-    return CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
@@ -204,19 +205,7 @@ def get(SessionId: str = Cookie(None)):
     mainCollection = mainMongo["collection"]
 
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                result = cursor.fetchone()  
-                if not result:
-                    return {"error": "Session not found"}
-                username = result[0]
-    except Exception as error:
-        return {"error": str(error)}
-    
-
-    try:
-        doc = mainCollection.find_one({"username": username})
+        doc = mainCollection.find_one({"username": SessionId})
         
     except Exception as error:
         return {"error": str(error)}
@@ -232,15 +221,16 @@ async def depositget(amount: float, SessionId: str = Cookie(None)):
         return {"error": "No cookie provided"}
     
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                result = cursor.fetchone()  
+        conn = getPostgresConnection() 
 
-                if result is None:
-                    return {"error": "Invalid session"}
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
 
-                sitename = result[0]
+            if result is None:
+                return {"error": "Invalid session"}
+
+            sitename = result[0]
 
     except Exception as error:
         return error
@@ -268,17 +258,17 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
     if not SessionId:
         return {"error": "No cookie provided"}
     
-
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                result = cursor.fetchone()  
+        conn = getPostgresConnection() 
 
-                if result is None:
-                    return {"error": "Invalid session"}
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
 
-                sitename = result[0]
+            if result is None:
+                return {"error": "Invalid session"}
+
+            sitename = result[0]
 
     except Exception as error:
         return {"error": error}
@@ -354,22 +344,23 @@ def depositearnings(data: deposit):
         return JSONResponse({"error": "Duplicate request detected"}, status_code=429)
 
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT username FROM accounts WHERE username = %s AND sessionid = %s",
-                    (data.siteusername, data.sessionid)
-                )
-                row = cur.fetchone()
+        conn = getPostgresConnection() 
 
-                if not row:
-                    return JSONResponse({"error": "Invalid session"}, status_code=403)
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT username FROM accounts WHERE username = %s AND sessionid = %s",
+                (data.siteusername, data.sessionid)
+            )
+            row = cur.fetchone()
 
-                cur.execute(
-                    "UPDATE accounts SET robloxusername = %s WHERE username = %s",
-                    (data.robloxusername, data.siteusername)
-                )
-                conn.commit()
+            if not row:
+                return JSONResponse({"error": "Invalid session"}, status_code=403)
+
+            cur.execute(
+                "UPDATE accounts SET robloxusername = %s WHERE username = %s",
+                (data.robloxusername, data.siteusername)
+            )
+            conn.commit()
 
     except Exception as e:
         return JSONResponse({"error": f"Database error: {str(e)}"}, status_code=400)
@@ -673,13 +664,14 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     mainCollection = mainMongo["collection"]
 
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                result = cursor.fetchone()  
-                if not result:
-                    return {"error": "Session not found"}
-                username = result[0]
+        conn = getPostgresConnection() 
+
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
+            if not result:
+                return {"error": "Session not found"}
+            username = result[0]
     except Exception as error:
         return {"error": str(error)}
     
@@ -789,22 +781,23 @@ def cashout(SessionId: str = Cookie(None)):
     if tocashout <= 0:
         return JSONResponse({"error": "Nothing to cash out"}, status_code=400)
 
-    with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                "SELECT username FROM accounts WHERE sessionid = %s",
-                (SessionId,)
-            )
-            row = cursor.fetchone()
-            if not row:
-                return JSONResponse({"error": "Session not found"}, status_code=400)
+    conn = getPostgresConnection() 
 
-            username = row[0]
-            mainCollection = getMainMongo()["collection"]
-            mainCollection.update_one(
-                {"username": username},
-                {"$inc": {"balance": tocashout}}
-            )
+    with conn.cursor() as cursor:
+        cursor.execute(
+            "SELECT username FROM accounts WHERE sessionid = %s",
+            (SessionId,)
+        )
+        row = cursor.fetchone()
+        if not row:
+            return JSONResponse({"error": "Session not found"}, status_code=400)
+
+        username = row[0]
+        mainCollection = getMainMongo()["collection"]
+        mainCollection.update_one(
+            {"username": username},
+            {"$inc": {"balance": tocashout}}
+        )
 
 
     if isinstance(mines_raw, bytes):
@@ -854,36 +847,36 @@ def register(
     robloxusername = ""
 
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cur:
+        conn = getPostgresConnection() 
+        with conn.cursor() as cur:
 
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS accounts (
-                        id SERIAL PRIMARY KEY,
-                        sessionid TEXT NOT NULL,
-                        username VARCHAR(50) UNIQUE NOT NULL,
-                        email VARCHAR(100) NOT NULL,
-                        password VARCHAR(255) NOT NULL,
-                        robloxusername VARCHAR(255) NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    );
-                """)
-                conn.commit()
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS accounts (
+                    id SERIAL PRIMARY KEY,
+                    sessionid TEXT NOT NULL,
+                    username VARCHAR(50) UNIQUE NOT NULL,
+                    email VARCHAR(100) NOT NULL,
+                    password VARCHAR(255) NOT NULL,
+                    robloxusername VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            conn.commit()
 
-                cur.execute("""
-                    INSERT INTO accounts (username, email, password, sessionid,robloxusername)
-                    VALUES (%s, %s, %s, %s,%s)
-                    ON CONFLICT (username) DO NOTHING
-                    RETURNING id;
-                """, (username, email, hashed_password, session_id,robloxusername))
+            cur.execute("""
+                INSERT INTO accounts (username, email, password, sessionid,robloxusername)
+                VALUES (%s, %s, %s, %s,%s)
+                ON CONFLICT (username) DO NOTHING
+                RETURNING id;
+            """, (username, email, hashed_password, session_id,robloxusername))
 
-                row = cur.fetchone()
-                if row is None:
-                    return templates.TemplateResponse(
-                        "register.html",
-                        {"request": request, "error": "Username already exists", "username": username},
-                        status_code=status.HTTP_400_BAD_REQUEST
-                    )
+            row = cur.fetchone()
+            if row is None:
+                return templates.TemplateResponse(
+                    "register.html",
+                    {"request": request, "error": "Username already exists", "username": username},
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
 
     except Exception as e:
         return templates.TemplateResponse(
@@ -912,28 +905,28 @@ def login_post(
 ):
 
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
+        conn = getPostgresConnection() 
 
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT password, sessionid FROM accounts WHERE username = %s", (username,))
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT password, sessionid FROM accounts WHERE username = %s", (username,))
 
-                result = cursor.fetchone()  
+            result = cursor.fetchone()  
 
-                if result and bcrypt.checkpw(password.encode("utf-8"), result[0].encode("utf-8")):
+            if result and bcrypt.checkpw(password.encode("utf-8"), result[0].encode("utf-8")):
 
-                    ten_years_seconds = 10 * 365 * 24 * 60 * 60
+                ten_years_seconds = 10 * 365 * 24 * 60 * 60
 
-                    response = RedirectResponse(url="/home", status_code=303)
-                    response.set_cookie(
-                        key="SessionId",
-                        value=result[1],
-                        max_age=ten_years_seconds,
-                        httponly=True,
-                        path="/"
-                    )
-                    return response
-                else:
-                    raise ValueError("Incorrect Password or username!")
+                response = RedirectResponse(url="/home", status_code=303)
+                response.set_cookie(
+                    key="SessionId",
+                    value=result[1],
+                    max_age=ten_years_seconds,
+                    httponly=True,
+                    path="/"
+                )
+                return response
+            else:
+                raise ValueError("Incorrect Password or username!")
         
     except Exception as error:
         return templates.TemplateResponse(
@@ -984,11 +977,53 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
 
     try:
         result = CoinflipCollection.update_one(
-            {"SessionId": SessionId,"Username":UserCheck}, 
-            {"$set": {"CoinflipItems": coinflipData}},  
+            {"SessionId": SessionId, "Username": UserCheck},
+            {
+                "$push": {
+                    "CoinflipItems": {
+                        "$each": coinflipData
+                    }
+                }
+            },
             upsert=True
         )
-        return JSONResponse({"success": True}, status_code=400)
+
+        return JSONResponse({"success": True}, status_code=200)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+    
+
+@app.post("/cancelcoinflip", response_class=HTMLResponse)
+async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
+    if not SessionId:
+        return JSONResponse({"error": "No session"}, status_code=400)
+
+    deleted = redis.delete("CoinflipActive" + SessionId)
+    if deleted == 0:
+        return JSONResponse({"error": "This coinflip already ended or was cancelled already!"}, status_code=400)
+
+    data = await request.json()
+    coinflipData = data.get("coinflipData")
+    
+    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
+
+    try:
+        UserCheck = str(UserCheck)
+    except Exception as e:
+        return UserCheck
+
+    CoinflipCollection = getCoinflipMongo()["collection"]
+
+    try:
+        result = CoinflipCollection.update_one(
+            {"SessionId": SessionId, "Username": UserCheck},
+            {
+                "$pull": {
+                    "CoinflipItems": { "$in": coinflipData }
+                }
+            }
+        )
+        return JSONResponse({"success": True}, status_code=200)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
@@ -1003,15 +1038,16 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
     page = data.get("page")
     
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                result = cursor.fetchone()  
+        conn = getPostgresConnection() 
 
-                if result is None:
-                    return {"error": "Invalid session"}
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
 
-                sitename = result[0]
+            if result is None:
+                return {"error": "Invalid session"}
+
+            sitename = result[0]
 
     except Exception as error:
         return error
@@ -1059,15 +1095,16 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     page = data.get("page")
 
     try:
-        with psycopg.connect(os.environ["POSTGRES_DATABASE_URL"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-                result = cursor.fetchone()  
+        conn = getPostgresConnection() 
 
-                if result is None:
-                    return {"error": "Invalid session"}
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
 
-                sitename = result[0]
+            if result is None:
+                return {"error": "Invalid session"}
+
+            sitename = result[0]
 
     except Exception as error:
         return {"error": error}
@@ -1108,169 +1145,3 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
