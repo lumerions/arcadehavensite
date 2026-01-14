@@ -21,6 +21,7 @@
         gap: 20px;
     }
 
+    /* Stats Cards */
     .stats-cards {
         display: flex;
         gap: 12px;
@@ -47,6 +48,7 @@
         color: #22c55e;
     }
 
+    /* Create Match Button */
     .create-btn {
         padding: 14px;
         background: #2563eb;
@@ -62,6 +64,7 @@
         background: #1d4ed8;
     }
 
+    /* Matches Container */
     .matches-container {
         display: flex;
         flex-direction: column;
@@ -71,6 +74,7 @@
         padding-right: 4px;
     }
 
+    /* Active Coinflip Card (List View) */
     .match-card {
         background: #1e1e2e;
         border: 1px solid #333;
@@ -79,6 +83,13 @@
         display: flex;
         flex-direction: column;
         gap: 12px;
+        cursor: pointer;
+        transition: transform 0.15s, border 0.15s;
+    }
+
+    .match-card:hover {
+        transform: translateY(-2px);
+        border-color: #555;
     }
 
     .match-header {
@@ -112,7 +123,45 @@
         color: #fff;
     }
 
-    .choices {
+    /* Opened Coinflip Detailed View */
+    .coinflip-open {
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 14px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: relative;
+        animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .coinflip-open .close-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: #b91c1c;
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .coinflip-open .coinflip-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .coinflip-open .coin {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+    }
+
+    .coinflip-open .choices {
         display: flex;
         gap: 12px;
     }
@@ -187,6 +236,12 @@
         background-color: #555;
         border-radius: 3px;
     }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
 </style>
 
 <div class="coinflip-container">
@@ -217,7 +272,7 @@
     <!-- Scrollable Coinflip Matches -->
     <div class="matches-container" id="matchesContainer">
         {% for match in matches %}
-        <div class="match-card">
+        <div class="match-card" data-id="{{ match.id }}">
             <div class="match-header">
                 <div class="match-title">Coinflip #{{ match.id }}</div>
                 <div class="coin {% if match.side == 'tails' %}tails{% endif %}">
@@ -240,6 +295,25 @@
             </div>
         </div>
         {% endfor %}
+    </div>
+</div>
+
+<!-- Opened Coinflip Template (hidden, cloned via JS when opened) -->
+<div id="coinflipOpenTemplate" style="display:none;">
+    <div class="coinflip-open">
+        <button class="close-btn">Close</button>
+        <div class="coinflip-header">
+            <div class="match-title">Coinflip #<span class="match-id"></span></div>
+            <div class="coin heads"></div>
+        </div>
+        <div class="choices">
+            <div class="choice" data-choice="heads">Heads</div>
+            <div class="choice" data-choice="tails">Tails</div>
+        </div>
+        <div class="items-grid">
+            <!-- Items will be cloned here dynamically -->
+        </div>
+        <button class="create-btn" style="margin-top:10px;">Join Coinflip</button>
     </div>
 </div>
 
