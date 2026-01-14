@@ -218,7 +218,7 @@ def get(SessionId: str = Cookie(None)):
     
     try:
         doc = mainCollection.find_one({"username": username})
-        
+        print(doc)
     except Exception as error:
         return {"error": str(error)}
     
