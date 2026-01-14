@@ -14,25 +14,27 @@
     }
 
     .coinflip-page {
-        display: flex;
-        gap: 24px;
         max-width: 1200px;
         margin: 40px auto;
-    }
-
-    /* Left Controls */
-    .coinflip-controls {
-        width: 250px;
         display: flex;
         flex-direction: column;
-        gap: 20px;
-        flex-shrink: 0;
+        gap: 24px;
+        align-items: center; /* center everything */
+    }
+
+    /* Controls: stats cards + create match */
+    .coinflip-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
     }
 
     .stats-cards {
         display: flex;
-        flex-direction: column;
         gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .stat-card {
@@ -41,6 +43,7 @@
         border-radius: 12px;
         padding: 16px;
         text-align: center;
+        min-width: 100px;
     }
 
     .stat-title {
@@ -56,7 +59,7 @@
     }
 
     .create-btn {
-        padding: 14px;
+        padding: 14px 30px;
         background: #2563eb;
         border: none;
         border-radius: 8px;
@@ -70,15 +73,15 @@
         background: #1d4ed8;
     }
 
-    /* Right Container */
+    /* Scrolling coinflip container */
     .coinflip-container {
-        flex: 1;
+        width: 100%;
         max-height: 900px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
         gap: 16px;
-        padding-right: 8px;
+        padding: 0 8px;
     }
 
     .coinflip-container::-webkit-scrollbar {
@@ -90,7 +93,7 @@
         border-radius: 4px;
     }
 
-    /* Coinflip Card */
+    /* Coinflip card */
     .match-card {
         background: #1e1e2e;
         border: 1px solid #333;
@@ -143,6 +146,8 @@
     .items-sides {
         display: flex;
         gap: 16px;
+        flex-wrap: wrap;
+        justify-content: space-between;
     }
 
     .items-side {
@@ -195,23 +200,15 @@
     }
 
     @media (max-width: 1000px) {
-        .coinflip-page {
-            flex-direction: column;
-        }
-        .coinflip-controls {
-            width: 100%;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
         .stats-cards {
-            flex-direction: row;
+            flex-direction: column;
+            align-items: center;
         }
     }
 </style>
 
 <div class="coinflip-page">
-    <!-- Left Controls -->
+    <!-- Centered Controls -->
     <div class="coinflip-controls">
         <div class="stats-cards">
             <div class="stat-card">
@@ -235,9 +232,9 @@
         <button class="create-btn" id="createMatchBtn">Create Match</button>
     </div>
 
-    <!-- Right Scrolling Coinflips -->
+    <!-- Scrollable Coinflips -->
     <div class="coinflip-container">
-        <!-- Example Active Coinflip -->
+        <!-- Sample Active Coinflip -->
         <div class="match-card" data-id="1">
             <div class="match-header">
                 <div class="match-title">Coinflip #1</div>
@@ -304,5 +301,4 @@
         {% endfor %}
     </div>
 </div>
-
 {% endblock %}
