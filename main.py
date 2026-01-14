@@ -599,7 +599,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         mine_multiplier = ((len(mines) / 23) ** 1.5) + 0.1
         payout = bet_amount * (row + 1) * mine_multiplier * 0.4
         payout = math.floor(payout)
-        payoutset = CashoutAvailable + payout
+        payoutset = redis_int(CashoutAvailable) + payout
         rowset = currentRow + 1
         redis.mset({
             "ClickData." + SessionId: json.dumps(existing_array),
