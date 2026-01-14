@@ -4,230 +4,227 @@
 
 {% block content %}
 <style>
-    * { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #0b0b0b;
-        color: #fff;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b0b0b;
+    color: #fff;
+}
 
-        .items-preview {
-            display: flex;
-            gap: 6px;
-            margin-top: 12px;
-        }
+.coinflip-page {
+    max-width: 1200px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+}
 
-        .preview-item {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            overflow: hidden;
-            background: #222;
-            border: 1px solid #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            color: #fff;
-        }
+/* Stats cards + create match button */
+.coinflip-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+}
 
-        .preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+.stats-cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
 
-        .preview-item.more {
-            background: #111;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.75rem;
-            color: #ccc;
-        }
+.stat-card {
+    background: #1e1e2e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    min-width: 100px;
+}
 
+.stat-title {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin-bottom: 6px;
+}
 
-    .coinflip-page {
-        max-width: 1200px;
-        margin: 40px auto;
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        align-items: center; /* center everything */
-    }
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #22c55e;
+}
 
-    /* Controls: stats cards + create match */
-    .coinflip-controls {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        align-items: center;
-    }
+.create-btn {
+    padding: 14px 30px;
+    background: #2563eb;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
 
-    .stats-cards {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
+.create-btn:hover {
+    background: #1d4ed8;
+}
 
-    .stat-card {
-        background: #1e1e2e;
-        border: 1px solid #333;
-        border-radius: 12px;
-        padding: 16px;
-        text-align: center;
-        min-width: 100px;
-    }
+/* Coinflip container */
+.coinflip-container {
+    width: 100%;
+    max-height: 900px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 8px;
+}
 
-    .stat-title {
-        font-size: 0.85rem;
-        color: #9ca3af;
-        margin-bottom: 6px;
-    }
+.coinflip-container::-webkit-scrollbar {
+    width: 8px;
+}
 
-    .stat-value {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #22c55e;
-    }
+.coinflip-container::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+}
 
-    .create-btn {
-        padding: 14px 30px;
-        background: #2563eb;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
+/* Match card */
+.match-card {
+    background: #1e1e2e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
 
-    .create-btn:hover {
-        background: #1d4ed8;
-    }
+.players {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
+}
 
-    /* Scrollable coinflip container */
-    .coinflip-container {
-        width: 100%;
-        max-height: 900px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        padding: 0 8px;
-    }
+.player {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-    .coinflip-container::-webkit-scrollbar {
-        width: 8px;
-    }
+.player-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #333;
+}
 
-    .coinflip-container::-webkit-scrollbar-thumb {
-        background-color: #555;
-        border-radius: 4px;
-    }
+.player-item {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    object-fit: cover;
+    background: #000;
+}
 
-    /* Coinflip Card: player vs player */
-    .match-card {
-        background: #1e1e2e;
-        border: 1px solid #333;
-        border-radius: 12px;
-        padding: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-    }
+.vs-text {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #fff;
+}
 
+/* Items preview */
+.items-preview {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+.preview-item {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #222;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #fff;
+}
+
+.preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-item.more {
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #ccc;
+}
+
+/* Actions buttons */
+.match-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.match-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.join-btn {
+    background: #16a34a;
+    color: #fff;
+}
+
+.join-btn:hover {
+    background: #15803d;
+}
+
+.view-btn {
+    background: #2563eb;
+    color: #fff;
+}
+
+.view-btn:hover {
+    background: #1d4ed8;
+}
+
+@media (max-width: 800px) {
     .players {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .player {
-        position: relative;
-        display: flex;
         flex-direction: column;
-        align-items: center;
-    }
-
-    .player-avatar {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #333;
-    }
-
-    .player-item {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        border: 2px solid #fff;
-        object-fit: cover;
-        background: #000;
-    }
-
-    .vs-text {
-        font-weight: 700;
-        font-size: 1.2rem;
-        color: #fff;
-    }
-
-    .match-actions {
-        display: flex;
         gap: 8px;
     }
-
-    .match-btn {
-        padding: 8px 16px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: background 0.2s;
-    }
-
-    .join-btn {
-        background: #16a34a;
-        color: #fff;
-    }
-
-    .join-btn:hover {
-        background: #15803d;
-    }
-
-    .view-btn {
-        background: #2563eb;
-        color: #fff;
-    }
-
-    .view-btn:hover {
-        background: #1d4ed8;
-    }
-
-    @media (max-width: 800px) {
-        .match-card {
-            flex-direction: column;
-            gap: 12px;
-            align-items: center;
-        }
-        .match-actions {
-            width: 100%;
-            justify-content: center;
-        }
-    }
+}
 </style>
 
 <div class="coinflip-page">
-    <!-- Centered Controls -->
+    <!-- Controls -->
     <div class="coinflip-controls">
         <div class="stats-cards">
             <div class="stat-card">
@@ -251,9 +248,9 @@
         <button class="create-btn" id="createMatchBtn">Create Match</button>
     </div>
 
-    <!-- Scrollable Coinflips -->
+    <!-- Coinflip container -->
     <div class="coinflip-container">
-        <!-- Example Match Card -->
+        <!-- Example match -->
         <div class="match-card" data-id="1">
             <div class="players">
                 <div class="player">
@@ -269,49 +266,67 @@
                 </div>
             </div>
 
+            <div class="items-preview">
+                {% set display_items = example_items[:5] %}
+                {% for item in display_items %}
+                <div class="preview-item">
+                    <img src="{{ item.image }}" alt="">
+                </div>
+                {% endfor %}
+                {% if example_items|length > 5 %}
+                <div class="preview-item more">
+                    +{{ example_items|length - 5 }}
+                </div>
+                {% endif %}
+            </div>
+
             <div class="match-actions">
                 <button class="match-btn join-btn">Join</button>
                 <button class="match-btn view-btn">View</button>
             </div>
         </div>
 
-        <!-- Other matches from backend -->
+        <!-- Matches from backend -->
         {% for match in matches %}
-<!-- Coinflip Card -->
-<div class="match-card" data-id="1">
-    <div class="players">
-        <div class="player">
-            <img class="player-avatar" src="/static/images/player1.png" alt="Player 1">
-            <img class="player-item" src="/static/images/item1.png" alt="Item 1">
-        </div>
+        <div class="match-card" data-id="{{ match.id }}">
+            <div class="players">
+                <div class="player">
+                    <img class="player-avatar" src="{{ match.player1.avatar }}" alt="{{ match.player1.username }}">
+                    {% if match.player1_item %}
+                    <img class="player-item" src="{{ match.player1_item.image }}" alt="Item 1">
+                    {% endif %}
+                </div>
 
-        <div class="vs-text">VS</div>
+                <div class="vs-text">VS</div>
 
-        <div class="player">
-            <img class="player-avatar" src="/static/images/player2.png" alt="Player 2">
-            <img class="player-item" src="/static/images/item2.png" alt="Item 2">
-        </div>
-    </div>
+                <div class="player">
+                    <img class="player-avatar" src="{{ match.player2.avatar }}" alt="{{ match.player2.username }}">
+                    {% if match.player2_item %}
+                    <img class="player-item" src="{{ match.player2_item.image }}" alt="Item 2">
+                    {% endif %}
+                </div>
+            </div>
 
-    <!-- Items preview container -->
-    <div class="items-preview">
-        {% set display_items = player_items[:5] %}
-        {% for item in display_items %}
-        <div class="preview-item">
-            <img src="{{ item.image }}" alt="">
+            <div class="items-preview">
+                {% set display_items = match.items[:5] %}
+                {% for item in display_items %}
+                <div class="preview-item">
+                    <img src="{{ item.image }}" alt="">
+                </div>
+                {% endfor %}
+                {% if match.items|length > 5 %}
+                <div class="preview-item more">
+                    +{{ match.items|length - 5 }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="match-actions">
+                <button class="match-btn join-btn">Join</button>
+                <button class="match-btn view-btn">View</button>
+            </div>
         </div>
         {% endfor %}
-        {% if player_items|length > 5 %}
-        <div class="preview-item more">
-            +{{ player_items|length - 5 }}
-        </div>
-        {% endif %}
     </div>
-
-    <div class="match-actions">
-        <button class="match-btn join-btn">Join</button>
-        <button class="match-btn view-btn">View</button>
-    </div>
-</div>
 </div>
 {% endblock %}
