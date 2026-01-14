@@ -487,9 +487,7 @@
 
                 async function restoreRevealedTiles() {
                     try {
-                        const response = await fetch('/games/getCurrentData', {
-                            credentials: 'include' 
-                        });
+                        const response = await fetch(`/games/getCurrentData?Game=Mines`, { method: 'GET', credentials: 'include' });
                 
                         if (!response.ok) throw new Error('Failed to fetch current mines data');
                 
@@ -525,6 +523,7 @@
         Initiate();          
     </script>
 {% endblock %}
+
 
 
 
