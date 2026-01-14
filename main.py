@@ -405,16 +405,19 @@ def GetUniverseId(GameId: int):
 
 
 @app.get("/games/getCurrentData")
-def get(SessionId: str = Cookie(None)):
+def get(Game : str,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
     keys = [
         "ClickData." + SessionId,
-        #SessionId + "TowersActive"
+        SessionId + "TowersActive"
     ]
 
-    #data_raw, towersactive = redis.mget(*keys)
+    data_raw, towersactive = redis.mget(*keys)
     data_raw = redis.get("ClickData." + SessionId)
+
+    if towersactive == "1" and Game == "Mines":
+        return []
 
     existing_array = json.loads(data_raw) if data_raw else []
     return existing_array
@@ -1149,6 +1152,12 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     )
 
     return RedirectResponse(roblox_url)
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
 
 
 if __name__ == "__main__":
