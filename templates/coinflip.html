@@ -21,6 +21,32 @@
         gap: 20px;
     }
 
+    .stats-cards {
+        display: flex;
+        gap: 12px;
+    }
+
+    .stat-card {
+        flex: 1;
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+    }
+
+    .stat-title {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-bottom: 6px;
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #22c55e;
+    }
+
     .create-btn {
         padding: 14px;
         background: #2563eb;
@@ -42,7 +68,7 @@
         gap: 16px;
         max-height: 600px;
         overflow-y: auto;
-        padding-right: 4px; /* For scrollbar spacing */
+        padding-right: 4px;
     }
 
     .match-card {
@@ -164,6 +190,27 @@
 </style>
 
 <div class="coinflip-container">
+
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-title">Active Coinflips</div>
+            <div class="stat-value">{{ matches|length }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Total Items Value</div>
+            <div class="stat-value">
+                ${{ matches|sum(attribute='total_value') }}
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Total Items</div>
+            <div class="stat-value">
+                {{ matches|sum(attribute='total_items') }}
+            </div>
+        </div>
+    </div>
+
     <!-- Create Match Button -->
     <button class="create-btn" id="createMatchBtn">Create Match</button>
 
