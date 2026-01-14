@@ -524,7 +524,8 @@
             let row = -1;
         
             async function restoreRevealedTiles() {
-                const response =  await fetch('/games/getCurrentData', { credentials: 'include' });
+                const response = await fetch(`/games/getCurrentData?Game=Towers`, { method: 'GET', credentials: 'include' });
+
                 if (!response.ok) return;
         
                 const revealedIndices = await response.json();
@@ -582,6 +583,7 @@
             initGame();
     </script>
 {% endblock %}
+
 
 
 
