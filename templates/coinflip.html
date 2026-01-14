@@ -13,22 +13,29 @@
         color: #fff;
     }
 
-    .coinflip-container {
-        max-width: 600px;
+    .coinflip-page {
+        display: flex;
+        gap: 24px;
+        max-width: 1200px;
         margin: 40px auto;
+    }
+
+    /* Left Controls */
+    .coinflip-controls {
+        width: 250px;
         display: flex;
         flex-direction: column;
         gap: 20px;
+        flex-shrink: 0;
     }
 
-    /* Stats Cards */
     .stats-cards {
         display: flex;
+        flex-direction: column;
         gap: 12px;
     }
 
     .stat-card {
-        flex: 1;
         background: #1e1e2e;
         border: 1px solid #333;
         border-radius: 12px;
@@ -48,7 +55,6 @@
         color: #22c55e;
     }
 
-    /* Create Match Button */
     .create-btn {
         padding: 14px;
         background: #2563eb;
@@ -64,17 +70,27 @@
         background: #1d4ed8;
     }
 
-    /* Matches Container */
-    .matches-container {
+    /* Right Container */
+    .coinflip-container {
+        flex: 1;
+        max-height: 900px;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
         gap: 16px;
-        max-height: 600px;
-        overflow-y: auto;
-        padding-right: 4px;
+        padding-right: 8px;
     }
 
-    /* Active Coinflip Card */
+    .coinflip-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .coinflip-container::-webkit-scrollbar-thumb {
+        background-color: #555;
+        border-radius: 4px;
+    }
+
+    /* Coinflip Card */
     .match-card {
         background: #1e1e2e;
         border: 1px solid #333;
@@ -123,34 +139,30 @@
         color: #fff;
     }
 
-    .choices {
+    /* Items split for Heads / Tails */
+    .items-sides {
         display: flex;
-        gap: 12px;
+        gap: 16px;
     }
 
-    .choice {
+    .items-side {
         flex: 1;
-        padding: 10px;
-        border-radius: 8px;
+        background: #111;
         border: 1px solid #333;
-        background: #222;
-        cursor: pointer;
-        text-align: center;
-        font-weight: 500;
-        color: #d1d5db;
-        transition: all 0.15s;
-    }
-
-    .choice.active {
-        background: #16a34a;
-        border-color: #22c55e;
-        color: #fff;
-    }
-
-    .items-grid {
+        border-radius: 12px;
+        padding: 12px;
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+        min-height: 100px;
+        justify-content: flex-start;
+    }
+
+    .items-side-title {
+        width: 100%;
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-bottom: 6px;
     }
 
     .item {
@@ -160,7 +172,6 @@
         border: 1px solid #333;
         border-radius: 8px;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
         cursor: pointer;
@@ -179,55 +190,53 @@
 
     .item img {
         max-width: 100%;
-        max-height: 36px;
+        max-height: 48px;
         object-fit: contain;
-        margin-bottom: 4px;
     }
 
-    .item-value {
-        font-size: 0.65rem;
-        color: #9ca3af;
-    }
-
-    /* Scrollbar styling */
-    .matches-container::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .matches-container::-webkit-scrollbar-thumb {
-        background-color: #555;
-        border-radius: 3px;
+    @media (max-width: 1000px) {
+        .coinflip-page {
+            flex-direction: column;
+        }
+        .coinflip-controls {
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+        .stats-cards {
+            flex-direction: row;
+        }
     }
 </style>
 
-<div class="coinflip-container">
+<div class="coinflip-page">
+    <!-- Left Controls -->
+    <div class="coinflip-controls">
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-title">Active Coinflips</div>
+                <div class="stat-value">{{ matches|length + 1 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Items Value</div>
+                <div class="stat-value">
+                    ${{ matches|sum(attribute='total_value') + 50 }}
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Items</div>
+                <div class="stat-value">
+                    {{ matches|sum(attribute='total_items') + 2 }}
+                </div>
+            </div>
+        </div>
 
-    <!-- Stats Cards -->
-    <div class="stats-cards">
-        <div class="stat-card">
-            <div class="stat-title">Active Coinflips</div>
-            <div class="stat-value">{{ matches|length + 1 }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Total Items Value</div>
-            <div class="stat-value">
-                ${{ matches|sum(attribute='total_value') + 50 }}
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Total Items</div>
-            <div class="stat-value">
-                {{ matches|sum(attribute='total_items') + 2 }}
-            </div>
-        </div>
+        <button class="create-btn" id="createMatchBtn">Create Match</button>
     </div>
 
-    <!-- Create Match Button -->
-    <button class="create-btn" id="createMatchBtn">Create Match</button>
-
-    <!-- Scrollable Coinflip Matches -->
-    <div class="matches-container" id="matchesContainer">
-
+    <!-- Right Scrolling Coinflips -->
+    <div class="coinflip-container">
         <!-- Example Active Coinflip -->
         <div class="match-card" data-id="1">
             <div class="match-header">
@@ -235,24 +244,32 @@
                 <div class="coin heads">H</div>
             </div>
 
-            <div class="choices">
-                <div class="choice active" data-choice="heads">Heads</div>
-                <div class="choice" data-choice="tails">Tails</div>
-            </div>
-
-            <div class="items-grid">
-                <div class="item" data-id="101" data-value="30">
-                    <img src="/static/images/item1.png" alt="">
-                    <div class="item-value">$30</div>
+            <div class="items-sides">
+                <!-- Heads Side -->
+                <div class="items-side">
+                    <div class="items-side-title">Heads</div>
+                    <div class="item" data-id="101">
+                        <img src="/static/images/item1.png" alt="">
+                    </div>
+                    <div class="item" data-id="102">
+                        <img src="/static/images/item2.png" alt="">
+                    </div>
                 </div>
-                <div class="item" data-id="102" data-value="20">
-                    <img src="/static/images/item2.png" alt="">
-                    <div class="item-value">$20</div>
+
+                <!-- Tails Side -->
+                <div class="items-side">
+                    <div class="items-side-title">Tails</div>
+                    <div class="item" data-id="201">
+                        <img src="/static/images/item3.png" alt="">
+                    </div>
+                    <div class="item" data-id="202">
+                        <img src="/static/images/item4.png" alt="">
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Other matches from your backend -->
+        <!-- Other matches from backend -->
         {% for match in matches %}
         <div class="match-card" data-id="{{ match.id }}">
             <div class="match-header">
@@ -262,18 +279,26 @@
                 </div>
             </div>
 
-            <div class="choices">
-                <div class="choice {% if match.user_choice == 'heads' %}active{% endif %}" data-choice="heads">Heads</div>
-                <div class="choice {% if match.user_choice == 'tails' %}active{% endif %}" data-choice="tails">Tails</div>
-            </div>
-
-            <div class="items-grid">
-                {% for item in match.items %}
-                <div class="item" data-id="{{ item.id }}" data-value="{{ item.value }}">
-                    <img src="{{ item.image }}" alt="">
-                    <div class="item-value">${{ item.value }}</div>
+            <div class="items-sides">
+                <!-- Heads Side -->
+                <div class="items-side">
+                    <div class="items-side-title">Heads</div>
+                    {% for item in match.heads_items %}
+                    <div class="item" data-id="{{ item.id }}">
+                        <img src="{{ item.image }}" alt="">
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+
+                <!-- Tails Side -->
+                <div class="items-side">
+                    <div class="items-side-title">Tails</div>
+                    {% for item in match.tails_items %}
+                    <div class="item" data-id="{{ item.id }}">
+                        <img src="{{ item.image }}" alt="">
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
         {% endfor %}
