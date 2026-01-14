@@ -74,7 +74,7 @@
         padding-right: 4px;
     }
 
-    /* Active Coinflip Card (List View) */
+    /* Active Coinflip Card */
     .match-card {
         background: #1e1e2e;
         border: 1px solid #333;
@@ -123,45 +123,7 @@
         color: #fff;
     }
 
-    /* Opened Coinflip Detailed View */
-    .coinflip-open {
-        background: #111;
-        border: 1px solid #333;
-        border-radius: 14px;
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        position: relative;
-        animation: fadeIn 0.2s ease-in-out;
-    }
-
-    .coinflip-open .close-btn {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        background: #b91c1c;
-        border: none;
-        border-radius: 8px;
-        color: #fff;
-        padding: 6px 12px;
-        cursor: pointer;
-        font-weight: 600;
-    }
-
-    .coinflip-open .coinflip-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .coinflip-open .coin {
-        width: 80px;
-        height: 80px;
-        font-size: 1.5rem;
-    }
-
-    .coinflip-open .choices {
+    .choices {
         display: flex;
         gap: 12px;
     }
@@ -236,12 +198,6 @@
         background-color: #555;
         border-radius: 3px;
     }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
 </style>
 
 <div class="coinflip-container">
@@ -250,18 +206,18 @@
     <div class="stats-cards">
         <div class="stat-card">
             <div class="stat-title">Active Coinflips</div>
-            <div class="stat-value">{{ matches|length }}</div>
+            <div class="stat-value">{{ matches|length + 1 }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-title">Total Items Value</div>
             <div class="stat-value">
-                ${{ matches|sum(attribute='total_value') }}
+                ${{ matches|sum(attribute='total_value') + 50 }}
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-title">Total Items</div>
             <div class="stat-value">
-                {{ matches|sum(attribute='total_items') }}
+                {{ matches|sum(attribute='total_items') + 2 }}
             </div>
         </div>
     </div>
@@ -271,6 +227,32 @@
 
     <!-- Scrollable Coinflip Matches -->
     <div class="matches-container" id="matchesContainer">
+
+        <!-- Example Active Coinflip -->
+        <div class="match-card" data-id="1">
+            <div class="match-header">
+                <div class="match-title">Coinflip #1</div>
+                <div class="coin heads">H</div>
+            </div>
+
+            <div class="choices">
+                <div class="choice active" data-choice="heads">Heads</div>
+                <div class="choice" data-choice="tails">Tails</div>
+            </div>
+
+            <div class="items-grid">
+                <div class="item" data-id="101" data-value="30">
+                    <img src="/static/images/item1.png" alt="">
+                    <div class="item-value">$30</div>
+                </div>
+                <div class="item" data-id="102" data-value="20">
+                    <img src="/static/images/item2.png" alt="">
+                    <div class="item-value">$20</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other matches from your backend -->
         {% for match in matches %}
         <div class="match-card" data-id="{{ match.id }}">
             <div class="match-header">
@@ -295,25 +277,6 @@
             </div>
         </div>
         {% endfor %}
-    </div>
-</div>
-
-<!-- Opened Coinflip Template (hidden, cloned via JS when opened) -->
-<div id="coinflipOpenTemplate" style="display:none;">
-    <div class="coinflip-open">
-        <button class="close-btn">Close</button>
-        <div class="coinflip-header">
-            <div class="match-title">Coinflip #<span class="match-id"></span></div>
-            <div class="coin heads"></div>
-        </div>
-        <div class="choices">
-            <div class="choice" data-choice="heads">Heads</div>
-            <div class="choice" data-choice="tails">Tails</div>
-        </div>
-        <div class="items-grid">
-            <!-- Items will be cloned here dynamically -->
-        </div>
-        <button class="create-btn" style="margin-top:10px;">Join Coinflip</button>
     </div>
 </div>
 
