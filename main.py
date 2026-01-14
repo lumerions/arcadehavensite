@@ -23,7 +23,6 @@ import certifi
 import base64
 import math
 place_id = 97090711812957
-#
 
 
 app = FastAPI(
