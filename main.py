@@ -31,7 +31,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-
 def getMongoClient(ConnectionURI = None):
     if not ConnectionURI:
         ConnectionURI = os.environ["MONGO_CONNECTIONURI"]
