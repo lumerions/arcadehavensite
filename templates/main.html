@@ -431,27 +431,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('walletModal');
     const inventoryModal = document.getElementById('inventoryModal');
     const inventoryActionModal = document.getElementById('inventoryActionModal');
-
     const closeBtn = modal?.querySelector('.close');
     const closeInventoryBtn = inventoryModal?.querySelector('.close');
     const closeInventoryActionBtn = document.getElementById('closeInventoryAction');
-
     const tabs = document.querySelectorAll('.tab');
     const depositBtn = document.getElementById('depositBtn');
     const withdrawBtn = document.getElementById('withdrawBtn');
     const instructions = document.getElementById('instructions');
     const inputField = document.getElementById('amount');
-
     const openDepositBtn = document.getElementById('openDeposit');
     const openWithdrawBtn = document.getElementById('openWithdraw');
     const openInventoryBtn = document.getElementById('Inventory');
-
     const sortBtn = document.getElementById('sortBtn');
     const sortDropdown = document.getElementById('sortDropdown');
-
     const InventoryDepositBtn = document.getElementById('InventoryDepositBtn');
     const InventoryWithdrawBtn = document.getElementById('InventoryWithdrawBtn');
-
     const inventoryActionTitle = document.getElementById('inventoryActionTitle');
     const inventoryInstructions = document.getElementById('inventoryInstructions');
     const inventoryActionBtn = document.getElementById('inventoryActionBtn');
@@ -508,7 +502,11 @@ document.addEventListener('DOMContentLoaded', () => {
     openDepositBtn?.addEventListener('click', () => openWallet('deposit'));
     openWithdrawBtn?.addEventListener('click', () => openWallet('withdraw'));
 
-    closeBtn?.addEventListener('click', () => modal?.classList.remove('open'));
+    closeBtn?.addEventListener('click', () =>
+        modal?.classList.remove('open');
+        inventoryActionModal?.classList.remove('open'); 
+    );
+    
     modal?.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
     tabs.forEach(tab => {
@@ -529,11 +527,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
         modal?.classList.remove('open');
         inventoryModal?.classList.add('open');
-    });
-    
-    closeInventoryActionBtn?.addEventListener('click', () => {
-        console.log("ee");
-        inventoryActionModal?.classList.remove('open');
     });
     
     inventoryModal?.addEventListener('click', e => { if (e.target === inventoryModal) inventoryModal.classList.remove('open'); });
@@ -567,8 +560,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     closeInventoryActionBtn?.addEventListener('click', () => {
-        console.log("ee");
-        inventoryActionModal?.classList.remove('open');
+        if (inventoryActionModal?.classList.contains('open')) {
+            inventoryActionModal.classList.remove('open');
+        } else if (inventoryModal?.classList.contains('open')) {
+            inventoryModal.classList.remove('open');
+        }
     });
 
     inventoryActionModal?.addEventListener('click', e => { if (e.target === inventoryActionModal) inventoryActionModal.classList.remove('open'); });
@@ -608,7 +604,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 </script>
-
 
 </body>
 </html>
