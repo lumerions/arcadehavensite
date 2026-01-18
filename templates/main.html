@@ -423,36 +423,7 @@
 </div>
 </div>
 
-<script>
-    let TotalValue = 0;
-    const totalValueLabel = document.querySelector('#totalValue strong');
-
-     function UpdateTotalValueLabel() {
-        totalValueLabel.textContent = `$${TotalValue.toFixed(2)}`;
-    }
-    
-    document.querySelectorAll('.inventory-item').forEach(item => {
-        item.addEventListener('click', e => {
-            e.stopPropagation();
-    
-            if (item.classList.contains('selected')) {
-                let ValueText = item.querySelector('.value').textContent;
-                let CleanedValue = Number(ValueText.replace('$', ''));
-                TotalValue += CleanedValue;
-                UpdateTotalValueLabel()
-            } else {
-                let ValueText = item.querySelector('.value').textContent;
-                let CleanedValue = Number(ValueText.replace('$', ''));
-                TotalValue -= CleanedValue;
-                UpdateTotalValueLabel()
-            }
-    
-            item.classList.toggle('selected');
-        });
-    });
-</script>
-
-    
+  
 <script>
     const wrapper = document.querySelector('.balance-wrapper');
     const modal = document.getElementById('walletModal');
@@ -590,14 +561,11 @@
         inventoryActionModal.onclick = e =>
             e.target === inventoryActionModal && inventoryActionModal.classList.remove('open');
 
-
-    window.onload = () => {
-        if (document.querySelector('.error-message')) openWallet('withdraw');
-    };
-
     document.addEventListener("DOMContentLoaded", function() {
         const currentPath = window.location.pathname;
         const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+        if (document.querySelector('.error-message')) openWallet('withdraw');
 
         sidebarLinks.forEach(link => {
             link.classList.remove('active');
@@ -605,6 +573,33 @@
                 link.classList.add('active');
             }
         });
+
+    let TotalValue = 0;
+    const totalValueLabel = document.querySelector('#totalValue strong');
+
+     function UpdateTotalValueLabel() {
+        totalValueLabel.textContent = `$${TotalValue.toFixed(2)}`;
+    }
+    
+    document.querySelectorAll('.inventory-item').forEach(item => {
+        item.addEventListener('click', e => {
+            e.stopPropagation();
+    
+            if (item.classList.contains('selected')) {
+                let ValueText = item.querySelector('.value').textContent;
+                let CleanedValue = Number(ValueText.replace('$', ''));
+                TotalValue += CleanedValue;
+                UpdateTotalValueLabel()
+            } else {
+                let ValueText = item.querySelector('.value').textContent;
+                let CleanedValue = Number(ValueText.replace('$', ''));
+                TotalValue -= CleanedValue;
+                UpdateTotalValueLabel()
+            }
+    
+            item.classList.toggle('selected');
+        });
+    });
     });
 </script>
 
