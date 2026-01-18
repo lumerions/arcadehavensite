@@ -325,10 +325,10 @@
         <hr style="border: 0; height: 1px; background: #333; margin: 10px 0;">
 
         <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
-            <input type="text" id="inventorySearch" placeholder="Search items..." style="flex: 1;">
+            <input type="text" id="inventorySearch" placeholder="Search items..." style="flex: 1; height: 38px;">
             <div style="position: relative;">
-                <button id="sortBtn" style="padding: 8px 12px; background: #2a3448; color: #cbd5f5; border-radius: 8px; border: none; cursor: pointer;">
-                    Sort &#9662;
+                <button id="sortBtn" style="padding: 0 12px; height: 38px; background: #2a3448; color: #cbd5f5; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+                    Sort <span style="margin-left:5px;">&#9662;</span>
                 </button>
                 <div id="sortDropdown" style="position: absolute; right: 0; top: 110%; background: #1c2433; border: 1px solid #333; border-radius: 8px; display: none; min-width: 120px; z-index: 100;">
                     <a style="display: block; padding: 8px 12px; cursor: pointer; color: #fff;">Name</a>
@@ -340,11 +340,18 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <div style="font-size: 0.9rem; color: #cbd5f5;">Total Value: $0</div>
-            <button style="padding: 6px 12px; background: #16a34a; color: #fff; border-radius: 6px; border: none; cursor: pointer;">+Deposit</button>
+            <button style="padding: 6px 6px; background: #16a34a; color: #fff; border-radius: 6px; border: none; cursor: pointer; width: 10%;">+Deposit</button>
         </div>
 
-        <div style="background: #2a3448; border-radius: 10px; padding: 12px; min-height: 150px; margin-bottom: 10px;">
-            <p style="color:#94a3b8; font-size:0.85rem;">No items to display.</p>
+        <div style="background: #2a3448; border-radius: 10px; padding: 12px; min-height: 150px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px; background: #1c2433; border-radius: 8px; padding: 8px;">
+                <img src="https://via.placeholder.com/40" alt="Item Image" style="width: 40px; height: 40px; border-radius: 4px;">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+                    <span style="font-size: 0.75rem; color: #94a3b8;">Serial: 00123</span>
+                    <span style="font-weight: 500; color: #fff;">Example Item Name</span>
+                </div>
+                <span style="font-weight: 500; color: #16a34a;">$50</span>
+            </div>
         </div>
 
         <div style="text-align: right;">
