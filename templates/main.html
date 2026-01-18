@@ -218,6 +218,13 @@
             border: none; font-weight: 600; cursor: pointer; font-size: 1rem;
         }
 
+        .action-btn.small {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
         .action-btn.deposit { background: #16a34a; color: #fff; }
         .action-btn.withdraw { background: #2563eb; color: #fff; }
 
@@ -318,7 +325,6 @@
     </main>
 </div>
 
-<!-- Wallet Modal -->
 <div class="modal" id="walletModal">
     <div class="wallet">
         <div class="wallet-header">
@@ -357,7 +363,7 @@
 
     <div style="display:flex; justify-content:space-between; margin-top:10px;">
         <div>Total Value: <strong>$250</strong></div>
-        <button class="action-btn deposit">+Deposit</button>
+        <button class="action-btn deposit small">+Deposit</button>
     </div>
 
     <div class="inventory-grid">
