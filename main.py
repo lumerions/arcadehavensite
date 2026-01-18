@@ -1212,8 +1212,8 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
         f"?placeId={place_id}"
         f"&launchData={urllib.parse.quote(b64_data)}"
     )
-
-    return RedirectResponse(roblox_url)
+    
+    return RedirectResponse(url=roblox_url, status_code=303)
 
 @app.post("/withdrawitems",response_class =  HTMLResponse)
 async def withdrawget(request: Request, SessionId: str = Cookie(None)):
@@ -1222,7 +1222,6 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     
     data = await request.json()
     itemdata = data.get("itemdata")
-    page = data.get("page")
 
     try:
         conn = getPostgresConnection() 
@@ -1244,7 +1243,7 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     try:
         document = SiteItemsCollection.find_one({"SessionId": SessionId})
         if not document:
-            return MoreWithdraw(page,request)
+            return MoreWithdraw("gdfd",request)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
@@ -1270,10 +1269,15 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
         f"&launchData={urllib.parse.quote(b64_data)}"
     )
 
-    return RedirectResponse(roblox_url)
+    return RedirectResponse(url=roblox_url, status_code=303)
+
 
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
 
 
