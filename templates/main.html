@@ -252,6 +252,37 @@
                 margin-left: auto; 
             }
         }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .inventory-item {
+            background: #111827;
+            border-radius: 6px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.7rem;
+        }
+        
+        .inventory-item img {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+        
+        .inventory-item .serial {
+            color: #94a3b8;
+            font-size: 0.6rem;
+        }
+        .inventory-item .name { font-weight: 500; }
+        .inventory-item .price { color: #16a34a; font-weight: 600; }
     </style>
 </head>
 
@@ -316,50 +347,33 @@
 </div>
 
 <div class="modal" id="inventoryModal">
-    <div class="wallet" style="max-width: 500px; position: relative;">
-        <div class="wallet-header">
-            <h2>Inventory</h2>
-            <span class="close">&times;</span>
-        </div>
+<div class="wallet">
+    <div class="wallet-header">
+        <h2>Inventory</h2>
+        <span class="close">&times;</span>
+    </div>
 
-        <hr style="border: 0; height: 1px; background: #333; margin: 10px 0;">
+    <input placeholder="Search items...">
 
-        <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
-            <input type="text" id="inventorySearch" placeholder="Search items..." style="flex: 1; height: 38px;">
-            <div style="position: relative;">
-                <button id="sortBtn" style="padding: 0 12px; height: 38px; background: #2a3448; color: #cbd5f5; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
-                    Sort <span style="margin-left:5px;">&#9662;</span>
-                </button>
-                <div id="sortDropdown" style="position: absolute; right: 0; top: 110%; background: #1c2433; border: 1px solid #333; border-radius: 8px; display: none; min-width: 120px; z-index: 100;">
-                    <a style="display: block; padding: 8px 12px; cursor: pointer; color: #fff;">Name</a>
-                    <a style="display: block; padding: 8px 12px; cursor: pointer; color: #fff;">Value</a>
-                    <a style="display: block; padding: 8px 12px; cursor: pointer; color: #fff;">Date Acquired</a>
-                </div>
-            </div>
-        </div>
+    <div style="display:flex; justify-content:space-between; margin-top:10px;">
+        <div>Total Value: <strong>$250</strong></div>
+        <button class="deposit-btn">+Deposit</button>
+    </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <div style="font-size: 0.9rem; color: #cbd5f5;">Total Value: $0</div>
-            <button style="padding: 6px 6px; background: #16a34a; color: #fff; border-radius: 6px; border: none; cursor: pointer; width: 10%;">+Deposit</button>
-        </div>
+    <div class="inventory-grid">
+        <div class="inventory-item"><img src="https://via.placeholder.com/40"><span class="serial">#1</span><span class="name">Ruby</span><span class="price">$50</span></div>
+        <div class="inventory-item"><img src="https://via.placeholder.com/40"><span class="serial">#2</span><span class="name">Emerald</span><span class="price">$45</span></div>
+        <div class="inventory-item"><img src="https://via.placeholder.com/40"><span class="serial">#3</span><span class="name">Sapphire</span><span class="price">$55</span></div>
+        <div class="inventory-item"><img src="https://via.placeholder.com/40"><span class="serial">#4</span><span class="name">Diamond</span><span class="price">$70</span></div>
+        <div class="inventory-item"><img src="https://via.placeholder.com/40"><span class="serial">#5</span><span class="name">Opal</span><span class="price">$30</span></div>
+    </div>
 
-        <div style="background: #2a3448; border-radius: 10px; padding: 12px; min-height: 150px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; align-items: center; gap: 10px; background: #1c2433; border-radius: 8px; padding: 8px;">
-                <img src="https://via.placeholder.com/40" alt="Item Image" style="width: 40px; height: 40px; border-radius: 4px;">
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
-                    <span style="font-size: 0.75rem; color: #94a3b8;">Serial: 00123</span>
-                    <span style="font-weight: 500; color: #fff;">Example Item Name</span>
-                </div>
-                <span style="font-weight: 500; color: #16a34a;">$50</span>
-            </div>
-        </div>
-
-        <div style="text-align: right;">
-            <button style="padding: 8px 16px; background: #2563eb; color: #fff; border-radius: 6px; border: none; cursor: pointer;">Withdraw</button>
-        </div>
+    <div style="text-align:right; margin-top:12px;">
+        <button class="withdraw-btn">Withdraw</button>
     </div>
 </div>
-
+</div>
+    
 <script>
     const wrapper = document.querySelector('.balance-wrapper');
     const modal = document.getElementById('walletModal');
