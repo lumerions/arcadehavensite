@@ -152,6 +152,7 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
 def readregister(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","home.html")
 
+
 @app.get("/login",response_class =  HTMLResponse)
 def readlogin(request: Request):
     SessionId = request.cookies.get('SessionId')  
@@ -1177,7 +1178,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
 
-@app.post("/deposititems")
+@app.get("/deposititems")
 async def depositget(request : Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
@@ -1211,7 +1212,7 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
         f"?placeId={place_id}"
         f"&launchData={urllib.parse.quote(b64_data)}"
     )
-    
+
     return RedirectResponse(url=roblox_url, status_code=303)
 
 @app.post("/withdrawitems",response_class =  HTMLResponse)
