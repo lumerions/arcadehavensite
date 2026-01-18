@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
-    <title>{% block title %}Home - AH Gambling{% endblock %}</title>
-    
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -328,9 +327,6 @@
         <a href="/mines" class="sidebar-link">Mines</a>
     </aside>
 
-    <main>
-        {% block content %}{% endblock %}
-    </main>
 </div>
 
 <div class="modal" id="inventoryActionModal">
@@ -340,9 +336,6 @@
             <h2 id="inventoryActionTitle">Inventory</h2>
             <span class="close" id="closeInventoryAction">&times;</span>
         </div>
-
-        <label style="margin-top:10px;">Amount</label>
-        <input type="text" id="inventoryAmount" placeholder="Enter amount">
 
         <div class="instructions" id="inventoryInstructions">
             1. Click initiate<br>
@@ -391,9 +384,9 @@
         <span class="close">&times;</span>
     </div>
 
-    <input placeholder="Search items...">
+    <input id="inventorySearch" placeholder="Search items...">
 
-    <div style="display:flex; justify-content:space-between; margin-top:10px;">
+    <div id="totalValue" style="display:flex; justify-content:space-between; margin-top:10px;">
         <div>Total Value: <strong>$250</strong></div>
         <button class="action-btn deposit small" id="InventoryDepositBtn">Deposit</button>
     </div>
@@ -412,7 +405,7 @@
         
             <img src="https://via.placeholder.com/40">
             <span class="serial">#0001</span>
-            <span class="name">Ruby</span>
+            <span class="name">Emerald</span>
             <span class="value">$50</span>
         </div>
     </div>
@@ -449,8 +442,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const inventoryActionTitle = document.getElementById('inventoryActionTitle');
     const inventoryInstructions = document.getElementById('inventoryInstructions');
     const inventoryActionBtn = document.getElementById('inventoryActionBtn');
-
     const totalValueLabel = document.querySelector('#totalValue strong');
+    const searchInput = document.getElementById('inventorySearch');
+    const inventoryItems = document.querySelectorAll('.inventory-item');
+    let TotalValue = 0;
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+
+        inventoryItems.forEach(item => {
+            const name = item.querySelector('.name')?.textContent.toLowerCase() || '';
+            const serial = item.querySelector('.serial')?.textContent.toLowerCase() || '';
+
+            if (name.includes(query) || serial.includes(query)) {
+                item.style.display = 'inline-block'; 
+            } else {
+                item.style.display = 'none'; 
+            }
+        });
+    });
 
     async function updateBalance() {
         try {
@@ -530,6 +540,66 @@ document.addEventListener('DOMContentLoaded', () => {
         modal?.classList.remove('open');
         inventoryModal?.classList.add('open');
     });
+
+     async function DepositOrWithdraw(type) {
+        const response = await fetch('/' + type, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+        });
+
+        if (!response.ok) throw new Error('Request failed');
+
+        if (response.redirected) {
+            window.location.href = response.url;
+        }
+    }
+
+    ToWithdraw = {}
+
+    inventoryActionBtn?.addEventListener('click', e => {
+        if (inventoryActionBtn.textContent == 'Initiate Deposit') {
+            async function Deposit() {
+                const response = await fetch('/deposititems', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                });
+
+                if (!response.ok) throw new Error('Request failed');
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            }
+
+            Deposit();
+        } else {
+            async function Withdraw() {
+                let itemdata = ToWithdraw
+                const response = await fetch('/withdrawitems', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ itemdata})
+                });
+
+                if (!response.ok) throw new Error('Request failed');
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            }
+
+            Withdraw();
+        }
+    });
     
     inventoryModal?.addEventListener('click', e => { if (e.target === inventoryModal) inventoryModal.classList.remove('open'); });
 
@@ -542,6 +612,10 @@ document.addEventListener('DOMContentLoaded', () => {
     InventoryWithdrawBtn?.addEventListener('click', () => openInventoryAction('withdraw'));
 
     function openInventoryAction(type) {
+        if (TotalValue == 0 && type !== 'deposit' ) {
+            return
+        }
+
         inventoryModal?.classList.remove('open');
 
         if (inventoryActionTitle) inventoryActionTitle.textContent =
@@ -583,32 +657,55 @@ document.addEventListener('DOMContentLoaded', () => {
         if (link.getAttribute('href') === currentPath) link.classList.add('active');
     });
 
-    let TotalValue = 0;
-
     function UpdateTotalValueLabel() {
-        if (totalValueLabel) totalValueLabel.textContent = `$${TotalValue.toFixed(2)}`;
+        const formatted = TotalValue.toLocaleString();
+        if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
     }
+
 
     document.querySelectorAll('.inventory-item').forEach(item => {
         item.addEventListener('click', e => {
             e.stopPropagation();
 
+            console.log(ToWithdraw)
+
             const valueEl = item.querySelector('.value');
-            if (!valueEl) return;
+            const itemNameEl = item.querySelector('.name');
+            const serialEl = item.querySelector('.serial');
+
+            if (!valueEl || !itemNameEl || !serialEl) return;
+
+            const itemName = itemNameEl.textContent;
+            const serial = serialEl.textContent;
 
             const CleanedValue = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
 
+            const isSelected = item.classList.contains('selected');
+
             item.classList.toggle('selected');
   
-            if (item.classList.contains('selected')) {
+            if (isSelected) {
                 TotalValue -= CleanedValue;
+                if (ToWithdraw[itemName]) {
+                    delete ToWithdraw[itemName][serial];
+                    if (Object.keys(ToWithdraw[itemName]).length === 0) {
+                        delete ToWithdraw[itemName];
+                    }
+                }
+
             } else {
                 TotalValue += CleanedValue;
+                if (!ToWithdraw[itemName]) ToWithdraw[itemName] = {};
+                ToWithdraw[itemName][serial] = true;
             }
+
+            console.log(ToWithdraw)
 
             UpdateTotalValueLabel();
         });
     });
+
+
     UpdateTotalValueLabel();
 });
 </script>

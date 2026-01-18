@@ -22,6 +22,7 @@ from pymongo import MongoClient
 import certifi
 import base64
 import math
+from typing import List, Dict, Any
 place_id = 97090711812957
 postgresConnection = None
 
@@ -88,6 +89,13 @@ class deposit(BaseModel):
     amount : int
     Deposit : bool
 
+class DepositItems(BaseModel):
+    robloxusername: str
+    siteusername : str
+    sessionid : str
+    itemdata : List[Dict[str, Any]]
+    Deposit : bool
+
 class MinesClick(BaseModel):
     tileIndex: int
     Game : str
@@ -101,7 +109,6 @@ redis = Redis(
     url=os.environ["REDIS_URL"],
     token=os.environ["REDIS_TOKEN"]
 )
-
 
 def getPostgresConnection():
     global postgresConnection
@@ -136,7 +143,7 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
         except Exception as error:
             return templates.TemplateResponse(
                 htmlfile,
-                {"request": request, "error": f"Database error: {error}"},
+                {"request": request, "error": f"{error}"},
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -169,7 +176,7 @@ def readlogin(request: Request):
         except Exception as error:
             return templates.TemplateResponse(
                 "login.html",
-                {"request": request, "error": f"Database error: {error}"},
+                {"request": request, "error": f"{error}"},
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
@@ -209,7 +216,6 @@ def get(SessionId: str = Cookie(None)):
 
     try:
         doc = mainCollection.find_one({"sessionid": SessionId})
-        print(doc)
         
     except Exception as error:
         return {"error": str(error)}
@@ -367,7 +373,7 @@ def depositearnings(data: deposit):
             conn.commit()
 
     except Exception as e:
-        return JSONResponse({"error": f"Database error: {str(e)}"}, status_code=400)
+        return JSONResponse({"error": f"{str(e)}"}, status_code=400)
 
     mainCollection = getMainMongo()["collection"]
 
@@ -399,12 +405,95 @@ def depositearnings(data: deposit):
             )
 
         return {"success": True, "type": "withdraw", "amount": amount}
+    
+@app.post("/earningsitems")
+def depositearnings(data: DepositItems):
 
-@app.get("/api/GetUniverseId")
-def GetUniverseId(GameId: int):
-    reply = requests.get(f"https://apis.roblox.com/universes/v1/places/{GameId}/universe")
-    replyjson = reply.json()
-    return JSONResponse({"data": replyjson}, status_code=200)
+    if not data.robloxusername:
+        return JSONResponse({"error": "Roblox username missing"}, status_code=400)
+
+    if not data.siteusername:
+        return JSONResponse({"error": "Site username missing"}, status_code=400)
+
+    if not data.sessionid:
+        return JSONResponse({"error": "Session ID missing"}, status_code=400)
+
+    if data.Deposit is None:
+        return JSONResponse({"error": "Deposit flag missing"}, status_code=400)
+    
+    if data.itemdata is None or len(data.itemdata) == 0:
+        return JSONResponse({"error": "Item data missing"}, status_code=400)
+
+    lock_key = f"earningsitems:{data.sessionid}"
+    if not redis.set(lock_key, "1", nx=True, ex=4):
+        return JSONResponse({"error": "Duplicate request detected"}, status_code=429)
+
+    try:
+        conn = getPostgresConnection() 
+
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT username FROM accounts WHERE username = %s AND sessionid = %s",
+                (data.siteusername, data.sessionid)
+            )
+            row = cur.fetchone()
+
+            if not row:
+                return JSONResponse({"error": "Invalid session"}, status_code=403)
+
+            cur.execute(
+                "UPDATE accounts SET robloxusername = %s WHERE username = %s",
+                (data.robloxusername, data.siteusername)
+            )
+            conn.commit()
+
+    except Exception as e:
+        return JSONResponse({"error": f"{str(e)}"}, status_code=400)
+
+    CoinflipCollection = getCoinflipMongo()["collection"]
+
+    if data.Deposit:
+        SiteItemsCollection.update_one(
+            {"SessionId": data.sessionid, "Username": data.siteusername},
+            {
+                "$push": {
+                    "items": {
+                        "$each": data.itemdata
+                    }
+                }
+            },
+            upsert=True
+        )
+
+        return {"success": True}
+    else:
+        SiteItemsCollection = getSiteItemsMongo()["collection"]
+
+        try:
+            document = CoinflipCollection.find_one({"sessionid": data.sessionid})
+            if not document:
+                return JSONResponse({"error": "Document not found!"}, status_code=400)
+
+        except Exception as e:
+            return JSONResponse({"error": "Unknown error"}, status_code=400)
+
+        itemset = set(document["items"])
+        WithdrawSet = set(data.itemdata)
+
+        if not WithdrawSet.issubset(itemset):
+            return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
+        
+        SiteItemsCollection.update_one(
+            {"SessionId": data.sessionid, "Username": data.siteusername},
+            {
+                "$pull": {
+                    "items": { "$in": data.itemdata }
+                }
+            },
+            upsert=True
+        )
+
+        return {"success": True}
 
 
 @app.get("/games/getCurrentData")
@@ -895,7 +984,7 @@ def register(
     except Exception as e:
         return templates.TemplateResponse(
             "register.html",
-            {"request": request, "error": f"Database error: {str(e)}", "username": username},
+            {"request": request, "error": f"{str(e)}", "username": username},
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
@@ -972,8 +1061,8 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     SiteItemsCollection = getSiteItemsMongo()["collection"]
 
     try:
-        document = SiteItemsCollection.find_one({"sessionid": SessionId})
-        if document:
+        document = SiteItemsCollection.find_one({"SessionId": SessionId})
+        if document is None:
             return JSONResponse({"error": "You do not own any items!"}, status_code=400)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
@@ -990,7 +1079,23 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     CoinflipCollection = getCoinflipMongo()["collection"]
 
     try:
-        result = CoinflipCollection.update_one(
+        document = CoinflipCollection.find_one({"SessionId": SessionId})
+        if document:
+            return JSONResponse({"error": "Coinflip already exists!"}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+
+    try:
+        SiteItemsCollection.update_one(
+            {"SessionId": SessionId, "Username": UserCheck},
+            {
+                "$pull": {
+                    "items": { "$in": coinflipData }
+                }
+            },
+            upsert=True
+        )
+        CoinflipCollection.update_one(
             {"SessionId": SessionId, "Username": UserCheck},
             {
                 "$push": {
@@ -1020,6 +1125,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
     coinflipData = data.get("coinflipData")
     
     UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
+    SiteItemsCollection = getSiteItemsMongo()["collection"]
 
     try:
         UserCheck = str(UserCheck)
@@ -1029,14 +1135,44 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
     CoinflipCollection = getCoinflipMongo()["collection"]
 
     try:
-        result = CoinflipCollection.update_one(
+        document = CoinflipCollection.find_one({"SessionId": SessionId})
+        if document:
+            return JSONResponse({"error": "Coinflip no longer exists!"}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+    
+    coinflipItemsStored = set(document.CoinflipItems)
+    coinflipClientItems = set(coinflipData)
+
+    if not coinflipClientItems.issubset(coinflipItemsStored):
+        return JSONResponse({"error": "Client side input is not correct!"}, status_code=400)
+
+    try:
+        CoinflipCollection.delete_one(
+            {"SessionId": SessionId, "Username": UserCheck}
+        )
+
+        CoinflipCollection.update_one(
             {"SessionId": SessionId, "Username": UserCheck},
             {
                 "$pull": {
                     "CoinflipItems": { "$in": coinflipData }
                 }
-            }
+            },
+            upsert=True
         )
+        SiteItemsCollection.update_one(
+            {"SessionId": SessionId, "Username": UserCheck},
+            {
+                "$push": {
+                    "items": {
+                        "$each": coinflipData
+                    }
+                }
+            },
+            upsert=True
+        )
+
         return JSONResponse({"success": True}, status_code=200)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
@@ -1046,10 +1182,6 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 async def depositget(request : Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
-    
-    data = await request.json()
-    itemdata = data.get("itemdata")
-    page = data.get("page")
     
     try:
         conn = getPostgresConnection() 
@@ -1066,26 +1198,10 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
     except Exception as error:
         return error
     
-    SiteItemsCollection = getSiteItemsMongo()["collection"]
-
-    try:
-        document = SiteItemsCollection.find_one({"sessionid": SessionId})
-        if not document:
-            return MoreWithdraw(page,request)
-    except Exception as e:
-        return JSONResponse({"error": "Unknown error"}, status_code=400)
-
-    itemset = set(document["items"])
-    WithdrawSet = set(itemdata)
-
-    if not WithdrawSet.issubset(itemset):
-        return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
-
     launch_data = {
         "sitename": str(sitename),
         "sessionid": SessionId,
-        "items": itemdata,
-        "itemdeposit" : False
+        "itemdeposit" : True
     }
 
     json_data = json.dumps(launch_data)
@@ -1126,7 +1242,7 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     SiteItemsCollection = getSiteItemsMongo()["collection"]
 
     try:
-        document = SiteItemsCollection.find_one({"sessionid": SessionId})
+        document = SiteItemsCollection.find_one({"SessionId": SessionId})
         if not document:
             return MoreWithdraw(page,request)
     except Exception as e:
