@@ -501,11 +501,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     openDepositBtn?.addEventListener('click', () => openWallet('deposit'));
     openWithdrawBtn?.addEventListener('click', () => openWallet('withdraw'));
-
-    closeBtn?.addEventListener('click', () =>
+    
+    closeBtn?.addEventListener('click', () => {
         modal?.classList.remove('open');
         inventoryActionModal?.classList.remove('open'); 
-    );
+    });
+
     
     modal?.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
