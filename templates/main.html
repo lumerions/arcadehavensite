@@ -42,7 +42,6 @@
             margin-left: 0; 
         }
 
-
         .balance-wrapper {
             margin-left: auto;
             position: relative;
@@ -239,7 +238,6 @@
             .sidebar-label { display: none; }
             .sidebar-link { white-space: nowrap; padding: 0.5rem 1rem; }
             main { padding: 2rem 1rem; }
-            .cards { grid-template-columns: 1fr; }
             nav {
                 justify-content: center; 
                 padding: 1rem;
@@ -267,6 +265,7 @@
         <div class="balance-menu">
             <a id="openDeposit">Deposit</a>
             <a id="openWithdraw">Withdraw</a>
+            <a id="Inventory">Inventory</a>
             <div class="divider"></div>
             <a href="/logout">Log out</a>
         </div>
@@ -288,6 +287,7 @@
     </main>
 </div>
 
+<!-- Wallet Modal -->
 <div class="modal" id="walletModal">
     <div class="wallet">
         <div class="wallet-header">
@@ -315,15 +315,31 @@
     </div>
 </div>
 
+<!-- Inventory Modal -->
+<div class="modal" id="inventoryModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Inventory</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="instructions">
+            Your items will appear here.
+        </div>
+    </div>
+</div>
+
 <script>
     const wrapper = document.querySelector('.balance-wrapper');
     const modal = document.getElementById('walletModal');
-    const closeBtn = document.querySelector('.close');
+    const inventoryModal = document.getElementById('inventoryModal');
+    const closeBtn = modal.querySelector('.close');
+    const closeInventoryBtn = inventoryModal.querySelector('.close');
     const tabs = document.querySelectorAll('.tab');
     const depositBtn = document.getElementById('depositBtn');
     const withdrawBtn = document.getElementById('withdrawBtn');
     const instructions = document.getElementById('instructions');
     const inputField = document.getElementById('amount');
+    const openInventoryBtn = document.getElementById('Inventory');
 
     async function updateBalance() {
         try {
@@ -351,10 +367,19 @@
     document.getElementById('openDeposit').onclick = openDeposit;
     document.getElementById('openWithdraw').onclick = openWithdraw;
 
+    openInventoryBtn.onclick = () => {
+        modal.classList.remove('open');
+        inventoryModal.classList.add('open');
+    };
+
     closeBtn.onclick = () => modal.classList.remove('open');
+    closeInventoryBtn.onclick = () => inventoryModal.classList.remove('open');
+
     modal.onclick = e => e.target === modal && modal.classList.remove('open');
+    inventoryModal.onclick = e => e.target === inventoryModal && inventoryModal.classList.remove('open');
 
     function openWallet(type) {
+        inventoryModal.classList.remove('open'); // close inventory
         modal.classList.add('open');
         switchTab(type);
     }
@@ -392,13 +417,13 @@
     window.onload = () => {
         if (document.querySelector('.error-message')) openWallet('withdraw');
     };
+
     document.addEventListener("DOMContentLoaded", function() {
         const currentPath = window.location.pathname;
         const sidebarLinks = document.querySelectorAll('.sidebar-link');
 
         sidebarLinks.forEach(link => {
             link.classList.remove('active');
-
             if (link.getAttribute('href') === currentPath) {
                 link.classList.add('active');
             }
@@ -408,3 +433,4 @@
 
 </body>
 </html>
+
