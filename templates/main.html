@@ -425,22 +425,38 @@
 
   
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+
     const wrapper = document.querySelector('.balance-wrapper');
     const modal = document.getElementById('walletModal');
     const inventoryModal = document.getElementById('inventoryModal');
-    const closeBtn = modal.querySelector('.close');
-    const closeInventoryBtn = inventoryModal.querySelector('.close');
+    const inventoryActionModal = document.getElementById('inventoryActionModal');
+
+    const closeBtn = modal?.querySelector('.close');
+    const closeInventoryBtn = inventoryModal?.querySelector('.close');
+    const closeInventoryActionBtn = document.getElementById('closeInventoryAction');
+
     const tabs = document.querySelectorAll('.tab');
     const depositBtn = document.getElementById('depositBtn');
     const withdrawBtn = document.getElementById('withdrawBtn');
     const instructions = document.getElementById('instructions');
     const inputField = document.getElementById('amount');
+
+    const openDepositBtn = document.getElementById('openDeposit');
+    const openWithdrawBtn = document.getElementById('openWithdraw');
     const openInventoryBtn = document.getElementById('Inventory');
+
     const sortBtn = document.getElementById('sortBtn');
     const sortDropdown = document.getElementById('sortDropdown');
+
     const InventoryDepositBtn = document.getElementById('InventoryDepositBtn');
     const InventoryWithdrawBtn = document.getElementById('InventoryWithdrawBtn');
 
+    const inventoryActionTitle = document.getElementById('inventoryActionTitle');
+    const inventoryInstructions = document.getElementById('inventoryInstructions');
+    const inventoryActionBtn = document.getElementById('inventoryActionBtn');
+
+    const totalValueLabel = document.querySelector('#totalValue strong');
 
     async function updateBalance() {
         try {
@@ -448,7 +464,8 @@
             const data = await response.text(); 
             const number = parseFloat(data);
             if (!isNaN(number)) {
-                document.querySelector('.balance-btn').textContent = `$${number.toLocaleString()}`;
+                const balanceBtn = document.querySelector('.balance-btn');
+                if (balanceBtn) balanceBtn.textContent = `$${number.toLocaleString()}`;
             }
         } catch (error) {
             console.error('Error fetching balance:', error);
@@ -456,152 +473,134 @@
     }
     updateBalance();
 
-    document.querySelector('.balance-btn').onclick = (e) => {
+    wrapper?.querySelector('.balance-btn')?.addEventListener('click', e => {
         e.stopPropagation();
         wrapper.classList.toggle('open');
-    };
-    window.onclick = () => {
-        wrapper.classList.remove('open');
-        sortDropdown.style.display = 'none';
-    };
+    });
 
-    const openDeposit = () => openWallet('deposit');
-    const openWithdraw = () => openWallet('withdraw');
-    document.getElementById('openDeposit').onclick = openDeposit;
-    document.getElementById('openWithdraw').onclick = openWithdraw;
-
-    openInventoryBtn.onclick = (e) => {
-        e.stopPropagation();
-        modal.classList.remove('open');
-        inventoryModal.classList.add('open');
-    };
-
-    closeBtn.onclick = () => modal.classList.remove('open');
-    closeInventoryBtn.onclick = () => inventoryModal.classList.remove('open');
-
-    modal.onclick = e => e.target === modal && modal.classList.remove('open');
-    inventoryModal.onclick = e => e.target === inventoryModal && inventoryModal.classList.remove('open');
+    window.addEventListener('click', () => {
+        wrapper?.classList.remove('open');
+        if (sortDropdown) sortDropdown.style.display = 'none';
+    });
 
     function openWallet(type) {
-        inventoryModal.classList.remove('open'); 
-        modal.classList.add('open');
+        inventoryModal?.classList.remove('open');
+        modal?.classList.add('open');
         switchTab(type);
     }
 
     function switchTab(type) {
         tabs.forEach(tab => tab.classList.remove('active'));
         const activeTab = document.querySelector('.tab.' + type);
-        activeTab.classList.add('active');
+        if (activeTab) activeTab.classList.add('active');
 
         if (type === 'deposit') {
             depositBtn.style.display = 'block';
             withdrawBtn.style.display = 'none';
-            instructions.innerHTML = `1. Enter amount<br>2. Click Initiate<br>3. Complete in-game`;
+            if (instructions) instructions.innerHTML = `1. Enter amount<br>2. Click Initiate<br>3. Complete in-game`;
         } else {
             depositBtn.style.display = 'none';
             withdrawBtn.style.display = 'block';
-            instructions.innerHTML = `1. Enter amount<br>2. Click Initiate<br>3. Complete in-game`;
+            if (instructions) instructions.innerHTML = `1. Enter amount<br>2. Click Initiate<br>3. Complete in-game`;
         }
     }
+
+    openDepositBtn?.addEventListener('click', () => openWallet('deposit'));
+    openWithdrawBtn?.addEventListener('click', () => openWallet('withdraw'));
+
+    closeBtn?.addEventListener('click', () => modal?.classList.remove('open'));
+    modal?.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
     tabs.forEach(tab => {
-        tab.onclick = () => switchTab(tab.classList.contains('deposit') ? 'deposit' : 'withdraw');
+        tab.addEventListener('click', () => switchTab(tab.classList.contains('deposit') ? 'deposit' : 'withdraw'));
     });
 
-    depositBtn.onclick = () => {
-        const val = parseFloat(inputField.value);
+    depositBtn?.addEventListener('click', () => {
+        const val = parseFloat(inputField?.value);
         if (val > 0) window.location.href = `/deposit?amount=${val}`;
-    };
+    });
 
-    withdrawBtn.onclick = () => {
-        const val = parseFloat(inputField.value);
+    withdrawBtn?.addEventListener('click', () => {
+        const val = parseFloat(inputField?.value);
         if (val > 0) window.location.href = `/withdraw?amount=${val}&page=home`;
-    };
+    });
 
-    sortBtn.onclick = (e) => {
+    openInventoryBtn?.addEventListener('click', e => {
         e.stopPropagation();
-        sortDropdown.style.display = sortDropdown.style.display === 'block' ? 'none' : 'block';
-    };
+        modal?.classList.remove('open');
+        inventoryModal?.classList.add('open');
+    });
 
-        const inventoryActionModal = document.getElementById('inventoryActionModal');
-        const inventoryActionTitle = document.getElementById('inventoryActionTitle');
-        const inventoryInstructions = document.getElementById('inventoryInstructions');
-        const inventoryActionBtn = document.getElementById('inventoryActionBtn');
-        
-        document.querySelector('.inventory .deposit-btn, .deposit-btn')?.addEventListener('click', () => {
-            openInventoryAction('deposit');
-        });
-        
-        document.querySelector('.withdraw-btn')?.addEventListener('click', () => {
-            openInventoryAction('withdraw');
-        });
-        
-        function openInventoryAction(type) {
-            document.getElementById('inventoryModal').classList.remove('open');
-        
-            inventoryActionTitle.textContent =
-                type === 'deposit' ? 'Inventory Deposit' : 'Inventory Withdraw';
-        
+    closeInventoryBtn?.addEventListener('click', () => inventoryModal?.classList.remove('open'));
+    inventoryModal?.addEventListener('click', e => { if (e.target === inventoryModal) inventoryModal.classList.remove('open'); });
+
+    sortBtn?.addEventListener('click', e => {
+        e.stopPropagation();
+        if (sortDropdown) sortDropdown.style.display = sortDropdown.style.display === 'block' ? 'none' : 'block';
+    });
+
+    InventoryDepositBtn?.addEventListener('click', () => openInventoryAction('deposit'));
+    InventoryWithdrawBtn?.addEventListener('click', () => openInventoryAction('withdraw'));
+
+    function openInventoryAction(type) {
+        inventoryModal?.classList.remove('open');
+
+        if (inventoryActionTitle) inventoryActionTitle.textContent =
+            type === 'deposit' ? 'Inventory Deposit' : 'Inventory Withdraw';
+
+        if (inventoryActionBtn) {
             inventoryActionBtn.className = `action-btn ${type}`;
-            inventoryActionBtn.textContent =
-                type === 'deposit' ? 'Initiate Deposit' : 'Initiate Withdraw';
-        
-            inventoryInstructions.innerHTML = `
-                1. Select items<br>
-                2. Enter amount<br>
-                3. Complete in-game
-            `;
-        
-            inventoryActionModal.classList.add('open');
+            inventoryActionBtn.textContent = type === 'deposit' ? 'Initiate Deposit' : 'Initiate Withdraw';
         }
-        
-        document.getElementById('closeInventoryAction').onclick = () =>
-            inventoryActionModal.classList.remove('open');
-        
-        inventoryActionModal.onclick = e =>
-            e.target === inventoryActionModal && inventoryActionModal.classList.remove('open');
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const currentPath = window.location.pathname;
-        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        if (inventoryInstructions) inventoryInstructions.innerHTML = `
+            1. Select items<br>
+            2. Enter amount<br>
+            3. Complete in-game
+        `;
 
-        if (document.querySelector('.error-message')) openWallet('withdraw');
+        inventoryActionModal?.classList.add('open');
+    }
 
-        sidebarLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === currentPath) {
-                link.classList.add('active');
-            }
-        });
+    closeInventoryActionBtn?.addEventListener('click', () => inventoryActionModal?.classList.remove('open'));
+    inventoryActionModal?.addEventListener('click', e => { if (e.target === inventoryActionModal) inventoryActionModal.classList.remove('open'); });
+
+    const currentPath = window.location.pathname;
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    sidebarLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === currentPath) link.classList.add('active');
+    });
 
     let TotalValue = 0;
-    const totalValueLabel = document.querySelector('#totalValue strong');
 
-     function UpdateTotalValueLabel() {
-        totalValueLabel.textContent = `$${TotalValue.toFixed(2)}`;
+    function UpdateTotalValueLabel() {
+        if (totalValueLabel) totalValueLabel.textContent = `$${TotalValue.toFixed(2)}`;
     }
-    
+
     document.querySelectorAll('.inventory-item').forEach(item => {
         item.addEventListener('click', e => {
             e.stopPropagation();
-    
+
+            const valueEl = item.querySelector('.value');
+            if (!valueEl) return;
+
+            const CleanedValue = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+
             if (item.classList.contains('selected')) {
-                let ValueText = item.querySelector('.value').textContent;
-                let CleanedValue = Number(ValueText.replace('$', ''));
-                TotalValue += CleanedValue;
-                UpdateTotalValueLabel()
-            } else {
-                let ValueText = item.querySelector('.value').textContent;
-                let CleanedValue = Number(ValueText.replace('$', ''));
                 TotalValue -= CleanedValue;
-                UpdateTotalValueLabel()
+            } else {
+                TotalValue += CleanedValue;
             }
-    
+
             item.classList.toggle('selected');
+            UpdateTotalValueLabel();
         });
     });
-    });
+
+});
 </script>
+
 
 </body>
 </html>
