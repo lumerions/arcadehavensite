@@ -183,6 +183,10 @@ def loadmines(request: Request):
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
+@app.get("/coinflipgame", response_class=HTMLResponse)
+def read_root(request: Request):
+    return CheckIfUserIsLoggedIn(request,"register.html","home.html")
+
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","home.html")
@@ -1158,7 +1162,3 @@ if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
 
 
-
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
