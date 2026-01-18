@@ -183,8 +183,8 @@ def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
 @app.get("/coinflipgame", response_class=HTMLResponse)
-def read_root(request: Request):
-    return CheckIfUserIsLoggedIn(request,"register.html","home.html")
+def coinflipHome(request: Request):
+    return CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
