@@ -531,10 +531,11 @@ document.addEventListener('DOMContentLoaded', () => {
         inventoryModal?.classList.add('open');
     });
 
-    closeInventoryBtn?.addEventListener('click', () =>
+    closeInventoryBtn?.addEventListener('click', () => {
         console.log("e");
-        inventoryModal?.classList.remove('open')
-    );
+        inventoryModal?.classList.remove('open');
+    });
+
     
     inventoryModal?.addEventListener('click', e => { if (e.target === inventoryModal) inventoryModal.classList.remove('open'); });
 
@@ -569,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeInventoryActionBtn?.addEventListener('click', () =>
         console.log("ee");
         inventoryActionModal?.classList.remove('open'))
-    );
+    });
     inventoryActionModal?.addEventListener('click', e => { if (e.target === inventoryActionModal) inventoryActionModal.classList.remove('open'); });
 
     const currentPath = window.location.pathname;
