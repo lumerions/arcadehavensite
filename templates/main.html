@@ -297,7 +297,7 @@
             outline-offset: 1px;
         }
         .inventory-item .name { font-weight: 500; }
-        .inventory-item .price { color: #16a34a; font-weight: 600; }
+        .inventory-item .value { color: #16a34a; font-weight: 600; }
     </style>
 </head>
 
@@ -405,7 +405,7 @@
             <img src="https://via.placeholder.com/40">
             <span class="serial">#0001</span>
             <span class="name">Ruby</span>
-            <span class="price">$50</span>
+            <span class="value">$50</span>
         </div>
         <div class="inventory-item">
             <div class="select-box"></div>
@@ -413,7 +413,7 @@
             <img src="https://via.placeholder.com/40">
             <span class="serial">#0001</span>
             <span class="name">Ruby</span>
-            <span class="price">$50</span>
+            <span class="value">$50</span>
         </div>
     </div>
 
@@ -424,12 +424,32 @@
 </div>
 
 <script>
-document.querySelectorAll('.inventory-item').forEach(item => {
-    item.addEventListener('click', e => {
-        e.stopPropagation();
-        item.classList.toggle('selected');
+    let TotalValue = 0;
+    const totalValueLabel = document.querySelector('#totalValue strong');
+
+     function UpdateTotalValueLabel() {
+        totalValueLabel.textContent = `$${TotalValue.toFixed(2)}`;
+    }
+    
+    document.querySelectorAll('.inventory-item').forEach(item => {
+        item.addEventListener('click', e => {
+            e.stopPropagation();
+    
+            if (item.classList.contains('selected')) {
+                let ValueText = item.querySelector('.value').textContent;
+                let CleanedValue = Number(ValueText.replace('$', ''));
+                TotalValue += CleanedValue;
+                UpdateTotalValueLabel()
+            } else {
+                let ValueText = item.querySelector('.value').textContent;
+                let CleanedValue = Number(ValueText.replace('$', ''));
+                TotalValue -= CleanedValue;
+                UpdateTotalValueLabel()
+            }
+    
+            item.classList.toggle('selected');
+        });
     });
-});
 </script>
 
     
