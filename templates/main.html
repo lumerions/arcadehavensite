@@ -563,8 +563,13 @@ document.addEventListener('DOMContentLoaded', () => {
     closeInventoryActionBtn?.addEventListener('click', () => {
         if (inventoryActionModal?.classList.contains('open')) {
             inventoryActionModal.classList.remove('open');
-        } else if (inventoryModal?.classList.contains('open')) {
-            inventoryModal.classList.remove('open');
+            inventoryModal?.classList.add('open');
+        } else {
+            if (inventoryModal?.classList.contains('open')) {
+                inventoryModal?.classList.remove('open');
+            } else {
+                inventoryActionModal.classList.add('open');
+            }
         }
     });
 
