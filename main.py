@@ -152,7 +152,6 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
 def readregister(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","home.html")
 
-
 @app.get("/login",response_class =  HTMLResponse)
 def readlogin(request: Request):
     SessionId = request.cookies.get('SessionId')  
