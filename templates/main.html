@@ -564,9 +564,6 @@ document.addEventListener('DOMContentLoaded', () => {
             async function Deposit() {
                 const response = await fetch('/deposititems', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     credentials: 'include',
                 });
 
