@@ -530,12 +530,11 @@ document.addEventListener('DOMContentLoaded', () => {
         modal?.classList.remove('open');
         inventoryModal?.classList.add('open');
     });
-
-    closeInventoryBtn?.addEventListener('click', () => {
-        console.log("e");
-        inventoryModal?.classList.remove('open');
+    
+    closeInventoryActionBtn?.addEventListener('click', () => {
+        console.log("ee");
+        inventoryActionModal?.classList.remove('open');
     });
-
     
     inventoryModal?.addEventListener('click', e => { if (e.target === inventoryModal) inventoryModal.classList.remove('open'); });
 
@@ -567,10 +566,11 @@ document.addEventListener('DOMContentLoaded', () => {
         inventoryActionModal?.classList.add('open');
     }
 
-    closeInventoryActionBtn?.addEventListener('click', () =>
+    closeInventoryActionBtn?.addEventListener('click', () => {
         console.log("ee");
-        inventoryActionModal?.classList.remove('open'))
+        inventoryActionModal?.classList.remove('open');
     });
+
     inventoryActionModal?.addEventListener('click', e => { if (e.target === inventoryActionModal) inventoryActionModal.classList.remove('open'); });
 
     const currentPath = window.location.pathname;
