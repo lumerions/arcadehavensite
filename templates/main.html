@@ -315,15 +315,40 @@
     </div>
 </div>
 
-<!-- Inventory Modal -->
 <div class="modal" id="inventoryModal">
-    <div class="wallet">
+    <div class="wallet" style="max-width: 500px; position: relative;">
         <div class="wallet-header">
             <h2>Inventory</h2>
             <span class="close">&times;</span>
         </div>
-        <div class="instructions">
-            Your items will appear here.
+
+        <hr style="border: 0; height: 1px; background: #333; margin: 10px 0;">
+
+        <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+            <input type="text" id="inventorySearch" placeholder="Search items..." style="flex: 1;">
+            <div style="position: relative;">
+                <button id="sortBtn" style="padding: 8px 12px; background: #2a3448; color: #cbd5f5; border-radius: 8px; border: none; cursor: pointer;">
+                    Sort &#9662;
+                </button>
+                <div id="sortDropdown" style="position: absolute; right: 0; top: 110%; background: #1c2433; border: 1px solid #333; border-radius: 8px; display: none; min-width: 120px; z-index: 100;">
+                    <a style="display: block; padding: 8px 12px; cursor: pointer; color: #fff;">Name</a>
+                    <a style="display: block; padding: 8px 12px; cursor: pointer; color: #fff;">Value</a>
+                    <a style="display: block; padding: 8px 12px; cursor: pointer; color: #fff;">Date Acquired</a>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-size: 0.9rem; color: #cbd5f5;">Total Value: $0</div>
+            <button style="padding: 6px 12px; background: #16a34a; color: #fff; border-radius: 6px; border: none; cursor: pointer;">+Deposit</button>
+        </div>
+
+        <div style="background: #2a3448; border-radius: 10px; padding: 12px; min-height: 150px; margin-bottom: 10px;">
+            <p style="color:#94a3b8; font-size:0.85rem;">No items to display.</p>
+        </div>
+
+        <div style="text-align: right;">
+            <button style="padding: 8px 16px; background: #2563eb; color: #fff; border-radius: 6px; border: none; cursor: pointer;">Withdraw</button>
         </div>
     </div>
 </div>
@@ -340,6 +365,8 @@
     const instructions = document.getElementById('instructions');
     const inputField = document.getElementById('amount');
     const openInventoryBtn = document.getElementById('Inventory');
+    const sortBtn = document.getElementById('sortBtn');
+    const sortDropdown = document.getElementById('sortDropdown');
 
     async function updateBalance() {
         try {
@@ -359,15 +386,19 @@
         e.stopPropagation();
         wrapper.classList.toggle('open');
     };
-    window.onclick = () => wrapper.classList.remove('open');
+    window.onclick = () => {
+        wrapper.classList.remove('open');
+        sortDropdown.style.display = 'none';
+    };
 
+    // Open wallet
     const openDeposit = () => openWallet('deposit');
     const openWithdraw = () => openWallet('withdraw');
-
     document.getElementById('openDeposit').onclick = openDeposit;
     document.getElementById('openWithdraw').onclick = openWithdraw;
 
-    openInventoryBtn.onclick = () => {
+    openInventoryBtn.onclick = (e) => {
+        e.stopPropagation();
         modal.classList.remove('open');
         inventoryModal.classList.add('open');
     };
@@ -414,6 +445,11 @@
         if (val > 0) window.location.href = `/withdraw?amount=${val}&page=home`;
     };
 
+    sortBtn.onclick = (e) => {
+        e.stopPropagation();
+        sortDropdown.style.display = sortDropdown.style.display === 'block' ? 'none' : 'block';
+    };
+
     window.onload = () => {
         if (document.querySelector('.error-message')) openWallet('withdraw');
     };
@@ -433,4 +469,5 @@
 
 </body>
 </html>
+
 
