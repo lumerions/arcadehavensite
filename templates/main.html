@@ -350,6 +350,30 @@
     </main>
 </div>
 
+<div class="modal" id="inventoryActionModal">
+    <div class="wallet">
+
+        <div class="wallet-header">
+            <h2 id="inventoryActionTitle">Inventory</h2>
+            <span class="close" id="closeInventoryAction">&times;</span>
+        </div>
+
+        <label style="margin-top:10px;">Amount</label>
+        <input type="text" id="inventoryAmount" placeholder="Enter amount">
+
+        <div class="instructions" id="inventoryInstructions">
+            1. Select items<br>
+            2. Enter amount<br>
+            3. Confirm in-game
+        </div>
+
+        <button class="action-btn deposit" id="inventoryActionBtn">
+            Confirm
+        </button>
+
+    </div>
+</div>
+
 <div class="modal" id="walletModal">
     <div class="wallet">
         <div class="wallet-header">
@@ -388,7 +412,7 @@
 
     <div style="display:flex; justify-content:space-between; margin-top:10px;">
         <div>Total Value: <strong>$250</strong></div>
-        <button class="action-btn deposit small" id="InventoryDepositBtn">+Deposit</button>
+        <button class="action-btn deposit small" id="InventoryDepositBtn">Deposit</button>
     </div>
 
     <div class="inventory-grid">
@@ -524,6 +548,45 @@ document.querySelectorAll('.inventory-item').forEach(item => {
         e.stopPropagation();
         sortDropdown.style.display = sortDropdown.style.display === 'block' ? 'none' : 'block';
     };
+
+        const inventoryActionModal = document.getElementById('inventoryActionModal');
+        const inventoryActionTitle = document.getElementById('inventoryActionTitle');
+        const inventoryInstructions = document.getElementById('inventoryInstructions');
+        const inventoryActionBtn = document.getElementById('inventoryActionBtn');
+        
+        document.querySelector('.inventory .deposit-btn, .deposit-btn')?.addEventListener('click', () => {
+            openInventoryAction('deposit');
+        });
+        
+        document.querySelector('.withdraw-btn')?.addEventListener('click', () => {
+            openInventoryAction('withdraw');
+        });
+        
+        function openInventoryAction(type) {
+            document.getElementById('inventoryModal').classList.remove('open');
+        
+            inventoryActionTitle.textContent =
+                type === 'deposit' ? 'Inventory Deposit' : 'Inventory Withdraw';
+        
+            inventoryActionBtn.className = `action-btn ${type}`;
+            inventoryActionBtn.textContent =
+                type === 'deposit' ? 'Initiate Deposit' : 'Initiate Withdraw';
+        
+            inventoryInstructions.innerHTML = `
+                1. Select items<br>
+                2. Enter amount<br>
+                3. Complete in-game
+            `;
+        
+            inventoryActionModal.classList.add('open');
+        }
+        
+        document.getElementById('closeInventoryAction').onclick = () =>
+            inventoryActionModal.classList.remove('open');
+        
+        inventoryActionModal.onclick = e =>
+            e.target === inventoryActionModal && inventoryActionModal.classList.remove('open');
+
 
     window.onload = () => {
         if (document.querySelector('.error-message')) openWallet('withdraw');
