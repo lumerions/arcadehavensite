@@ -561,20 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     inventoryActionBtn?.addEventListener('click', e => {
         if (inventoryActionBtn.textContent == 'Initiate Deposit') {
-            async function Deposit() {
-                const response = await fetch('/deposititems', {
-                    method: 'POST',
-                    credentials: 'include',
-                });
-
-                if (!response.ok) throw new Error('Request failed');
-
-                if (response.redirected) {
-                    window.location.href = response.url;
-                }
-            }
-
-            Deposit();
+            window.location.href = '/deposititems';
         } else {
             async function Withdraw() {
                 let itemdata = ToWithdraw
