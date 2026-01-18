@@ -367,6 +367,20 @@
                 input.value = balanceNumber;
             }
 
+            async function updateBalance() {
+                try {
+                    const response = await fetch('/getbalance');
+                    const data = await response.text(); 
+                    const number = parseFloat(data);
+                    if (!isNaN(number)) {
+                        const balanceBtn = document.querySelector('.balance-btn');
+                        if (balanceBtn) balanceBtn.textContent = `$${number.toLocaleString()}`;
+                    }
+                } catch (error) {
+                    console.error('Error fetching balance:', error);
+                }
+            }
+
             document.getElementById('playTowersBtn').addEventListener('click', async () => {
                 const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
                 const mineCount = parseInt(document.getElementById('mineCount').value) || 0;
@@ -412,8 +426,9 @@
                                 }
                             });
                         }
-            
-                         updateBalance();
+
+                                
+                        updateBalance();
                         playBtn.style.backgroundColor = '';
                         playBtn.textContent = 'Play Towers';
             
@@ -432,8 +447,12 @@
                         });
             
                         if (!response.ok) throw new Error('Request failed');
-            
-                        if (response.redirected) window.location.href = response.url;
+
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else {
+                            updateBalance();
+                        }
             
                     } catch (err) {
                         console.error('Error starting Towers:', err);

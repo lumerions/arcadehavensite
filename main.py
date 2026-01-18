@@ -692,7 +692,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
     if Game == "Towers":
         mine_multiplier = ((len(mines) / 23) ** 1.5) + 0.1
-        payout = bet_amount * (row + 1) * mine_multiplier * 0.15
+        payout = bet_amount * (row + 1) * mine_multiplier * 0.25
         payout = math.floor(payout)
         payoutset = redis_int(CashoutAvailable) + payout
         rowset = currentRow + 1
