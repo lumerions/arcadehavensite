@@ -474,10 +474,12 @@ def depositearnings(data: DepositItems):
         playerinventoryset = set(playerInventoryCursor)
 
         playerinventoryset = set(
-            (item["serial"], item["itemid"], item["itemname"]) for item in playerInventoryCursor
+            (int(item["serial"]), int(item["itemid"]), item["itemname"].strip()) 
+            for item in playerInventoryCursor
         )
         depositSet = set(
-            (item["serial"], item["itemid"], item["itemname"]) for item in data.itemdata
+            (int(item["serial"]), int(item["itemid"]), item["itemname"].strip()) 
+            for item in data.itemdata
         )
 
         if not depositSet.issubset(playerinventoryset):
