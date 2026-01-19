@@ -422,7 +422,7 @@ def depositearnings(data: DepositItems):
         return JSONResponse({"error": "Deposit flag missing"}, status_code=400)
     
     if data.userid is None:
-        return JSONResponse({"error": "Deposit flag missing"}, status_code=400)
+        return JSONResponse({"error": "userid missing"}, status_code=400)
     
     if data.itemdata is None or len(data.itemdata) == 0:
         return JSONResponse({"error": "Item data missing"}, status_code=400)
@@ -472,7 +472,13 @@ def depositearnings(data: DepositItems):
         
         playerinventorylist = list(playerInventoryCursor)
         playerinventoryset = set(playerInventoryCursor)
-        depositSet = set(data.itemdata)
+
+        playerinventoryset = set(
+            (item["serial"], item["itemid"], item["itemname"]) for item in playerInventoryCursor
+        )
+        depositSet = set(
+            (item["serial"], item["itemid"], item["itemname"]) for item in data.itemdata
+        )
 
         if not depositSet.issubset(playerinventoryset):
             return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
@@ -501,6 +507,8 @@ def depositearnings(data: DepositItems):
         collection.bulk_write(operations)
 
         itemdata_dicts = [item.dict() for item in data.itemdata]
+
+        SiteItemsCollection = getSiteItemsMongo()["collection"]
 
         SiteItemsCollection.update_one(
             {"SessionId": data.sessionid, "Username": data.siteusername},
