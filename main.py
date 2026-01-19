@@ -508,7 +508,7 @@ def depositearnings(data: DepositItems):
 
     if data.Deposit:
         getInventoryUrl =  "https://express-js-on-vercel-blue-sigma.vercel.app/GetInventory?id=" + str(data.userid)
-        MONGO_URI = "mongodb+srv://MongoDB:r7jBEW8yIWqcLZp3@cluster0.m96ya.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+        MONGO_URI = os.environ["MONGOINVENTORY_CONNECTIONURI"]
         client = MongoClient(
             MONGO_URI,
             serverSelectionTimeoutMS=10000,
@@ -728,11 +728,28 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
         return JSONResponse({"error": "Unknown error"}, status_code=400)
     
     AssetIdParam = ""
-    
+
     for i,v in enumerate(document["items"]):
         AssetIdParam = AssetIdParam + str(v["itemid"]) + ","
 
     AssetIdParam = AssetIdParam[:-1]
+
+    MONGO_URI = os.environ["MONGOINVENTORY_CONNECTIONURI"]
+    client = MongoClient(
+        MONGO_URI,
+        serverSelectionTimeoutMS=10000,
+        tls=True,
+        tlsCAFile=certifi.where()
+    )
+
+    database = client["cool"]
+    collection = database["cp"]
+
+    MarketplaceData = collection.find(
+        {},
+    )
+
+    MarketplaceData = list(document)
 
     try:
         response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
@@ -742,6 +759,10 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
             for i2 in decodedResponseData:
                 if str(i2["targetId"]) == str(v["itemid"]):
                     v["ImageUrl"] = i2["imageUrl"]
+                    for i3 in MarketplaceData:
+                        if int(i["itemId"]) == str(v["itemid"]):
+                            v["Value"] = i3["value"]
+                            break
 
         return document["items"]
     except Exception as e:
@@ -1385,8 +1406,6 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
 
 
 
