@@ -18,7 +18,7 @@ import requests
 from pydantic import BaseModel
 import time
 import uvicorn
-from pymongo import MongoClient
+from pymongo import MongoClient,UpdateOne
 import certifi
 import base64
 import math
@@ -92,6 +92,7 @@ class deposit(BaseModel):
 
 class DepositItems(BaseModel):
     robloxusername: str
+    userid : int
     siteusername : str
     sessionid : str
     itemdata : List[Dict[str, Any]]
@@ -420,6 +421,9 @@ def depositearnings(data: DepositItems):
     if data.Deposit is None:
         return JSONResponse({"error": "Deposit flag missing"}, status_code=400)
     
+    if data.userid is None:
+        return JSONResponse({"error": "Deposit flag missing"}, status_code=400)
+    
     if data.itemdata is None or len(data.itemdata) == 0:
         return JSONResponse({"error": "Item data missing"}, status_code=400)
 
@@ -452,6 +456,51 @@ def depositearnings(data: DepositItems):
     CoinflipCollection = getCoinflipMongo()["collection"]
 
     if data.Deposit:
+        MainInventoryMongoClient = MongoClient(
+            os.environ["MONGOINVENTORY_CONNECTIONURI"],
+            serverSelectionTimeoutMS=20000,
+            tls=True,
+            tlsCAFile=certifi.where()
+        )
+
+        database = MainInventoryMongoClient["cool"]
+        collection = database["cp"]
+
+        playerInventoryCursor = collection.find(
+                {"serials.u": int(data.userid)},
+                {"serials.u": 1, "serials._id": 1, "itemId": 1}
+            )
+        
+        playerinventorylist = list(playerInventoryCursor)
+        playerinventoryset = set(playerInventoryCursor)
+        depositSet = set(data.itemdata)
+
+        if not depositSet.issubset(playerinventoryset):
+            return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
+        
+        for item in data.itemdata:
+            operations = []
+            serialtouse = int(item.serial) - 1
+
+            newslot = {
+                "$set": {
+                    f"serials.{serialtouse}.u": "Roblox",
+                    f"serials.{serialtouse}.t": int(time())
+                },
+                "$unset": {
+                    f"reselling.{serialtouse}.u": ""
+                }
+            }
+
+            operations.append(
+                UpdateOne(
+                    {"itemId": int(item.itemid)},  
+                    newslot
+                )
+            )
+
+        collection.bulk_write(operations)
+
         SiteItemsCollection.update_one(
             {"SessionId": data.sessionid, "Username": data.siteusername},
             {
@@ -469,9 +518,9 @@ def depositearnings(data: DepositItems):
         SiteItemsCollection = getSiteItemsMongo()["collection"]
 
         try:
-            document = CoinflipCollection.find_one({"sessionid": data.sessionid})
-            if not document:
-                return JSONResponse({"error": "Document not found!"}, status_code=400)
+            document = SiteItemsCollection.find_one({"SessionId": data.sessionid})
+            if document:
+                return JSONResponse({"error": "Coinflip active"}, status_code=400)
 
         except Exception as e:
             return JSONResponse({"error": "Unknown error"}, status_code=400)
@@ -1136,7 +1185,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
     try:
         document = CoinflipCollection.find_one({"SessionId": SessionId})
         if document:
-            return JSONResponse({"error": "Coinflip no longer exists!"}, status_code=400)
+            return JSONResponse({"error": "You can only have 1 coinflip active!"}, status_code=400)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
     
