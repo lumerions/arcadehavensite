@@ -454,7 +454,7 @@ def depositearnings(data: DepositItems):
         return JSONResponse({"error": f"{str(e)}"}, status_code=400)
 
     if data.Deposit:
-        getInventoryUrl =  "https://express-js-on-vercel-blue-sigma.vercel.app/GetInventory?id=3547716533"
+        getInventoryUrl =  "https://express-js-on-vercel-blue-sigma.vercel.app/GetInventory?id=" + str(data.userid)
 
         MONGO_URI = "mongodb+srv://MongoDB:r7jBEW8yIWqcLZp3@cluster0.m96ya.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
         client = MongoClient(
@@ -476,9 +476,7 @@ def depositearnings(data: DepositItems):
             }
         }
 
-        depo = list(data.itemdata)
-        keys = ["serial", "itemid", "name"]
-        deposit_dict_list = [dict(zip(keys, t)) for t in depo]
+        depo = data.itemdata
         ItemsVerified = 0
 
         for item_id, serials in DataGet.items():
@@ -490,10 +488,10 @@ def depositearnings(data: DepositItems):
                 profile["Data"]["Inventory"][item_id][sn] = {}
 
         print("itemdata",data.itemdata)
-        print("depositdict",deposit_dict_list)
+        print("deposit",depo)
         print("datagetitems",DataGet.items())
 
-        for i in deposit_dict_list:
+        for i in depo:
             inv = profile["Data"]["Inventory"]
             item_id = str(i["itemid"])
 
