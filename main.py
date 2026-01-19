@@ -476,7 +476,34 @@ def depositearnings(data: DepositItems):
             }
         }
 
-        print(data.itemdata)
+        depo = list(data.itemdata)
+        keys = ["serial", "itemid", "name"]
+        deposit_dict_list = [dict(zip(keys, t)) for t in depo]
+        ItemsVerified = 0
+
+        for item_id, serials in DataGet.items():
+            if item_id not in profile["Data"]["Inventory"]:
+                profile["Data"]["Inventory"][item_id] = {}
+
+            for sn in serials:
+                print(item_id, sn)
+                profile["Data"]["Inventory"][item_id][sn] = {}
+
+        print("itemdata",data.itemdata)
+        print("depositdict",deposit_dict_list)
+        print("datagetitems",DataGet.items())
+
+        for i in deposit_dict_list:
+            inv = profile["Data"]["Inventory"]
+            item_id = str(i["itemid"])
+
+            if item_id in inv:
+                inv2 = profile["Data"]["Inventory"][item_id]
+                serial = str(i["serial"])
+                if serial in inv2:
+                    ItemsVerified += 1
+
+        print(ItemsVerified +  "/" + len(data.itemdata))
 
         if profile:
             return
@@ -1331,7 +1358,6 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
 
 
 
