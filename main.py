@@ -759,14 +759,16 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
         response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
         decodedResponse = response.json()
         decodedResponseData = decodedResponse.get("data")
-        for i,v in enumerate(document["items"]):
-            for i2 in decodedResponseData:
-                if str(i2["targetId"]) == str(v["itemid"]):
-                    v["ImageUrl"] = i2["imageUrl"]
-                    for i3 in MarketplaceData:
-                        if int(i["itemId"]) == int(v["itemid"]):
-                            v["Value"] = i3["value"]
-                            break
+        for v in document["items"]: 
+            for thumb in decodedResponseData:
+                if int(thumb["targetId"]) == int(v["itemid"]):
+                    v["ImageUrl"] = thumb["imageUrl"]
+                    break
+
+            for market in MarketplaceData:
+                if int(market["itemId"]) == int(v["itemid"]):  
+                    v["Value"] = market["value"]
+                    break
 
         return document["items"]
     except Exception as e:
@@ -1410,6 +1412,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
