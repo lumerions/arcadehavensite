@@ -505,9 +505,12 @@ def depositearnings(data: DepositItems):
 
         if int(ItemsVerified) != len(data.itemdata):
             return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
+        else:
+            print("past that yo")
+        
+        operations = []
 
-        for item in data.itemdata:
-            operations = []
+        for item in depo:
             serial = int(item["serial"]) - 1
             newslot = {
                 "$set": {
@@ -526,23 +529,26 @@ def depositearnings(data: DepositItems):
                 )
             )
 
-        collection.bulk_write(operations)
+        print(operations)
+        result = collection.bulk_write(operations)
 
-        itemdata_dicts = [item.dict() for item in data.itemdata]
+        print(result)
 
         SiteItemsCollection = getSiteItemsMongo()["collection"]
 
-        SiteItemsCollection.update_one(
+        response = SiteItemsCollection.update_one(
             {"SessionId": data.sessionid, "Username": data.siteusername},
             {
                 "$push": {
                     "items": {
-                        "$each": itemdata_dicts
+                        "$each": depo
                     }
                 }
             },
             upsert=True
         )
+
+        print(response)
 
         return {"success": True}
     else:
@@ -1354,6 +1360,9 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
 
 
 
