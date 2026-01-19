@@ -453,7 +453,6 @@ def depositearnings(data: DepositItems):
     except Exception as e:
         return JSONResponse({"error": f"{str(e)}"}, status_code=400)
 
-    CoinflipCollection = getCoinflipMongo()["collection"]
 
     if data.Deposit:
         MainInventoryMongoClient = MongoClient(
@@ -501,12 +500,14 @@ def depositearnings(data: DepositItems):
 
         collection.bulk_write(operations)
 
+        itemdata_dicts = [item.dict() for item in data.itemdata]
+
         SiteItemsCollection.update_one(
             {"SessionId": data.sessionid, "Username": data.siteusername},
             {
                 "$push": {
                     "items": {
-                        "$each": data.itemdata
+                        "$each": itemdata_dicts
                     }
                 }
             },
