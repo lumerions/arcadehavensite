@@ -713,7 +713,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     }
 
 @app.get("/GetInventory")
-def getcashoutAmount(SessionId: str = Cookie(None)):
+def getInventory(SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
     
@@ -750,7 +750,7 @@ def getcashoutAmount(SessionId: str = Cookie(None)):
             {},
         )
 
-        MarketplaceData = list(document)
+        MarketplaceData = list(MarketplaceData)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=400)
 
@@ -1412,6 +1412,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
