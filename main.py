@@ -482,8 +482,11 @@ def depositearnings(data: DepositItems):
             for item in data.itemdata
         )
 
+        print("Inventory set:", playerinventoryset)
+        print("Deposit set:", depositSet)
+
         if not depositSet.issubset(playerinventoryset):
-            return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
+            return JSONResponse({"error": "You do not own the items required to deposit!"}, status_code=400)
         
         for item in data.itemdata:
             operations = []
@@ -1334,6 +1337,10 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
+
 
 
 
