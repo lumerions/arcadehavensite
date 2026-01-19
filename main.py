@@ -503,7 +503,7 @@ def depositearnings(data: DepositItems):
                 if serial in inv2:
                     ItemsVerified += 1
 
-        print(ItemsVerified +  "/" + len(data.itemdata))
+        print(str(ItemsVerified) +  "/" + str(len(data.itemdata)))
 
         if profile:
             return
