@@ -265,7 +265,12 @@
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
             margin-top: 10px;
+
+            max-height: 400px;   
+            overflow-y: auto;    
+            padding-right: 6px;   
         }
+
         .inventory-item {
             background: #111827;
             border-radius: 6px;
@@ -394,24 +399,7 @@
         <button class="action-btn deposit small" id="InventoryDepositBtn">Deposit</button>
     </div>
 
-    <div class="inventory-grid">
-        <div class="inventory-item">
-            <div class="select-box"></div>
-        
-            <img src="https://via.placeholder.com/40">
-            <span class="serial">#0001</span>
-            <span class="name">Ruby</span>
-            <span class="value">$50</span>
-        </div>
-        <div class="inventory-item">
-            <div class="select-box"></div>
-        
-            <img src="https://via.placeholder.com/40">
-            <span class="serial">#0001</span>
-            <span class="name">Emerald</span>
-            <span class="value">$50</span>
-        </div>
-    </div>
+    <div class="inventory-grid"></div>
 
     <div style="text-align:right; margin-top:12px;">
         <button class="action-btn withdraw" id="InventoryWithdrawBtn">Withdraw</button>
@@ -561,6 +549,40 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="name">${item.itemname}</span>
                     `;
 
+                    div.addEventListener('click', () => {
+                        const valueEl = div.querySelector('.value');
+                        const itemNameEl = div.querySelector('.name');
+                        const serialEl = div.querySelector('.serial');
+
+                        if (!valueEl || !itemNameEl || !serialEl) return;
+
+                        const itemName = itemNameEl.textContent;
+                        const serial = serialEl.textContent;
+
+                        const CleanedValue = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+
+                        const isSelected = div.classList.contains('selected');
+
+                        div.classList.toggle('selected');
+            
+                        if (isSelected) {
+                            TotalValue -= CleanedValue;
+                            if (ToWithdraw[itemName]) {
+                                delete ToWithdraw[itemName][serial];
+                                if (Object.keys(ToWithdraw[itemName]).length === 0) {
+                                    delete ToWithdraw[itemName];
+                                }
+                            }
+
+                        } else {
+                            TotalValue += CleanedValue;
+                            if (!ToWithdraw[itemName]) ToWithdraw[itemName] = {};
+                            ToWithdraw[itemName][serial] = true;
+                        }
+
+                        UpdateTotalValueLabel();
+                    });
+                    
                     grid.appendChild(div);
                 });
 
@@ -666,39 +688,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log(ToWithdraw)
 
-            const valueEl = item.querySelector('.value');
-            const itemNameEl = item.querySelector('.name');
-            const serialEl = item.querySelector('.serial');
-
-            if (!valueEl || !itemNameEl || !serialEl) return;
-
-            const itemName = itemNameEl.textContent;
-            const serial = serialEl.textContent;
-
-            const CleanedValue = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
-
-            const isSelected = item.classList.contains('selected');
-
-            item.classList.toggle('selected');
-  
-            if (isSelected) {
-                TotalValue -= CleanedValue;
-                if (ToWithdraw[itemName]) {
-                    delete ToWithdraw[itemName][serial];
-                    if (Object.keys(ToWithdraw[itemName]).length === 0) {
-                        delete ToWithdraw[itemName];
-                    }
-                }
-
-            } else {
-                TotalValue += CleanedValue;
-                if (!ToWithdraw[itemName]) ToWithdraw[itemName] = {};
-                ToWithdraw[itemName][serial] = true;
-            }
-
-            console.log(ToWithdraw)
-
-            UpdateTotalValueLabel();
         });
     });
 
@@ -709,5 +698,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
