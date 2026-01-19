@@ -23,9 +23,7 @@ import certifi
 import base64
 import math
 from typing import List, Dict, Any
-
 place_id = 97090711812957
-postgresConnection = None
 
 app = FastAPI(
     title="AH Gambling",
@@ -81,7 +79,6 @@ def MoreWithdraw(pagetype,request):
             {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
             status_code=status.HTTP_400_BAD_REQUEST
         )
-
 
 class deposit(BaseModel):
     robloxusername: str
@@ -327,6 +324,62 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
     return RedirectResponse(roblox_url)
 
 
+@app.post("/withdrawitems",response_class =  HTMLResponse)
+async def withdrawget(request: Request, SessionId: str = Cookie(None)):
+    if not SessionId:
+        return {"error": "No cookie provided"}
+    
+    data = await request.json()
+    itemdata = data.get("itemdata")
+
+    try:
+        conn = getPostgresConnection() 
+
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
+
+            if result is None:
+                return {"error": "Invalid session"}
+
+            sitename = result[0]
+
+    except Exception as error:
+        return {"error": error}
+
+    SiteItemsCollection = getSiteItemsMongo()["collection"]
+
+    try:
+        document = SiteItemsCollection.find_one({"SessionId": SessionId})
+        if not document:
+            return MoreWithdraw("gdfd",request)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+
+    itemset = set(document["items"])
+    WithdrawSet = set(itemdata)
+
+    if not WithdrawSet.issubset(itemset):
+        return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
+
+    launch_data = {
+        "sitename": str(sitename),
+        "sessionid": SessionId,
+        "items": itemdata,
+        "itemdeposit" : False
+    }
+
+    json_data = json.dumps(launch_data)
+    b64_data = base64.b64encode(json_data.encode()).decode()
+
+    roblox_url = (
+        f"https://www.roblox.com/games/start"
+        f"?placeId={place_id}"
+        f"&launchData={urllib.parse.quote(b64_data)}"
+    )
+
+    return RedirectResponse(url=roblox_url, status_code=303)
+
 @app.post("/earnings")
 def depositearnings(data: deposit):
 
@@ -455,7 +508,6 @@ def depositearnings(data: DepositItems):
 
     if data.Deposit:
         getInventoryUrl =  "https://express-js-on-vercel-blue-sigma.vercel.app/GetInventory?id=" + str(data.userid)
-
         MONGO_URI = "mongodb+srv://MongoDB:r7jBEW8yIWqcLZp3@cluster0.m96ya.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
         client = MongoClient(
             MONGO_URI,
@@ -484,12 +536,7 @@ def depositearnings(data: DepositItems):
                 profile["Data"]["Inventory"][item_id] = {}
 
             for sn in serials:
-                print(item_id, sn)
                 profile["Data"]["Inventory"][item_id][sn] = {}
-
-        print("itemdata",data.itemdata)
-        print("deposit",depo)
-        print("datagetitems",DataGet.items())
 
         for i in depo:
             inv = profile["Data"]["Inventory"]
@@ -501,47 +548,32 @@ def depositearnings(data: DepositItems):
                 if serial in inv2:
                     ItemsVerified += 1
 
-        print(str(ItemsVerified) +  "/" + str(len(data.itemdata)))
-
         if int(ItemsVerified) != len(data.itemdata):
             return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
-        else:
-            print("past that yo")
         
         operations = []
 
-        try:
+        for item in depo:
+            serial = int(item["serial"]) - 1
 
-            for item in depo:
-                serial = int(item["serial"]) - 1
-                print(serial)
-                newslot = {
-                    "$set": {
-                        f"serials.{serial}.u": "Roblox",
-                        f"serials.{serial}.t": int(time.time())
-                    },
-                    "$unset": {
-                        f"reselling.{serial}.u": ""
-                    }
+            newslot = {
+                "$set": {
+                    f"serials.{serial}.u": "Roblox",
+                    f"serials.{serial}.t": int(time.time())
+                },
+                "$unset": {
+                    f"reselling.{serial}.u": ""
                 }
+            }
 
-                print(newslot)
-
-                operations.append(
-                    UpdateOne(
-                        {"itemId": int(item["itemid"])},  
-                        newslot
-                    )
+            operations.append(
+                UpdateOne(
+                    {"itemId": int(item["itemid"])},  
+                    newslot
                 )
+            )
 
-            print(operations)
-            result = collection.bulk_write(operations)
-
-            print(result)
-        except Exception as e:
-            print(e)
-            return JSONResponse({"error": "e"}, status_code=400)
-
+        collection.bulk_write(operations)
 
         SiteItemsCollection = getSiteItemsMongo()["collection"]
 
@@ -557,8 +589,6 @@ def depositearnings(data: DepositItems):
             upsert=True
         )
 
-        print(response)
-
         return {"success": True}
     else:
         SiteItemsCollection = getSiteItemsMongo()["collection"]
@@ -571,21 +601,30 @@ def depositearnings(data: DepositItems):
         except Exception as e:
             return JSONResponse({"error": "Unknown error"}, status_code=400)
 
-        itemset = set(document["items"])
-        WithdrawSet = set(data.itemdata)
+        found_count = SiteItemsCollection.count_documents({
+            "SessionId": str(data.sessionid),
+            "Username": str(data.siteusername),
+            "items.itemid": {"$in": [i["itemid"] for i in data.itemdata]},
+            "items.serial": {"$in": [i["serial"] for i in data.itemdata]}
+        })
 
-        if not WithdrawSet.issubset(itemset):
-            return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
-        
-        SiteItemsCollection.update_one(
-            {"SessionId": data.sessionid, "Username": data.siteusername},
-            {
-                "$pull": {
-                    "items": { "$in": data.itemdata }
-                }
-            },
-            upsert=True
-        )
+        if int(found_count) != len(data.itemdata):
+            return JSONResponse({"error": "Item verification failed!"}, status_code=400)
+
+        bulk_ops = []
+
+        for item in data.itemdata:
+            bulk_ops.append(
+                UpdateOne(
+                    {"SessionId": str(data.sessionid), "Username": str(data.siteusername)},
+                    {"$pull": {"items": {"itemid": int(item["itemid"]), "serial": int(item["serial"])}}}
+                )
+            )
+
+        if bulk_ops:
+            SiteItemsCollection.bulk_write(bulk_ops)
+        else:
+            return JSONResponse({"error": "No bulk ops"}, status_code=400)
 
         return {"success": True}
 
@@ -672,6 +711,79 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
         "amountafter": amountafternexttile,
         "multiplier": current_multiplier
     }
+
+@app.get("/GetInventory")
+def getcashoutAmount(SessionId: str = Cookie(None)):
+    if not SessionId:
+        return JSONResponse({"error": "SessionId missing"}, status_code=400)
+    
+    SiteItemsCollection = getSiteItemsMongo()["collection"]
+
+    try:
+        document = SiteItemsCollection.find_one({"SessionId": SessionId})
+        if not document:
+            return JSONResponse({"error": "document not found"}, status_code=400)
+
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+    
+    AssetIdParam = ""
+    
+    for i,v in enumerate(document["items"]):
+        AssetIdParam = AssetIdParam + str(v["itemid"]) + ","
+
+    AssetIdParam = AssetIdParam[:-1]
+
+    try:
+        response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
+        decodedResponse = response.json()
+        decodedResponseData = decodedResponse.get("data")
+        for i,v in enumerate(document["items"]):
+            for i2 in decodedResponseData:
+                if str(i2["targetId"]) == str(v["itemid"]):
+                    v["ImageUrl"] = i2["imageUrl"]
+
+        return document["items"]
+    except Exception as e:
+        return JSONResponse({"error": e}, status_code=400)
+
+
+@app.get("/deposititems")
+async def depositget(request : Request, SessionId: str = Cookie(None)):
+    if not SessionId:
+        return {"error": "No cookie provided"}
+    
+    try:
+        conn = getPostgresConnection() 
+
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
+
+            if result is None:
+                return {"error": "Invalid session"}
+
+            sitename = result[0]
+
+    except Exception as error:
+        return error
+    
+    launch_data = {
+        "sitename": str(sitename),
+        "sessionid": SessionId,
+        "itemdeposit" : True
+    }
+
+    json_data = json.dumps(launch_data)
+    b64_data = base64.b64encode(json_data.encode()).decode()
+
+    roblox_url = (
+        f"https://www.roblox.com/games/start"
+        f"?placeId={place_id}"
+        f"&launchData={urllib.parse.quote(b64_data)}"
+    )
+
+    return RedirectResponse(url=roblox_url, status_code=303)
 
 
 @app.post("/games/click")
@@ -1271,104 +1383,10 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
-
-@app.get("/deposititems")
-async def depositget(request : Request, SessionId: str = Cookie(None)):
-    if not SessionId:
-        return {"error": "No cookie provided"}
-    
-    try:
-        conn = getPostgresConnection() 
-
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-            result = cursor.fetchone()  
-
-            if result is None:
-                return {"error": "Invalid session"}
-
-            sitename = result[0]
-
-    except Exception as error:
-        return error
-    
-    launch_data = {
-        "sitename": str(sitename),
-        "sessionid": SessionId,
-        "itemdeposit" : True
-    }
-
-    json_data = json.dumps(launch_data)
-    b64_data = base64.b64encode(json_data.encode()).decode()
-
-    roblox_url = (
-        f"https://www.roblox.com/games/start"
-        f"?placeId={place_id}"
-        f"&launchData={urllib.parse.quote(b64_data)}"
-    )
-
-    return RedirectResponse(url=roblox_url, status_code=303)
-
-@app.post("/withdrawitems",response_class =  HTMLResponse)
-async def withdrawget(request: Request, SessionId: str = Cookie(None)):
-    if not SessionId:
-        return {"error": "No cookie provided"}
-    
-    data = await request.json()
-    itemdata = data.get("itemdata")
-
-    try:
-        conn = getPostgresConnection() 
-
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-            result = cursor.fetchone()  
-
-            if result is None:
-                return {"error": "Invalid session"}
-
-            sitename = result[0]
-
-    except Exception as error:
-        return {"error": error}
-
-    SiteItemsCollection = getSiteItemsMongo()["collection"]
-
-    try:
-        document = SiteItemsCollection.find_one({"SessionId": SessionId})
-        if not document:
-            return MoreWithdraw("gdfd",request)
-    except Exception as e:
-        return JSONResponse({"error": "Unknown error"}, status_code=400)
-
-    itemset = set(document["items"])
-    WithdrawSet = set(itemdata)
-
-    if not WithdrawSet.issubset(itemset):
-        return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
-
-    launch_data = {
-        "sitename": str(sitename),
-        "sessionid": SessionId,
-        "items": itemdata,
-        "itemdeposit" : False
-    }
-
-    json_data = json.dumps(launch_data)
-    b64_data = base64.b64encode(json_data.encode()).decode()
-
-    roblox_url = (
-        f"https://www.roblox.com/games/start"
-        f"?placeId={place_id}"
-        f"&launchData={urllib.parse.quote(b64_data)}"
-    )
-
-    return RedirectResponse(url=roblox_url, status_code=303)
-
-
-
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
 
 
 
