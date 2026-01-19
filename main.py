@@ -511,14 +511,14 @@ def depositearnings(data: DepositItems):
         operations = []
 
         try:
-                
+
             for item in depo:
                 serial = int(item["serial"]) - 1
                 print(serial)
                 newslot = {
                     "$set": {
                         f"serials.{serial}.u": "Roblox",
-                        f"serials.{serial}.t": int(time())
+                        f"serials.{serial}.t": int(time.time())
                     },
                     "$unset": {
                         f"reselling.{serial}.u": ""
