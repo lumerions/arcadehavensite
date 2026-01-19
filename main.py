@@ -510,29 +510,38 @@ def depositearnings(data: DepositItems):
         
         operations = []
 
-        for item in depo:
-            serial = int(item["serial"]) - 1
-            newslot = {
-                "$set": {
-                    f"serials.{serial}.u": "Roblox",
-                    f"serials.{serial}.t": int(time())
-                },
-                "$unset": {
-                    f"reselling.{serial}.u": ""
+        try:
+                
+            for item in depo:
+                serial = int(item["serial"]) - 1
+                print(serial)
+                newslot = {
+                    "$set": {
+                        f"serials.{serial}.u": "Roblox",
+                        f"serials.{serial}.t": int(time())
+                    },
+                    "$unset": {
+                        f"reselling.{serial}.u": ""
+                    }
                 }
-            }
 
-            operations.append(
-                UpdateOne(
-                    {"itemId": int(item["itemid"])},  
-                    newslot
+                print(newslot)
+
+                operations.append(
+                    UpdateOne(
+                        {"itemId": int(item["itemid"])},  
+                        newslot
+                    )
                 )
-            )
 
-        print(operations)
-        result = collection.bulk_write(operations)
+            print(operations)
+            result = collection.bulk_write(operations)
 
-        print(result)
+            print(result)
+        except Exception as e:
+            print(e)
+            return JSONResponse({"error": "e"}, status_code=400)
+
 
         SiteItemsCollection = getSiteItemsMongo()["collection"]
 
@@ -1360,7 +1369,6 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
 
 
 
