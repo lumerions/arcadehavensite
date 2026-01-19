@@ -503,27 +503,25 @@ def depositearnings(data: DepositItems):
 
         print(str(ItemsVerified) +  "/" + str(len(data.itemdata)))
 
-        if profile:
-            return
-
+        if int(ItemsVerified) != len(data.itemdata):
+            return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
 
         for item in data.itemdata:
             operations = []
-            serialtouse = int(item.serial) - 1
-
+            serial = int(item["serial"]) - 1
             newslot = {
                 "$set": {
-                    f"serials.{serialtouse}.u": "Roblox",
-                    f"serials.{serialtouse}.t": int(time())
+                    f"serials.{serial}.u": "Roblox",
+                    f"serials.{serial}.t": int(time())
                 },
                 "$unset": {
-                    f"reselling.{serialtouse}.u": ""
+                    f"reselling.{serial}.u": ""
                 }
             }
 
             operations.append(
                 UpdateOne(
-                    {"itemId": int(item.itemid)},  
+                    {"itemId": int(item["itemid"])},  
                     newslot
                 )
             )
@@ -552,8 +550,8 @@ def depositearnings(data: DepositItems):
 
         try:
             document = SiteItemsCollection.find_one({"SessionId": data.sessionid})
-            if document:
-                return JSONResponse({"error": "Coinflip active"}, status_code=400)
+            if not document:
+                return JSONResponse({"error": "document not found"}, status_code=400)
 
         except Exception as e:
             return JSONResponse({"error": "Unknown error"}, status_code=400)
