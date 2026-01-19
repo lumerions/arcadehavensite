@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.replaceChildren(); 
         async function FillGrid() {
             try {
-                const response = await fetch('/getbalance');
+                const response = await fetch('/getInventory');
                 const data = await response.json(); 
 
                 data.forEach(item => {
