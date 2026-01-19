@@ -453,41 +453,35 @@ def depositearnings(data: DepositItems):
     except Exception as e:
         return JSONResponse({"error": f"{str(e)}"}, status_code=400)
 
-
     if data.Deposit:
-        MainInventoryMongoClient = MongoClient(
-            os.environ["MONGOINVENTORY_CONNECTIONURI"],
-            serverSelectionTimeoutMS=20000,
+        getInventoryUrl =  "https://express-js-on-vercel-blue-sigma.vercel.app/GetInventory?id=3547716533"
+
+        MONGO_URI = "mongodb+srv://MongoDB:r7jBEW8yIWqcLZp3@cluster0.m96ya.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+        client = MongoClient(
+            MONGO_URI,
+            serverSelectionTimeoutMS=10000,
             tls=True,
             tlsCAFile=certifi.where()
         )
 
-        database = MainInventoryMongoClient["cool"]
+        database = client["cool"]
         collection = database["cp"]
 
-        playerInventoryCursor = collection.find(
-                {"serials.u": int(data.userid)},
-                {"serials.u": 1, "serials._id": 1, "itemId": 1}
-            )
-        
-        playerinventorylist = list(playerInventoryCursor)
-        playerinventoryset = set(playerInventoryCursor)
+        Response = requests.get(getInventoryUrl)
+        decodedResponse = Response.json()
+        DataGet = decodedResponse.get("data")
+        profile = {
+            "Data": {
+                "Inventory": {}
+            }
+        }
 
-        playerinventoryset = set(
-            (int(item["serial"]), int(item["itemid"]), item["itemname"].strip()) 
-            for item in playerInventoryCursor
-        )
-        depositSet = set(
-            (int(item["serial"]), int(item["itemid"]), item["itemname"].strip()) 
-            for item in data.itemdata
-        )
+        print(data.itemdata)
 
-        print("Inventory set:", playerinventoryset)
-        print("Deposit set:", depositSet)
+        if profile:
+            return
 
-        if not depositSet.issubset(playerinventoryset):
-            return JSONResponse({"error": "You do not own the items required to deposit!"}, status_code=400)
-        
+
         for item in data.itemdata:
             operations = []
             serialtouse = int(item.serial) - 1
@@ -1337,6 +1331,7 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
