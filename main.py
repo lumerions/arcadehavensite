@@ -23,7 +23,6 @@ import certifi
 import base64
 import math
 from typing import List, Dict, Any
-from psycopg_pool import ConnectionPool # type:ignore
 
 place_id = 97090711812957
 postgresConnection = None
@@ -112,14 +111,9 @@ redis = Redis(
     token=os.environ["REDIS_TOKEN"]
 )
 
-pool = ConnectionPool(os.environ["POSTGRES_DATABASE_URL"])
 
 def getPostgresConnection():
-   # global postgresConnection
- #   if postgresConnection is None or postgresConnection.closed:
-     #   postgresConnection = psycopg.connect(os.environ["POSTGRES_DATABASE_URL"], autocommit=True)
-   # return postgresConnection
-   return pool.connection()
+    return psycopg.connect(os.environ["POSTGRES_DATABASE_URL"], autocommit=True)
 
 templates = Jinja2Templates(directory="templates")
 
@@ -1280,9 +1274,6 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
-
 
 
 
