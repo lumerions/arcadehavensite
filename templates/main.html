@@ -665,12 +665,32 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inventoryActionBtn.textContent === 'Initiate Deposit') {
             window.location.href = '/deposititems';
         } else {
-            const itemdata = ToWithdraw;
+            const itemdata = ToWithdraw; 
 
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/withdrawitems';
-            form.submit();
+            try {
+                const response = await fetch('/withdrawitems', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ itemdata })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Request failed');
+                }
+
+                const data = await response.json();
+
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    console.error('No redirect URL returned');
+                }
+            } catch (err) {
+                console.error('Error withdrawing items:', err.message);
+            }
+
         }
     });
 

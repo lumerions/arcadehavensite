@@ -388,7 +388,6 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
                     ItemsVerifiedCount += 1
                     break
 
-
     if ItemsVerifiedCount != len(itemdata):
         return JSONResponse({"error": "Item verification failed!"}, status_code=400)
 
@@ -408,7 +407,7 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
         f"&launchData={urllib.parse.quote(b64_data)}"
     )
 
-    return RedirectResponse(url=roblox_url, status_code=303)
+    return JSONResponse({"redirect": roblox_url})
 
 @app.post("/earnings")
 def depositearnings(data: deposit):
