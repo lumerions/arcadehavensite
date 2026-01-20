@@ -671,17 +671,19 @@ def depositearnings(data: DepositItems):
                     )
                 )
 
+               
                 operations.append(
                     UpdateOne(
                         {"itemId": itemid},
                         {
                             "$set": {
-                                f"serials.{serial - 1}.u": data.robloxusername,
-                                f"serials.{serial - 1}.t": int(time.time())
+                                f"serials.{serial + 1}.u": data.robloxusername,
+                                f"serials.{serial + 1}.t": int(time.time())
                             }
                         }
                     )
                 )
+
 
 
             if len(bulk_ops) > 0 and len(operations) > 0:
