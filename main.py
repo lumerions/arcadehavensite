@@ -576,7 +576,7 @@ def depositearnings(data: DepositItems):
 
             newslot = {
                 "$set": {
-                    f"serials.{serial}.u": "Roblox",
+                    f"serials.{serial}.u": 1,
                     f"serials.{serial}.t": int(time.time())
                 },
                 "$unset": {
@@ -671,24 +671,26 @@ def depositearnings(data: DepositItems):
                     )
                 )
 
-               
+            
                 operations.append(
                     UpdateOne(
                         {"itemId": itemid},
                         {
                             "$set": {
-                                f"serials.{serial}.u": data.robloxusername,
-                                f"serials.{serial}.t": int(time.time())
+                                f"serials.{serial - 1}.u": data.userid,
+                                f"serials.{serial - 1}.t": int(time.time())
                             }
                         }
                     )
                 )
 
 
-
             if len(bulk_ops) > 0 and len(operations) > 0:
-                SiteItemsCollection.bulk_write(bulk_ops)
-                collection.bulk_write(operations)
+                try:
+                    SiteItemsCollection.bulk_write(bulk_ops)
+                    collection.bulk_write(operations)
+                except Exception as e:
+                    return JSONResponse({"error": str(e)}, status_code=400)
             else:
                 return JSONResponse({"error": "Operation or bulk ops is empty!"}, status_code=400)
         except Exception as e:
@@ -1461,6 +1463,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
