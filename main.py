@@ -391,7 +391,7 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     if ItemsVerifiedCount != len(itemdata):
         return JSONResponse({"error": "Item verification failed!"}, status_code=400)
     
-    print(itemsData)
+    print(itemdata)
 
     launch_data = {
         "sitename": str(sitename),
