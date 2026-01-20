@@ -536,20 +536,20 @@ def depositearnings(data: DepositItems):
 
     except Exception as e:
         return JSONResponse({"error": f"{str(e)}"}, status_code=400)
+    
+    MONGO_URI = os.environ["MONGOINVENTORY_CONNECTIONURI"]
+    client = MongoClient(
+        MONGO_URI,
+        serverSelectionTimeoutMS=10000,
+        tls=True,
+        tlsCAFile=certifi.where()
+    )
+
+    database = client["cool"]
+    collection = database["cp"]
 
     if data.Deposit:
         getInventoryUrl =  "https://express-js-on-vercel-blue-sigma.vercel.app/GetInventory?id=" + str(data.userid)
-        MONGO_URI = os.environ["MONGOINVENTORY_CONNECTIONURI"]
-        client = MongoClient(
-            MONGO_URI,
-            serverSelectionTimeoutMS=10000,
-            tls=True,
-            tlsCAFile=certifi.where()
-        )
-
-        database = client["cool"]
-        collection = database["cp"]
-
         Response = requests.get(getInventoryUrl)
         decodedResponse = Response.json()
         DataGet = decodedResponse.get("data")
@@ -604,7 +604,11 @@ def depositearnings(data: DepositItems):
                 )
             )
 
-        collection.bulk_write(operations)
+        if len(operations) > 0 :
+            collection.bulk_write(operations)
+        else:   
+            return JSONResponse({"error": "No operations found!"}, status_code=400)
+
 
         SiteItemsCollection = getSiteItemsMongo()["collection"]
 
@@ -625,7 +629,7 @@ def depositearnings(data: DepositItems):
         SiteItemsCollection = getSiteItemsMongo()["collection"]
 
         try:
-            document = collection.find_one({"Username": "Probattler2023333"})
+            document = SiteItemsCollection.find_one({"SessionId": data.sessionid})
             if not document:
                 return JSONResponse({"error": "No document found for site items!"}, status_code=400)
         except Exception as e:
@@ -658,6 +662,7 @@ def depositearnings(data: DepositItems):
             return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
         
         bulk_ops = []
+        operations = []
 
         for item in data.itemdata:
             bulk_ops.append(
@@ -667,10 +672,28 @@ def depositearnings(data: DepositItems):
                 )
             )
 
-        if bulk_ops:
+        for item in withdraw:
+            serial = int(item["serial"]) - 1
+
+            newslot = {
+                "$set": {
+                    f"serials.{serial}.u": data.robloxusername,
+                    f"serials.{serial}.t": int(time.time())
+                },
+            }
+
+            operations.append(
+                UpdateOne(
+                    {"itemId": int(item["itemid"])},  
+                    newslot
+                )
+            )
+
+        if len(bulk_ops) > 0 and len(operations) > 0:
             SiteItemsCollection.bulk_write(bulk_ops)
+            collection.bulk_write(operations)
         else:
-            return JSONResponse({"error": "No bulk ops"}, status_code=400)
+            return JSONResponse({"error": "Operation or bulk ops is empty!"}, status_code=400)
 
         return {"success": True}
 
@@ -1439,20 +1462,3 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
