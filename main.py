@@ -390,8 +390,6 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     json_data = json.dumps(launch_data)
     b64_data = base64.b64encode(json_data.encode()).decode()
 
-    print(b64_data)
-
     roblox_url = (
         f"https://www.roblox.com/games/start"
         f"?placeId={place_id}"
@@ -615,78 +613,81 @@ def depositearnings(data: DepositItems):
 
         return {"success": True}
     else:
-        SiteItemsCollection = getSiteItemsMongo()["collection"]
-
         try:
-            document = SiteItemsCollection.find_one({"SessionId": data.sessionid})
-            if not document:
-                return JSONResponse({"error": "No document found for site items!"}, status_code=400)
+            SiteItemsCollection = getSiteItemsMongo()["collection"]
+
+            try:
+                document = SiteItemsCollection.find_one({"SessionId": data.sessionid})
+                if not document:
+                    return JSONResponse({"error": "No document found for site items!"}, status_code=400)
+            except Exception as e:
+                return JSONResponse({"error": str(e)}, status_code=400)
+
+            profile = {
+                "Data": {
+                    "Inventory": {}
+                }
+            }
+
+            withdraw = data.itemdata
+            ItemsVerified = 0
+
+            for i in document["items"]:
+                itemid = str(i["itemid"])
+                serial = str(i["serial"])
+
+                if i["itemid"] not in profile["Data"]["Inventory"]:
+                    profile["Data"]["Inventory"][itemid] = {}
+
+                profile["Data"]["Inventory"][itemid][serial] = {}
+
+            for i in withdraw:
+                inv = profile["Data"]["Inventory"]
+                item_id = str(i["itemid"])
+
+                if item_id in inv:
+                    inv2 = profile["Data"]["Inventory"][item_id]
+                    serial = str(i["serial"])
+                    if serial in inv2:
+                        ItemsVerified += 1
+
+            if int(ItemsVerified) != len(withdraw):
+                return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
+            
+            bulk_ops = []
+            operations = []
+
+            for item in data.itemdata:
+                itemid = int(item["itemid"])
+                serial = int(item["serial"])
+
+                bulk_ops.append(
+                    UpdateOne(
+                        {"SessionId": data.sessionid},
+                        {"$pull": {"items": {"itemid": itemid, "serial": serial}}}
+                    )
+                )
+
+                operations.append(
+                    UpdateOne(
+                        {"itemId": itemid},
+                        {
+                            "$set": {
+                                f"serials.{serial - 1}.u": data.robloxusername,
+                                f"serials.{serial - 1}.t": int(time.time())
+                            }
+                        }
+                    )
+                )
+
+
+            if len(bulk_ops) > 0 and len(operations) > 0:
+                SiteItemsCollection.bulk_write(bulk_ops)
+                collection.bulk_write(operations)
+            else:
+                return JSONResponse({"error": "Operation or bulk ops is empty!"}, status_code=400)
         except Exception as e:
             return JSONResponse({"error": str(e)}, status_code=400)
-
-        profile = {
-            "Data": {
-                "Inventory": {}
-            }
-        }
-
-        withdraw = data.itemdata
-        ItemsVerified = 0
-
-        for i in document["items"]:
-            itemid = str(i["itemid"])
-            serial = str(i["serial"])
-
-            if i["itemid"] not in profile["Data"]["Inventory"]:
-                profile["Data"]["Inventory"][itemid] = {}
-
-            profile["Data"]["Inventory"][itemid][serial] = {}
-
-        for i in withdraw:
-            inv = profile["Data"]["Inventory"]
-            item_id = str(i["itemid"])
-
-            if item_id in inv:
-                inv2 = profile["Data"]["Inventory"][item_id]
-                serial = str(i["serial"])
-                if serial in inv2:
-                    ItemsVerified += 1
-
-        if int(ItemsVerified) != len(withdraw):
-            return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
-        
-        bulk_ops = []
-        operations = []
-
-        for item in data.itemdata:
-            itemid = int(item["itemid"])
-            serial = int(item["serial"])
-
-            bulk_ops.append(
-                UpdateOne(
-                    {"SessionId": data.sessionid},
-                    {"$pull": {"items": {"itemid": itemid, "serial": serial}}}
-                )
-            )
-
-            operations.append(
-                UpdateOne(
-                    {"itemId": itemid},
-                    {
-                        "$set": {
-                            f"serials.{serial - 1}.u": data.robloxusername,
-                            f"serials.{serial - 1}.t": int(time.time())
-                        }
-                    }
-                )
-            )
-
-
-        if len(bulk_ops) > 0 and len(operations) > 0:
-            SiteItemsCollection.bulk_write(bulk_ops)
-            collection.bulk_write(operations)
-        else:
-            return JSONResponse({"error": "Operation or bulk ops is empty!"}, status_code=400)
 
         return {"success": True}
 
@@ -1455,7 +1456,6 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
 
 
 
