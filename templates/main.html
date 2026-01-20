@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
-    <!-- <title>{% block title %}Home - AH Gambling{% endblock %}</title>  -->
+     <title>{% block title %}Home - AH Gambling{% endblock %}</title>  
 
     <style>
         * { 
@@ -397,7 +397,7 @@
         <a href="/mines" class="sidebar-link">Mines</a>
     </aside>
         <main>
-        <!-- {% block content %}{% endblock %} -->
+         {% block content %}{% endblock %} 
     </main>
 </div>
 
@@ -686,8 +686,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) throw new Error('Request failed');
 
-            if (response.redirected) {
-                window.location.href = response.url;
+            if (response.redirect) {
+                window.location.href = response.redirect;
             }
         }
     });
