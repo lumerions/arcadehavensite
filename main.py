@@ -79,6 +79,28 @@ def MoreWithdraw(pagetype,request):
             {"request": request,"wallet_error":"You are trying to withdraw more then you have!"},
             status_code=status.HTTP_400_BAD_REQUEST
         )
+    
+def getMarketplaceData():
+    MONGO_URI = os.environ["MONGOINVENTORY_CONNECTIONURI"]
+    NewClientInstance = MongoClient(
+        MONGO_URI,
+        serverSelectionTimeoutMS=10000,
+        tls=True,
+        tlsCAFile=certifi.where()
+    )
+
+    database = NewClientInstance["cool"]
+    collection = database["cp"]
+    try:
+        MarketplaceData = collection.find(
+            {},
+        )
+
+        MarketplaceData = list(MarketplaceData)
+        return MarketplaceData
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
+
 
 class deposit(BaseModel):
     robloxusername: str
@@ -352,15 +374,23 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     try:
         document = SiteItemsCollection.find_one({"SessionId": SessionId})
         if not document:
-            return MoreWithdraw("gdfd",request)
+            return JSONResponse({"error": "Unknown error"}, status_code=400)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
+    
+    itemsData = document["items"]
+    ItemsVerifiedCount = 0
 
-    itemset = set(document["items"])
-    WithdrawSet = set(itemdata)
+    for item_name, serials in itemdata.items():
+        for serial in serials:
+            print("Item:", item_name, "Serial:", serial)
+            for i,v in enumerate(document["items"]):
+                if str(v["itemname"]) == str(item_name):
+                    ItemsVerifiedCount += 1
+                    break
 
-    if not WithdrawSet.issubset(itemset):
-        return JSONResponse({"error": "You do not own the items required to withdraw!"}, status_code=400)
+    if ItemsVerifiedCount != len(itemsData.items()):
+        return JSONResponse({"error": "Item verification failed!"}, status_code=400)
 
     launch_data = {
         "sitename": str(sitename),
@@ -734,26 +764,7 @@ def getInventory(SessionId: str = Cookie(None)):
 
     AssetIdParam = AssetIdParam[:-1]
 
-    MONGO_URI = os.environ["MONGOINVENTORY_CONNECTIONURI"]
-    client = MongoClient(
-        MONGO_URI,
-        serverSelectionTimeoutMS=10000,
-        tls=True,
-        tlsCAFile=certifi.where()
-    )
-
-    database = client["cool"]
-    collection = database["cp"]
-
-    try:
-        MarketplaceData = collection.find(
-            {},
-        )
-
-        MarketplaceData = list(MarketplaceData)
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=400)
-
+    MarketplaceData = getMarketplaceData()
 
     try:
         response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
@@ -1412,6 +1423,8 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
 
 
 
