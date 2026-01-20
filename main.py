@@ -650,36 +650,35 @@ def depositearnings(data: DepositItems):
                 if serial in inv2:
                     ItemsVerified += 1
 
-        if int(ItemsVerified) != len(data.itemdata):
+        if int(ItemsVerified) != len(withdraw):
             return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
         
         bulk_ops = []
         operations = []
 
         for item in data.itemdata:
+            itemid = int(item["itemid"])
+            serial = int(item["serial"])
+
             bulk_ops.append(
                 UpdateOne(
-                    {"SessionId": str(data.sessionid), "Username": str(data.siteusername)},
-                    {"$pull": {"items": {"itemid": int(item["itemid"]), "serial": int(item["serial"])}}}
+                    {"SessionId": data.sessionid},
+                    {"$pull": {"items": {"itemid": itemid, "serial": serial}}}
                 )
             )
-
-        for item in withdraw:
-            serial = int(item["serial"]) - 1
-
-            newslot = {
-                "$set": {
-                    f"serials.{serial}.u": data.robloxusername,
-                    f"serials.{serial}.t": int(time.time())
-                },
-            }
 
             operations.append(
                 UpdateOne(
-                    {"itemId": int(item["itemid"])},  
-                    newslot
+                    {"itemId": itemid},
+                    {
+                        "$set": {
+                            f"serials.{serial - 1}.u": data.robloxusername,
+                            f"serials.{serial - 1}.t": int(time.time())
+                        }
+                    }
                 )
             )
+
 
         if len(bulk_ops) > 0 and len(operations) > 0:
             SiteItemsCollection.bulk_write(bulk_ops)
