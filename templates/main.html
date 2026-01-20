@@ -678,8 +678,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) throw new Error('Request failed');
 
-            if (response.redirected) {
-                window.location.href = response.url;
+            if (response.status === 303) {
+                const redirectUrl = response.headers.get('Location');
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
             }
         }
     });
