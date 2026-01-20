@@ -383,13 +383,13 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
     for item_name, serials in itemdata.items():
         for serial in serials:
-            print("Item:", item_name, "Serial:", serial)
             for i,v in enumerate(document["items"]):
-                if str(v["itemname"]) == str(item_name):
+                if str(v["itemname"]) == str(item_name) and int(serial.replace("#","")) == int(v["serial"]):
                     ItemsVerifiedCount += 1
                     break
 
-    if ItemsVerifiedCount != len(itemsData):
+
+    if ItemsVerifiedCount != len(itemdata):
         return JSONResponse({"error": "Item verification failed!"}, status_code=400)
 
     launch_data = {
