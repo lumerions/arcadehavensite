@@ -639,7 +639,7 @@ def depositearnings(data: DepositItems):
                 itemid = str(i["itemid"])
                 serial = str(i["serial"])
 
-                if i["itemid"] not in profile["Data"]["Inventory"]:
+                if itemid not in profile["Data"]["Inventory"]:
                     profile["Data"]["Inventory"][itemid] = {}
 
                 profile["Data"]["Inventory"][itemid][serial] = {}
@@ -653,6 +653,10 @@ def depositearnings(data: DepositItems):
                     serial = str(i["serial"])
                     if serial in inv2:
                         ItemsVerified += 1
+
+            print("Inventory map:", profile["Data"]["Inventory"])
+            print("Withdraw items:", withdraw)
+
 
             if int(ItemsVerified) != len(withdraw):
                 return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
@@ -671,7 +675,6 @@ def depositearnings(data: DepositItems):
                     )
                 )
 
-            
                 operations.append(
                     UpdateOne(
                         {"itemId": itemid},
@@ -1463,6 +1466,9 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+
 
 
 
