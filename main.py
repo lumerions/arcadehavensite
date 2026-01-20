@@ -677,8 +677,8 @@ def depositearnings(data: DepositItems):
                         {"itemId": itemid},
                         {
                             "$set": {
-                                f"serials.{serial + 1}.u": data.robloxusername,
-                                f"serials.{serial + 1}.t": int(time.time())
+                                f"serials.{serial}.u": data.robloxusername,
+                                f"serials.{serial}.t": int(time.time())
                             }
                         }
                     )
