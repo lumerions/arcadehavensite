@@ -623,23 +623,38 @@ def depositearnings(data: DepositItems):
         SiteItemsCollection = getSiteItemsMongo()["collection"]
 
         try:
-            document = SiteItemsCollection.find_one({"SessionId": data.sessionid})
+            document = collection.find_one({"Username": "Probattler2023333"})
             if not document:
-                return JSONResponse({"error": "document not found"}, status_code=400)
-
+                return JSONResponse({"error": "No document found for site items!"}, status_code=400)
         except Exception as e:
-            return JSONResponse({"error": "Unknown error"}, status_code=400)
+            return JSONResponse({"error": str(e)}, status_code=400)
 
-        found_count = SiteItemsCollection.count_documents({
-            "SessionId": str(data.sessionid),
-            "Username": str(data.siteusername),
-            "items.itemid": {"$in": [i["itemid"] for i in data.itemdata]},
-            "items.serial": {"$in": [i["serial"] for i in data.itemdata]}
-        })
+        profile = {
+            "Data": {
+                "Inventory": {}
+            }
+        }
 
-        if int(found_count) != len(data.itemdata):
-            return JSONResponse({"error": "Item verification failed!"}, status_code=400)
+        withdraw = data.itemdata
+        ItemsVerified = 0
 
+        for i in document["items"]:
+            if i["itemid"] not in profile["Data"]["Inventory"]:
+                profile["Data"]["Inventory"][str(i["itemid"])][str(i["serial"])] = {}
+
+        for i in withdraw:
+            inv = profile["Data"]["Inventory"]
+            item_id = str(i["itemid"])
+
+            if item_id in inv:
+                inv2 = profile["Data"]["Inventory"][item_id]
+                serial = str(i["serial"])
+                if serial in inv2:
+                    ItemsVerified += 1
+
+        if int(ItemsVerified) != len(data.itemdata):
+            return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
+        
         bulk_ops = []
 
         for item in data.itemdata:
