@@ -390,6 +390,8 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
     if ItemsVerifiedCount != len(itemdata):
         return JSONResponse({"error": "Item verification failed!"}, status_code=400)
+    
+    print(itemsData)
 
     launch_data = {
         "sitename": str(sitename),
@@ -1437,6 +1439,8 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
 
 
 
