@@ -498,8 +498,6 @@ def depositearnings(data: DepositItems):
     if data.itemdata is None:
         return JSONResponse({"error": "Item data missing"}, status_code=400)
 
-    print(data)
-
     lock_key = f"earningsitems:{data.sessionid}"
     if not redis.set(lock_key, "1", nx=True, ex=4):
         return JSONResponse({"error": "Duplicate request detected"}, status_code=429)
@@ -634,8 +632,13 @@ def depositearnings(data: DepositItems):
         ItemsVerified = 0
 
         for i in document["items"]:
+            itemid = str(i["itemid"])
+            serial = str(i["serial"])
+
             if i["itemid"] not in profile["Data"]["Inventory"]:
-                profile["Data"]["Inventory"][str(i["itemid"])][str(i["serial"])] = {}
+                profile["Data"]["Inventory"][itemid] = {}
+
+            profile["Data"]["Inventory"][itemid][serial] = {}
 
         for i in withdraw:
             inv = profile["Data"]["Inventory"]
@@ -1451,6 +1454,8 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
 
 
 
