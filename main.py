@@ -1,27 +1,14 @@
 
-
 from fastapi import FastAPI, Form, Request, Response, Cookie,status,Query
 from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse,FileResponse
 from fastapi.templating import Jinja2Templates
 from upstash_redis import Redis
-import psycopg
-import bcrypt
-import os 
-import secrets
-import string
-import random
 from datetime import datetime, timedelta
 from fastapi.staticfiles import StaticFiles
 import urllib.parse  
-import json
-import requests
+import json,requests,time,uvicorn,certifi,base64,math,random,string,secrets,os,bcrypt,psycopg
 from pydantic import BaseModel
-import time
-import uvicorn
 from pymongo import MongoClient,UpdateOne
-import certifi
-import base64
-import math
 from typing import List, Dict, Any
 place_id = 97090711812957
 
@@ -508,8 +495,10 @@ def depositearnings(data: DepositItems):
     if data.userid is None:
         return JSONResponse({"error": "userid missing"}, status_code=400)
     
-    if data.itemdata is None or len(data.itemdata) == 0:
+    if data.itemdata is None:
         return JSONResponse({"error": "Item data missing"}, status_code=400)
+
+    print(data)
 
     lock_key = f"earningsitems:{data.sessionid}"
     if not redis.set(lock_key, "1", nx=True, ex=4):
@@ -1462,3 +1451,6 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
+

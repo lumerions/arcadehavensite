@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
-    <title>{% block title %}Home - AH Gambling{% endblock %}</title>  
+    <!-- <title>{% block title %}Home - AH Gambling{% endblock %}</title>  -->
 
-       <style>
+    <style>
         * { 
             margin: 0; 
             padding: 0; 
@@ -397,7 +397,7 @@
         <a href="/mines" class="sidebar-link">Mines</a>
     </aside>
         <main>
-        {% block content %}{% endblock %} 
+        <!-- {% block content %}{% endblock %} -->
     </main>
 </div>
 
@@ -499,11 +499,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const inventoryActionBtn = document.getElementById('inventoryActionBtn');
     const totalValueLabel = document.querySelector('#totalValue strong');
     const searchInput = document.getElementById('inventorySearch');
-    const inventoryItems = document.querySelectorAll('.inventory-item');
     let TotalValue = 0;
 
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.toLowerCase();
+
+        const inventoryItems = document.querySelectorAll('.inventory-item');
 
         inventoryItems.forEach(item => {
             const name = item.querySelector('.name')?.textContent.toLowerCase() || '';
@@ -595,6 +596,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
         modal?.classList.remove('open');
         inventoryModal?.classList.add('open');
+        TotalValue = 0
+        totalValueLabel();
         const grid = document.querySelector('.inventory-grid');
         grid.replaceChildren(); 
         async function FillGrid() {
@@ -665,32 +668,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inventoryActionBtn.textContent === 'Initiate Deposit') {
             window.location.href = '/deposititems';
         } else {
-            const itemdata = ToWithdraw; 
+            const itemdata = ToWithdraw;
 
-            try {
-                const response = await fetch('/withdrawitems', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ itemdata })
-                });
+            const response = await fetch('/withdrawitems', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ itemdata })
+            });
 
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error || 'Request failed');
-                }
+            if (!response.ok) throw new Error('Request failed');
 
-                const data = await response.json();
-
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                } else {
-                    console.error('No redirect URL returned');
-                }
-            } catch (err) {
-                console.error('Error withdrawing items:', err.message);
+            if (response.redirected) {
+                window.location.href = response.url;
             }
-
         }
     });
 
@@ -773,6 +766,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
