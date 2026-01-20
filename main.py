@@ -390,6 +390,8 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     json_data = json.dumps(launch_data)
     b64_data = base64.b64encode(json_data.encode()).decode()
 
+    print(b64_data)
+
     roblox_url = (
         f"https://www.roblox.com/games/start"
         f"?placeId={place_id}"
