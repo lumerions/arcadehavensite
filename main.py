@@ -614,6 +614,7 @@ def depositearnings(data: DepositItems):
         return {"success": True}
     else:
         try:
+            print(data)
             SiteItemsCollection = getSiteItemsMongo()["collection"]
 
             try:
@@ -631,6 +632,8 @@ def depositearnings(data: DepositItems):
 
             withdraw = data.itemdata
             ItemsVerified = 0
+
+            print(document["items"])
 
             for i in document["items"]:
                 itemid = str(i["itemid"])
@@ -657,7 +660,7 @@ def depositearnings(data: DepositItems):
             bulk_ops = []
             operations = []
 
-            for item in data.itemdata:
+            for item in withdraw:
                 itemid = int(item["itemid"])
                 serial = int(item["serial"])
 
@@ -1456,6 +1459,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
 
