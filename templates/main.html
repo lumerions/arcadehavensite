@@ -592,12 +592,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (val > 0) window.location.href = `/withdraw?amount=${val}&page=home`;
     });
 
+    function UpdateTotalValueLabel() {
+        const formatted = TotalValue.toLocaleString();
+        if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
+    }
+
     openInventoryBtn?.addEventListener('click', e => {
         e.stopPropagation();
         modal?.classList.remove('open');
         inventoryModal?.classList.add('open');
         TotalValue = 0
-        totalValueLabel();
+        UpdateTotalValueLabel();
         const grid = document.querySelector('.inventory-grid');
         grid.replaceChildren(); 
         async function FillGrid() {
@@ -743,12 +748,6 @@ document.addEventListener('DOMContentLoaded', () => {
         link.classList.remove('active');
         if (link.getAttribute('href') === currentPath) link.classList.add('active');
     });
-
-    function UpdateTotalValueLabel() {
-        const formatted = TotalValue.toLocaleString();
-        if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
-    }
-
 
     document.querySelectorAll('.inventory-item').forEach(item => {
         item.addEventListener('click', e => {
