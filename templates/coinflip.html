@@ -218,23 +218,20 @@ body {
     }
 }
 
+
 #createCoinflipModal .wallet {
-    max-width: 600px;
-    width: 90%;
-    background: #1e1e2e;
-    border: 1px solid #333;
-    border-radius: 12px;
-    padding: 16px;
-    margin: 50px auto;
-    position: relative;
-    color: #fff;
+    background: #1c2433;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 420px;
+    padding: 24px;
 }
 
 #createCoinflipModal .wallet-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 #createCoinflipModal .wallet-header h2 {
@@ -335,6 +332,19 @@ body {
     background: #b91c1c;
 }
 
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal.open { display: flex; }
+
 </style>
 
 <div class="modal" id="createCoinflipModal">
@@ -344,7 +354,7 @@ body {
             <span class="close">&times;</span>
         </div>
 
-        <input id="coinflipTitle" placeholder="Enter match title..." />
+        <input id="itemSearch" placeholder="Enter an item name..." />
 
         <div id="selectedItems" style="display:flex; justify-content:space-between; margin-top:10px;">
             <div>Total Selected: <strong>0 items</strong></div>
