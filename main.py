@@ -46,13 +46,6 @@ def getSiteItemsMongo():
     collection = db["siteitems"]
     return {"db": db,"collection":collection}
 
-def redis_int(val, default=0):
-    if val is None:
-        return default
-    if isinstance(val, bytes):
-        val = val.decode()
-    return int(val)
-
 def MoreWithdraw(pagetype,request):
     if pagetype == "towers":
         return templates.TemplateResponse(
@@ -237,7 +230,7 @@ def get(SessionId: str = Cookie(None)):
 
         return int(doc["balance"])
     else:
-        return redis.get(SessionId)
+        return int(redis.get(SessionId))
 
 @app.get("/deposit")
 async def depositget(amount: float, SessionId: str = Cookie(None)):
@@ -428,10 +421,6 @@ def depositearnings(data: deposit):
     except Exception:
         return JSONResponse({"error": "Amount must be an integer"}, status_code=400)
 
-    lock_key = f"earnings:{data.sessionid}"
-    if not redis.set(lock_key, "1", nx=True, ex=4):
-        return JSONResponse({"error": "Duplicate request detected"}, status_code=429)
-
     try:
         conn = getPostgresConnection() 
 
@@ -515,10 +504,6 @@ def depositearnings(data: DepositItems):
     
     if data.itemdata is None:
         return JSONResponse({"error": "Item data missing"}, status_code=400)
-
-    lock_key = f"earningsitems:{data.sessionid}"
-    if not redis.set(lock_key, "1", nx=True, ex=4):
-        return JSONResponse({"error": "Duplicate request detected"}, status_code=429)
 
     try:
         conn = getPostgresConnection() 
@@ -998,7 +983,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
         mine_multiplier = ((len(mines) / 23) ** 1.5) + 0.1
         payout = bet_amount * (row + 1) * mine_multiplier * 0.3
         payout = math.floor(payout)
-        payoutset = redis_int(CashoutAvailable) + payout
+        payoutset = int(CashoutAvailable) + int(payout)
         rowset = currentRow + 1
         redis.mset({
             "ClickData." + SessionId: json.dumps(existing_array),
@@ -1102,7 +1087,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
             status_code=status.HTTP_400_BAD_REQUEST
         )
     
-    
+
     if not doc:
         return IfInsufficientFunds()
     if int(doc["balance"]) < int(bet_amount):
@@ -1127,12 +1112,20 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     newBalance = int(doc["balance"])
 
-    redis.set(SessionId,newBalance,ex = 2628000)
+    RedisPipeline = redis.pipeline()
+
+    RedisPipeline.delete(
+        SessionId + ":clicks",
+        SessionId + ":cashed",
+        "ClickData." + SessionId
+    )
+
+    RedisPipeline.set(SessionId,newBalance,ex = 2628000)
 
     multiplier_per_click = total_tiles / (total_tiles - mine_count)
 
     if Game == "Towers":
-        redis.mset({
+        RedisPipeline.mset({
             SessionId + "GameActive": "1",
             SessionId + "Cleared": 0,
             SessionId + "Cashout": 0,
@@ -1140,16 +1133,19 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
             SessionId + "minesdata": json.dumps(mines),
             SessionId + "TowersActive": "1",
             SessionId + "Row": 0,
+            SessionId : newBalance,
         })
+        RedisPipeline.exec()
         return RedirectResponse(url="/towers", status_code=303)
     elif Game == "Mines":
-        redis.mset({
+        RedisPipeline.mset({
             SessionId + "GameActive": "1",
             SessionId + "Cleared": 0,
             SessionId + "Cashout": 0,
             SessionId + "BetAmount": bet_amount,
             SessionId + "minesdata": json.dumps(mines),
         })
+        RedisPipeline.exec()
         return RedirectResponse(url="/mines", status_code=303)
     else:
         return templates.TemplateResponse(
@@ -1188,6 +1184,7 @@ def cashout(SessionId: str = Cookie(None)):
         return JSONResponse({"error": "Nothing to cash out"}, status_code=400)
 
     conn = getPostgresConnection() 
+    redisPipeline = redis.pipeline()
 
     with conn.cursor() as cursor:
         cursor.execute(
@@ -1208,7 +1205,7 @@ def cashout(SessionId: str = Cookie(None)):
 
         newBalance = int(newDocument["balance"])
 
-        redis.set(SessionId,newBalance,ex = 2628000)
+        redisPipeline.set(SessionId,newBalance,ex = 2628000)
 
 
     if isinstance(mines_raw, bytes):
@@ -1216,7 +1213,7 @@ def cashout(SessionId: str = Cookie(None)):
 
     mines = json.loads(mines_raw)
 
-    redis.delete(
+    redisPipeline.delete(
         SessionId + "GameActive",
         SessionId + "Cleared",
         SessionId + "Cashout",
@@ -1225,6 +1222,8 @@ def cashout(SessionId: str = Cookie(None)):
         SessionId + ":clicks",
         SessionId + "TowersActive"
     )
+
+    redisPipeline.exec()
 
     return JSONResponse({"success": True, "amount": tocashout,"mines": mines,"betamount":betamount})
 
@@ -1487,14 +1486,5 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
-
-
-
-
-
-
-
 
 
