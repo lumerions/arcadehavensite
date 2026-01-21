@@ -29,6 +29,17 @@ body {
     align-items: center;
 }
 
+.coinflip-modal-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.coinflip-modal-actions .action-btn {
+    flex: 1;
+}
+
+
 .stats-cards {
     display: flex;
     gap: 12px;
@@ -369,12 +380,17 @@ body {
             </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; margin-top:12px;">
-            <button class="action-btn withdraw" id="coinflipCancelBtn">Cancel</button>
-            <button class="action-btn deposit" id="coinflipCreateBtn">Create Match</button>
+        <div class="coinflip-modal-actions">
+            <button class="action-btn withdraw" id="coinflipCancelBtn">
+                Cancel
+            </button>
+            <button class="action-btn deposit" id="coinflipCreateBtn">
+                Create Match
+            </button>
         </div>
     </div>
 </div>
+
 
 
 <div class="coinflip-page">
