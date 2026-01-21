@@ -366,27 +366,6 @@ body {
     </div>
 </div>
 
-<script>
-const createMatchBtn = document.getElementById("createMatchBtn");
-const createModal = document.getElementById("createCoinflipModal");
-const modalClose = createModal.querySelector(".close");
-
-createMatchBtn.addEventListener("click", () => {
-    createModal.style.display = "block";
-});
-
-modalClose.addEventListener("click", () => {
-    createModal.style.display = "none";
-});
-
-window.addEventListener("click", (e) => {
-    if (e.target === createModal) {
-        createModal.style.display = "none";
-    }
-});
-</script>
-
-
 
 <div class="coinflip-page">
     <div class="coinflip-controls">
@@ -489,4 +468,25 @@ window.addEventListener("click", (e) => {
         {% endfor %}
     </div>
 </div>
+
+<script>
+const createMatchBtn = document.getElementById("createMatchBtn");
+const createModal = document.getElementById("createCoinflipModal");
+const modalClose = createModal.querySelector(".close");
+
+createMatchBtn.addEventListener("click", () => {
+    createModal.style.display = "block";
+});
+
+modalClose.addEventListener("click", () => {
+    createModal.style.display = "none";
+});
+
+window.addEventListener("click", (e) => {
+    if (e.target === createModal) {
+        createModal.style.display = "none";
+    }
+});
+</script>
+
 {% endblock %}
