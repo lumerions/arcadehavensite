@@ -217,7 +217,155 @@ body {
         gap: 8px;
     }
 }
+
+#createCoinflipModal .wallet {
+    max-width: 600px;
+    width: 90%;
+    background: #1e1e2e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 50px auto;
+    position: relative;
+    color: #fff;
+}
+
+#createCoinflipModal .wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+#createCoinflipModal .wallet-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+#createCoinflipModal .wallet-header .close {
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+#createCoinflipModal input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #111;
+    color: #fff;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+#createCoinflipModal .inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-top: 8px;
+}
+
+#createCoinflipModal .inventory-item {
+    background: #111827;
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.7rem;
+    cursor: pointer;
+    text-align: center;
+    transition: border 0.2s;
+}
+
+#createCoinflipModal .inventory-item img {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+#createCoinflipModal .inventory-item .name {
+    font-weight: 500;
+    font-size: 0.7rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+#createCoinflipModal .inventory-item .value {
+    color: #16a34a;
+    font-weight: 600;
+    font-size: 0.7rem;
+}
+
+#createCoinflipModal .inventory-item.selected {
+    border: 2px solid #16a34a;
+    box-sizing: border-box;
+}
+
+#createCoinflipModal .action-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#createCoinflipModal .action-btn.deposit {
+    background: #2563eb;
+    color: #fff;
+}
+
+#createCoinflipModal .action-btn.deposit:hover {
+    background: #1d4ed8;
+}
+
+#createCoinflipModal .action-btn.withdraw {
+    background: #dc2626;
+    color: #fff;
+}
+
+#createCoinflipModal .action-btn.withdraw:hover {
+    background: #b91c1c;
+}
+
 </style>
+
+<div class="modal" id="createCoinflipModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Create Coinflip</h2>
+            <span class="close">&times;</span>
+        </div>
+
+        <input id="coinflipTitle" placeholder="Enter match title..." />
+
+        <div id="selectedItems" style="display:flex; justify-content:space-between; margin-top:10px;">
+            <div>Total Selected: <strong>0 items</strong></div>
+            <div>Total Value: <strong>$0</strong></div>
+        </div>
+
+        <div class="inventory-grid" id="coinflipInventory">
+            <div class="inventory-item">
+                <img src="/static/images/item1.png" alt="">
+                <div class="name">Cool Sword</div>
+                <div class="value">$50</div>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:12px;">
+            <button class="action-btn withdraw" id="coinflipCancelBtn">Cancel</button>
+            <button class="action-btn deposit" id="coinflipCreateBtn">Create Match</button>
+        </div>
+    </div>
+</div>
+
 
 <div class="coinflip-page">
     <!-- Controls -->
