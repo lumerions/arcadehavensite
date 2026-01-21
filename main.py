@@ -617,7 +617,6 @@ def depositearnings(data: DepositItems):
         return {"success": True}
     else:
         try:
-            print(data)
             SiteItemsCollection = getSiteItemsMongo()["collection"]
 
             try:
@@ -1360,20 +1359,57 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     SiteItemsCollection = getSiteItemsMongo()["collection"]
 
     try:
-        document = SiteItemsCollection.find_one({"SessionId": SessionId})
+        document = SiteItemsCollection.find_one_and_update(
+            {"SessionId": SessionId, "Username": UserCheck},
+            {
+                "$pull": {
+                    "items": { "$in": coinflipData }
+                }
+            },
+            return_document = ReturnDocument.AFTER,
+        )
+
+        if not document:
+            return JSONResponse({"error": "No document found for site items!"}, status_code=400)
+
+        profile = {
+            "Data": {
+                "Inventory": {}
+            }
+        }
+
+        ItemsVerified = 0
+
+        print(document["items"])
+
+        for i in document["items"]:
+            itemid = str(i["itemid"])
+            serial = str(i["serial"])
+
+            if itemid not in profile["Data"]["Inventory"]:
+                profile["Data"]["Inventory"][itemid] = {}
+
+            profile["Data"]["Inventory"][itemid][serial] = {}
+
+        for i in coinflipData:
+            inv = profile["Data"]["Inventory"]
+            item_id = str(i["itemid"])
+
+            if item_id in inv:
+                inv2 = profile["Data"]["Inventory"][item_id]
+                serial = str(i["serial"])
+                if serial in inv2:
+                    ItemsVerified += 1
+
+        print("Inventory map:", profile["Data"]["Inventory"])
+        print("Coinflip items:", coinflipData)
+
+        if int(ItemsVerified) != len(coinflipData):
+            return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
         if document is None:
             return JSONResponse({"error": "You do not own any items!"}, status_code=400)
     except Exception as e:
-        return JSONResponse({"error": "Unknown error"}, status_code=400)
-    
-    if len(coinflipData) != len(document.items):
-        return JSONResponse({"error": "You do not own the items required to create a coinflip!"}, status_code=400)
-    
-    itemset = set(document["items"])
-    coinflipDataSet = set(coinflipData)
-
-    if not coinflipDataSet.issubset(itemset):
-        return JSONResponse({"error": "You do not own the items required to create a coinflip!"}, status_code=400)
+            return JSONResponse({"error": "Unknown error!"}, status_code=400)
 
     CoinflipCollection = getCoinflipMongo()["collection"]
 
@@ -1385,15 +1421,6 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
     try:
-        SiteItemsCollection.update_one(
-            {"SessionId": SessionId, "Username": UserCheck},
-            {
-                "$pull": {
-                    "items": { "$in": coinflipData }
-                }
-            },
-            upsert=True
-        )
         CoinflipCollection.update_one(
             {"SessionId": SessionId, "Username": UserCheck},
             {
@@ -1434,46 +1461,28 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
     CoinflipCollection = getCoinflipMongo()["collection"]
 
     try:
-        document = CoinflipCollection.find_one({"SessionId": SessionId})
-        if document:
-            return JSONResponse({"error": "You can only have 1 coinflip active!"}, status_code=400)
+        deleted_doc = CoinflipCollection.find_one_and_delete(
+            {"SessionId": SessionId, "Username": UserCheck}
+        )
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
     
-    coinflipItemsStored = set(document.CoinflipItems)
-    coinflipClientItems = set(coinflipData)
-
-    if not coinflipClientItems.issubset(coinflipItemsStored):
-        return JSONResponse({"error": "Client side input is not correct!"}, status_code=400)
-
     try:
-        CoinflipCollection.delete_one(
-            {"SessionId": SessionId, "Username": UserCheck}
-        )
-
-        CoinflipCollection.update_one(
-            {"SessionId": SessionId, "Username": UserCheck},
-            {
-                "$pull": {
-                    "CoinflipItems": { "$in": coinflipData }
-                }
-            },
-            upsert=True
-        )
-        SiteItemsCollection.update_one(
-            {"SessionId": SessionId, "Username": UserCheck},
-            {
-                "$push": {
-                    "items": {
-                        "$each": coinflipData
+        if deleted_doc and deleted_doc.get("CoinflipItems"):
+            SiteItemsCollection.update_one(
+                {"SessionId": SessionId, "Username": UserCheck},
+                {
+                    "$push": {
+                        "items": {
+                            "$each": document.CoinflipItems
+                        }
                     }
-                }
-            },
-            upsert=True
-        )
+                },
+                upsert=True
+            )
 
-        return JSONResponse({"success": True}, status_code=200)
-    except Exception as e:
+            return JSONResponse({"success": True}, status_code=200)
+        except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
 if __name__ == "__main__":

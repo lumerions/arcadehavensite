@@ -388,8 +388,8 @@ body {
         <input id="itemSearch" placeholder="Enter an item name..." />
 
         <div id="selectedItems" style="display:flex; justify-content:space-between; margin-top:10px;">
-            <div>Total Selected: <strong>0 items</strong></div>
-            <div>Total Value: <strong>$0</strong></div>
+            <div>Total Selected: <strong id="totalSelected">0 items</strong></div>
+            <div>Total Value: <strong id="totalValue">$0</strong></div>
         </div>
 
         <div class="inventory-grid" id="coinflipInventory">
@@ -534,6 +534,26 @@ window.addEventListener("click", (e) => {
 const grid = document.querySelector('.inventory-grid');
 grid.replaceChildren(); 
 CreateCoinflipItems = {}
+const totalValueLabel = document.getElementById('totalValue');
+const totalSelectedLabel = document.getElementById("totalSelected");
+const coinflipCancelBtn = document.getElementById("coinflipCancelBtn");
+const coinflipStartBtn = document.getElementById("coinflipCreateBtn");
+let TotalValue = 0;
+
+coinflipCancelBtn.addEventListener("click", async () => {
+
+});
+
+
+coinflipStartBtn.addEventListener("click", async () => {
+  
+});
+
+
+function UpdateTotalValueLabel() {
+    const formatted = TotalValue.toLocaleString();
+    if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
+}
 
 async function FillGrid() {
     try {
@@ -595,6 +615,7 @@ async function FillGrid() {
 }
 
 FillGrid();
+UpdateTotalValueLabel();
 </script>
 
 {% endblock %}
