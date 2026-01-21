@@ -902,17 +902,9 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     mines_raw, towers_active, GameActive, currentRow, cashedAlready, bet_amount, data_raw, tilescleared,CashoutAvailable =  redis.mget(*keys)
 
     CashoutAvailable = CashoutAvailable or 0
-
-    def decode(value):
-        if value is None:
-            return None
-        if isinstance(value, bytes):
-            return value.decode()
-        return value
-
-    towers_active = decode(towers_active)
-    GameActive = decode(GameActive)
-    cashedAlready = decode(cashedAlready)
+    towers_active = str((towers_active))
+    GameActive = str((GameActive))
+    cashedAlready = str((cashedAlready))
     currentRow = int(currentRow or 0)
     tilescleared = int(tilescleared or 0)
     bet_amount = int(bet_amount or 0)
@@ -942,7 +934,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if added == 0:
         return JSONResponse({"error": "Tile already clicked"}, status_code=400)
 
-    if decode(cashedAlready) == "1":
+    if cashedAlready == "1":
         return JSONResponse({"error": "Game already cashed out"}, status_code=400)
 
     try:
@@ -1103,14 +1095,14 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     mines = random.sample(range(total_tiles), mine_count)
 
-    result = mainCollection.find_one_and_update(
+    newDocument = mainCollection.find_one_and_update(
         {"username": username},
         {"$inc": {"balance": -int(bet_amount)}},
         return_document=ReturnDocument.AFTER,
         upsert=True
     )
 
-    newBalance = int(doc["balance"])
+    newBalance = int(newDocument["balance"])
 
     RedisPipeline = redis.pipeline()
 
@@ -1486,5 +1478,6 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
 
 
