@@ -237,7 +237,7 @@ def get(SessionId: str = Cookie(None)):
 
         return int(doc["balance"])
     else:
-        return redis.get(SessionId)
+        return int(redis.get(SessionId))
 
 @app.get("/deposit")
 async def depositget(amount: float, SessionId: str = Cookie(None)):
