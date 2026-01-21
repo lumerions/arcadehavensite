@@ -485,18 +485,19 @@ const createModal = document.getElementById("createCoinflipModal");
 const modalClose = createModal.querySelector(".close");
 
 createMatchBtn.addEventListener("click", () => {
-    createModal.style.display = "block";
+    createModal.classList.add("open");
 });
 
 modalClose.addEventListener("click", () => {
-    createModal.style.display = "none";
+    createModal.classList.remove("open");
 });
 
 window.addEventListener("click", (e) => {
     if (e.target === createModal) {
-        createModal.style.display = "none";
+        createModal.classList.remove("open");
     }
 });
+
 </script>
 
 {% endblock %}
