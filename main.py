@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 import urllib.parse  
 import json,requests,time,uvicorn,certifi,base64,math,random,string,secrets,os,bcrypt,psycopg
 from pydantic import BaseModel
-from pymongo import MongoClient,UpdateOne
+from pymongo import MongoClient,UpdateOne,ReturnDocument
 from typing import List, Dict, Any
 place_id = 97090711812957
 
@@ -217,19 +217,27 @@ def logout():
 
 @app.get("/getbalance")
 def get(SessionId: str = Cookie(None)):
-    mainMongo = getMainMongo()
-    mainCollection = mainMongo["collection"]
 
-    try:
-        doc = mainCollection.find_one({"sessionid": SessionId})
+    RedisGet = redis.get(SessionId)
+
+    if not RedisGet:
+        mainMongo = getMainMongo()
+        mainCollection = mainMongo["collection"]
+
+        try:
+            doc = mainCollection.find_one({"sessionid": SessionId})
+            
+        except Exception as error:
+            return {"error": str(error)}
         
-    except Exception as error:
-        return {"error": str(error)}
-    
-    if not doc:
-        return 0 
+        if not doc:
+            return 0 
         
-    return int(doc["balance"])
+        redis.set(SessionId,int(doc["balance"]),ex = 2628000)
+
+        return int(doc["balance"])
+    else:
+        return redis.get(SessionId)
 
 @app.get("/deposit")
 async def depositget(amount: float, SessionId: str = Cookie(None)):
@@ -370,7 +378,7 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
     for item_name, serials in itemdata.items():
         for serial in serials:
-            for i,v in enumerate(document["items"]):
+            for i,v in enumerate(itemsData):
                 if str(v["itemname"]) == str(item_name) and int(serial.replace("#","")) == int(v["serial"]):
                     ItemsVerifiedCount += 1
                     break
@@ -449,16 +457,20 @@ def depositearnings(data: deposit):
     mainCollection = getMainMongo()["collection"]
 
     if data.Deposit:
-        result = mainCollection.update_one(
+        newDocument = mainCollection.find_one_and_update(
             {"username": data.siteusername, "sessionid": data.sessionid},
             {"$inc": {"balance": amount}},
+            return_document = ReturnDocument.AFTER,
             upsert=True
         )
 
-        return {"success": True, "type": "deposit", "amount": amount}
+        newBalance = int(newDocument["balance"])
 
+        redis.set(data.sessionid,newBalance,ex = 2628000)
+
+        return {"success": True, "type": "deposit", "amount": amount}
     else:
-        result = mainCollection.update_one(
+        newDocument = mainCollection.update_one(
             {
                 "username": data.siteusername,
                 "sessionid": data.sessionid,
@@ -466,14 +478,20 @@ def depositearnings(data: deposit):
             },
             {
                 "$inc": {"balance": -amount}
-            }
+            },
+            return_document = ReturnDocument.AFTER
         )
 
-        if result.modified_count == 0:
+        if not newDocument:
             return JSONResponse(
                 {"error": "Insufficient funds or wallet not found"},
                 status_code=400
             )
+        
+        NewBalance = newDocument["balance"]
+
+
+        redis.set(data.sessionid,NewBalance,ex = 2628000)
 
         return {"success": True, "type": "withdraw", "amount": amount}
     
@@ -712,7 +730,6 @@ def get(Game : str,SessionId: str = Cookie(None)):
     ]
 
     data_raw, towersactive = redis.mget(*keys)
-    data_raw = redis.get("ClickData." + SessionId)
 
     if towersactive == "1" and Game == "Mines":
         return []
@@ -1104,16 +1121,15 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
     result = mainCollection.update_one(
         {"username": username},
         {"$inc": {"balance": -int(bet_amount)}},
+        return_document=ReturnDocument.AFTER,
         upsert=True
     )
 
-    multiplier_per_click = total_tiles / (total_tiles - mine_count)
+    newBalance = int(doc["balance"])
 
-    redis.delete(
-        SessionId + ":clicks",
-        SessionId + ":cashed",
-        "ClickData." + SessionId
-    )
+    redis.set(SessionId,newBalance,ex = 2628000)
+
+    multiplier_per_click = total_tiles / (total_tiles - mine_count)
 
     if Game == "Towers":
         redis.mset({
@@ -1184,10 +1200,15 @@ def cashout(SessionId: str = Cookie(None)):
 
         username = row[0]
         mainCollection = getMainMongo()["collection"]
-        mainCollection.update_one(
+        newDocument = mainCollection.find_one_and_update(
             {"username": username},
-            {"$inc": {"balance": tocashout}}
+            {"$inc": {"balance": tocashout}},
+            return_document = ReturnDocument.AFTER
         )
+
+        newBalance = int(newDocument["balance"])
+
+        redis.set(SessionId,newBalance,ex = 2628000)
 
 
     if isinstance(mines_raw, bytes):
