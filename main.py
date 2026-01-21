@@ -237,7 +237,7 @@ def get(SessionId: str = Cookie(None)):
 
         return int(doc["balance"])
     else:
-        return int(redis.get(SessionId))
+        return redis.get(SessionId)
 
 @app.get("/deposit")
 async def depositget(amount: float, SessionId: str = Cookie(None)):
@@ -470,7 +470,7 @@ def depositearnings(data: deposit):
 
         return {"success": True, "type": "deposit", "amount": amount}
     else:
-        newDocument = mainCollection.update_one(
+        newDocument = mainCollection.find_one_and_update(
             {
                 "username": data.siteusername,
                 "sessionid": data.sessionid,
@@ -1118,7 +1118,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     mines = random.sample(range(total_tiles), mine_count)
 
-    result = mainCollection.update_one(
+    result = mainCollection.find_one_and_update(
         {"username": username},
         {"$inc": {"balance": -int(bet_amount)}},
         return_document=ReturnDocument.AFTER,
@@ -1487,6 +1487,8 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
+
+
 
 
 
