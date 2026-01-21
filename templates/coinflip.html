@@ -541,12 +541,47 @@ const coinflipStartBtn = document.getElementById("coinflipCreateBtn");
 let TotalValue = 0;
 
 coinflipCancelBtn.addEventListener("click", async () => {
+    try {
+        const response = await fetch('/cancelcoinflip', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+        });
 
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Request failed');
+        }
+
+        const data = await response.json();
+
+        
+    } catch (err) {
+        console.error('Error:', err.message);
+    }
 });
 
 
 coinflipStartBtn.addEventListener("click", async () => {
-  
+    try {
+        const response = await fetch('/cancelcoinflip', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ coinflipData })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Request failed');
+        }
+
+        const data = await response.json();
+
+        
+    } catch (err) {
+        console.error('Error:', err.message);
+    }
 });
 
 
@@ -554,6 +589,8 @@ function UpdateTotalValueLabel() {
     const formatted = TotalValue.toLocaleString();
     if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
 }
+
+let coinflipData = [];
 
 async function FillGrid() {
     try {
@@ -565,7 +602,7 @@ async function FillGrid() {
             div.className = 'inventory-item';
 
             div.innerHTML = `
-                <div class="select-box"></div>
+                <div class="select-box" data-itemid="${item.itemid}"></div>
                 <img src="${item.ImageUrl}">
                 <span class="serial">#${item.serial}</span>
                 <span class="name">${item.itemname}</span>
@@ -576,6 +613,7 @@ async function FillGrid() {
                 const valueEl = div.querySelector('.value');
                 const itemNameEl = div.querySelector('.name');
                 const serialEl = div.querySelector('.serial');
+                const itemId = div.querySelector('.select-box').dataset.itemid;
 
                 if (!valueEl || !itemNameEl || !serialEl) return;
 
@@ -590,17 +628,22 @@ async function FillGrid() {
     
                 if (isSelected) {
                     TotalValue -= CleanedValue;
-                    if (CreateCoinflipItems[itemName]) {
-                        delete CreateCoinflipItems[itemName][serial];
-                        if (Object.keys(CreateCoinflipItems[itemName]).length === 0) {
-                            delete CreateCoinflipItems[itemName];
-                        }
+                    const index = coinflipData.findIndex(i => i.itemid === itemid);
+
+                    if (index !== -1) {
+                        coinflipData.splice(index, 1);
+                        console.log(`Item with itemid ${itemid} removed.`);
+                    } else {
+                        console.log(`Item with itemid ${itemid} does not exist.`);
                     }
 
                 } else {
                     TotalValue += CleanedValue;
-                    if (!CreateCoinflipItems[itemName]) CreateCoinflipItems[itemName] = {};
-                    CreateCoinflipItems[itemName][serial] = true;
+                    coinflipData.push({
+                        itemname: itemName,
+                        serial: serial,
+                        itemid: itemId
+                     });
                 }
 
                 UpdateTotalValueLabel();

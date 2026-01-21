@@ -1446,12 +1446,22 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
     deleted = redis.delete("CoinflipActive" + SessionId)
     if deleted == 0:
         return JSONResponse({"error": "This coinflip already ended or was cancelled already!"}, status_code=400)
-
-    data = await request.json()
-    coinflipData = data.get("coinflipData")
     
     UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
     SiteItemsCollection = getSiteItemsMongo()["collection"]
+   # Items = [{
+    #    "itemname": item.get_attribute("name"),
+      #  "serial": int(serial),
+      #  "itemid": int(item_id)
+   # }]
+    #Items = []
+
+  #  Items.append({
+    #    "itemname": item.get_attribute("name"),
+      #  "serial": int(serial),
+      #  "itemid": int(item_id)
+  #  })
+
 
     try:
         UserCheck = str(UserCheck)
