@@ -564,7 +564,7 @@ coinflipCancelBtn.addEventListener("click", async () => {
 
 coinflipStartBtn.addEventListener("click", async () => {
     try {
-        const response = await fetch('/cancelcoinflip', {
+        const response = await fetch('/createcoinflip', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
