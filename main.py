@@ -1341,11 +1341,7 @@ def login_post(
 async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
-    was_set = redis.set("CoinflipActive" + SessionId, True, nx=True)
-    
-    if not was_set:
-        return JSONResponse({"error": "Coinflip already active"}, status_code=400)
-    
+
     data = await request.json()
     coinflipData = data.get("coinflipData")
     
@@ -1369,11 +1365,21 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     print(coinflipData)
 
     try:
+        was_set = redis.set("CoinflipActive" + SessionId, True, nx=True)
+    
+        if not was_set:
+            return JSONResponse({"error": "Coinflip already active"}, status_code=400)
+            
         document = SiteItemsCollection.find_one_and_update(
             {"SessionId": SessionId, "Username": UserCheck},
             {
                 "$pull": {
-                    "items": { "$in": coinflipData }
+                    "items": {
+                        "$or": [
+                            {"itemid": item['itemid'], "serial": item['serial']} 
+                            for item in coinflipData
+                        ]
+                    }
                 }
             },
             return_document = ReturnDocument.AFTER,
