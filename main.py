@@ -1361,7 +1361,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         print(SessionId)
         print(UserCheck)
         document = SiteItemsCollection.find_one(
-            {"SessionId": SessionId)
+            {"SessionId": SessionId}
         )
 
         if document is None:
