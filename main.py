@@ -125,7 +125,7 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
         try:
             conn = getPostgresConnection() 
             with conn.cursor() as cursor:
-                cursor.execute("SELECT sessionid,username FROM accounts WHERE sessionid = %s", (SessionId,))
+                cursor.execute("SELECT sessionid,username,robloxusername FROM accounts WHERE sessionid = %s", (SessionId,))
                 
                 result = cursor.fetchone()  
                 
@@ -133,7 +133,7 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
                     if returnusername is None:
                         return templates.TemplateResponse(htmlfile2, {"request": request})
                     else:
-                        return result[1]
+                        return {"siteuser":result[1],"robloxuser":result[2]}
                 else:
                     response = templates.TemplateResponse(htmlfile, {"request": request})
                     response.delete_cookie("SessionId")
@@ -786,6 +786,31 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
         "multiplier": current_multiplier
     }
 
+@app.get("/GetActiveCoinflips")
+def GetActiveCoinflips(SessionId: str = Cookie(None)):
+    CoinflipCollection = getCoinflipMongo()["collection"]
+
+    Documents = CoinflipCollection.find(
+        {},
+    )
+
+
+    UserIds = ""
+
+    for i,v in enumerate(document["items"]):
+        UserIds = UserIds + str(v["itemid"]) + ","
+
+    AssetIdParam = AssetIdParam[:-1]
+
+    RobloxThumbnailEndpoint = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" + 123456 + "&size=420x420&format=Png&isCircular=false"
+
+    for item in Documents:
+        Documents
+
+    return JSONResponse({"CoinflipData": Documents}, status_code=400)
+
+
+
 @app.get("/GetInventory")
 def getInventory(SessionId: str = Cookie(None)):
     if not SessionId:
@@ -1349,7 +1374,8 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         Username = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html",True)
         if Username is None:
             raise ValueError("No username")
-        Username = str(Username)
+        RobloxUsername = str(Username["robloxuser"])
+        Username = str(Username["siteuser"])
     except Exception as e:
         return Username
     
@@ -1445,11 +1471,19 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
     try:
-        CoinflipCollection.update_one(
-            {"SessionId": SessionId, "Username": Username},
-            { "$push": { "CoinflipItems": { "$each": coinflipData } } },
-            upsert=True 
-        )
+        url = f"https://www.roblox.com/users/profile?username={RobloxUsername}"
+        response = requests.get(url, allow_redirects=False)  
+        redirect_url = response.headers.get("Location")
+
+        if redirect_url:
+            UserId = int(redirect_url.split("/")[4]))
+            CoinflipCollection.update_one(
+                {"SessionId": SessionId, "Username": Username,"UserId": UserId},
+                { "$push": { "CoinflipItems": { "$each": coinflipData } } },
+                upsert=True 
+            )
+        else:
+            return JSONResponse({"error": "Redirect url not found!"}, status_code=400)
 
         return JSONResponse({"success": True}, status_code=200)
     except Exception as e:
