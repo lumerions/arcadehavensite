@@ -1439,7 +1439,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     CoinflipCollection = getCoinflipMongo()["collection"]
 
     try:
-        document = CoinflipCollection.find_one({"SessionId": SessionId})
+        document = CoinflipCollection.find_one({"SessionId": SessionId, "Username": Username})
         if document:
             return JSONResponse({"error": "Coinflip already exists!"}, status_code=400)
     except Exception as e:
