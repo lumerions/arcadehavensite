@@ -1345,13 +1345,6 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     data = await request.json()
     coinflipData = data.get("coinflipData")
     
-    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html",True)
-
-    try:
-        UserCheck = str(UserCheck)
-    except Exception as e:
-        return UserCheck
-    
     SiteItemsCollection = getSiteItemsMongo()["collection"]
     print(coinflipData)
     coinflipData = [
@@ -1368,7 +1361,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         print(SessionId)
         print(UserCheck)
         document = SiteItemsCollection.find_one(
-            {"SessionId": SessionId, "Username": UserCheck},
+            {"SessionId": SessionId)
         )
 
         if document is None:
