@@ -1369,6 +1369,8 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
             {"SessionId": SessionId, "Username": UserCheck},
         )
 
+        if document is None:
+            return JSONResponse({"error": "You do not own any items!"}, status_code=400)
         
         profile = {
             "Data": {
