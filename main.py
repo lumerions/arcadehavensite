@@ -1357,7 +1357,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         return UserCheck
     
     SiteItemsCollection = getSiteItemsMongo()["collection"]
-
+    print(coinflipData)
     try:
         document = SiteItemsCollection.find_one_and_update(
             {"SessionId": SessionId, "Username": UserCheck},

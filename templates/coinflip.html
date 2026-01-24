@@ -628,13 +628,13 @@ async function FillGrid() {
     
                 if (isSelected) {
                     TotalValue -= CleanedValue;
-                    const index = coinflipData.findIndex(i => i.itemid === itemid);
+                    const index = coinflipData.findIndex(i => i.itemid === itemId);
 
                     if (index !== -1) {
                         coinflipData.splice(index, 1);
-                        console.log(`Item with itemid ${itemid} removed.`);
+                        console.log(`Item with itemid ${itemId} removed.`);
                     } else {
-                        console.log(`Item with itemid ${itemid} does not exist.`);
+                        console.log(`Item with itemid ${itemId} does not exist.`);
                     }
 
                 } else {
