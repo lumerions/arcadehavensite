@@ -1427,6 +1427,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         if document is None:
             return JSONResponse({"error": "You do not own any items!"}, status_code=400)
     except Exception as e:
+            print(e)
             return JSONResponse({"error": "Unknown error!"}, status_code=400)
 
     CoinflipCollection = getCoinflipMongo()["collection"]
