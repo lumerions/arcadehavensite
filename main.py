@@ -125,7 +125,7 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
         try:
             conn = getPostgresConnection() 
             with conn.cursor() as cursor:
-                cursor.execute("SELECT sessionid,robloxusername FROM accounts WHERE sessionid = %s", (SessionId,))
+                cursor.execute("SELECT sessionid,username FROM accounts WHERE sessionid = %s", (SessionId,))
                 
                 result = cursor.fetchone()  
                 
@@ -1344,6 +1344,14 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
 
     data = await request.json()
     coinflipData = data.get("coinflipData")
+
+    try:
+        Username = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html",True)
+        if Username is None:
+            raise ValueError("No username")
+        Username = str(Username)
+    except Exception as e:
+        return Username
     
     SiteItemsCollection = getSiteItemsMongo()["collection"]
     print(coinflipData)
@@ -1359,9 +1367,8 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
 
     try:
         print(SessionId)
-        print(UserCheck)
         document = SiteItemsCollection.find_one(
-            {"SessionId": SessionId}
+            {"SessionId": SessionId,"Username":Username}
         )
 
         if document is None:
@@ -1414,13 +1421,13 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         for item in coinflipData:
             Operations.append(
                 UpdateOne(
-                    {"SessionId": SessionId, "Username": UserCheck},
+                    {"SessionId": SessionId,"Username":Username},
                     {"$pull": {"items": {"itemid": item['itemid'], "serial": item['serial']}}},
                 )
             )
 
         if len(Operations) > 0:
-            UpdateResult = SiteItemsCollection.bulk_write(operations)
+            UpdateResult = SiteItemsCollection.bulk_write(Operations)
             print(UpdateResult)
             return UpdateResult
         else:
@@ -1441,14 +1448,8 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     try:
         CoinflipCollection.update_one(
             {"SessionId": SessionId, "Username": UserCheck},
-            {
-                "$push": {
-                    "CoinflipItems": {
-                        "$each": coinflipData
-                    }
-                }
-            },
-            upsert=True
+            { "$push": { "CoinflipItems": { "$each": coinflipData } } },
+            upsert=True 
         )
 
         return JSONResponse({"success": True}, status_code=200)
@@ -1465,7 +1466,6 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
     if deleted == 0:
         return JSONResponse({"error": "This coinflip already ended or was cancelled already!"}, status_code=400)
     
-    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html",True)
     SiteItemsCollection = getSiteItemsMongo()["collection"]
    # Items = [{
     #    "itemname": item.get_attribute("name"),
