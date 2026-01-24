@@ -1345,7 +1345,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     data = await request.json()
     coinflipData = data.get("coinflipData")
     
-    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
+    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html",True)
 
     try:
         UserCheck = str(UserCheck)
@@ -1472,7 +1472,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
     if deleted == 0:
         return JSONResponse({"error": "This coinflip already ended or was cancelled already!"}, status_code=400)
     
-    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
+    UserCheck = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html",True)
     SiteItemsCollection = getSiteItemsMongo()["collection"]
    # Items = [{
     #    "itemname": item.get_attribute("name"),
