@@ -1492,7 +1492,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
             )
 
             return JSONResponse({"success": True}, status_code=200)
-        except Exception as e:
+    except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
 
 if __name__ == "__main__":
