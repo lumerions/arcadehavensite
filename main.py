@@ -1419,12 +1419,13 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
                 UpdateOne(
                     {"SessionId": SessionId, "Username": UserCheck},
                     {"$pull": {"items": {"itemid": item['itemid'], "serial": item['serial']}}},
-                    return_document=ReturnDocument.AFTER,
                 )
             )
 
         if len(Operations) > 0:
-            SiteItemsCollection.bulk_write(operations)
+            UpdateResult = SiteItemsCollection.bulk_write(operations)
+            print(UpdateResult)
+            return UpdateResult
         else:
             return JSONResponse({"error": "Bulk write operations list had no items!"}, status_code=400)
     except Exception as e:
