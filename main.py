@@ -1369,10 +1369,16 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
 
     data = await request.json()
     coinflipData = data.get("coinflipData")
+    Side = data.get("Side") # heads or tails
 
     try:
+        Side = str(Side)
+        if Side != "Heads" or Side != "Tails":
+            Username = JSONResponse({"error": "Must be heads or tails"}, status_code=400)
+            raise ValueError("Not heads or tails")
         Username = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html",True)
         if Username is None:
+            Username = JSONResponse({"error": "No username"}, status_code=400)
             raise ValueError("No username")
         RobloxUsername = str(Username["robloxuser"])
         Username = str(Username["siteuser"])
@@ -1478,7 +1484,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         if redirect_url:
             UserId = int(redirect_url.split("/")[4]))
             CoinflipCollection.update_one(
-                {"SessionId": SessionId, "Username": Username,"UserId": UserId},
+                {"SessionId": SessionId, "Username": Username,"UserId": UserId,"Side":Side},
                 { "$push": { "CoinflipItems": { "$each": coinflipData } } },
                 upsert=True 
             )
