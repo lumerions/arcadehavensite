@@ -1429,7 +1429,6 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
         if len(Operations) > 0:
             UpdateResult = SiteItemsCollection.bulk_write(Operations)
             print(UpdateResult)
-            return UpdateResult
         else:
             return JSONResponse({"error": "Bulk write operations list had no items!"}, status_code=400)
     except Exception as e:
