@@ -1361,7 +1361,8 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     coinflipData = [
         {
             "itemid": int(item["itemid"]),
-            "serial": int(item["serial"].replace("#", ""))
+            "serial": int(item["serial"].replace("#", "")),
+            "itemname":str(item["itemname"])
         }
         for item in coinflipData
     ]
