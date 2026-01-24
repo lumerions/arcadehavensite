@@ -1369,20 +1369,22 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     
         if not was_set:
             return JSONResponse({"error": "Coinflip already active"}, status_code=400)
-            
+
         document = SiteItemsCollection.find_one_and_update(
             {"SessionId": SessionId, "Username": UserCheck},
             {
                 "$pull": {
                     "items": {
-                        "$or": [
-                            {"itemid": item['itemid'], "serial": item['serial']} 
-                            for item in coinflipData
-                        ]
+                        "$expr": {
+                            "$in": [
+                                {"itemid": "$itemid", "serial": "$serial"},
+                                [{"itemid": item['itemid'], "serial": item['serial']} for item in coinflipData]
+                            ]
+                        }
                     }
                 }
             },
-            return_document = ReturnDocument.AFTER,
+            return_document=ReturnDocument.AFTER,
         )
 
         if not document:
