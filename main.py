@@ -1365,31 +1365,11 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     print(coinflipData)
 
     try:
-        was_set = redis.set("CoinflipActive" + SessionId, True, nx=True)
-    
-        if not was_set:
-            return JSONResponse({"error": "Coinflip already active"}, status_code=400)
-
-        document = SiteItemsCollection.find_one_and_update(
+        document = SiteItemsCollection.find_one(
             {"SessionId": SessionId, "Username": UserCheck},
-            {
-                "$pull": {
-                    "items": {
-                        "$expr": {
-                            "$in": [
-                                {"itemid": "$itemid", "serial": "$serial"},
-                                [{"itemid": item['itemid'], "serial": item['serial']} for item in coinflipData]
-                            ]
-                        }
-                    }
-                }
-            },
-            return_document=ReturnDocument.AFTER,
         )
 
-        if not document:
-            return JSONResponse({"error": "No document found for site items!"}, status_code=400)
-
+        
         profile = {
             "Data": {
                 "Inventory": {}
@@ -1426,6 +1406,27 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
             return JSONResponse({"error": "Item ownership verification failed!"}, status_code=400)
         if document is None:
             return JSONResponse({"error": "You do not own any items!"}, status_code=400)
+
+        was_set = redis.set("CoinflipActive" + SessionId, True, nx=True)
+    
+        if not was_set:
+            return JSONResponse({"error": "Coinflip already active"}, status_code=400)
+
+        Operations = []
+
+        for item in coinflipData:
+            Operations.append(
+                UpdateOne(
+                    {"SessionId": SessionId, "Username": UserCheck},
+                    {"$pull": {"items": {"itemid": item['itemid'], "serial": item['serial']}}},
+                    return_document=ReturnDocument.AFTER,
+                )
+            )
+
+        if len(Operations) > 0:
+            SiteItemsCollection.bulk_write(operations)
+        else:
+            return JSONResponse({"error": "Bulk write operations list had no items!"}, status_code=400)
     except Exception as e:
             print(e)
             return JSONResponse({"error": "Unknown error!"}, status_code=400)
