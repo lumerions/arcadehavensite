@@ -1447,7 +1447,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
 
     try:
         CoinflipCollection.update_one(
-            {"SessionId": SessionId, "Username": UserCheck},
+            {"SessionId": SessionId, "Username": Username},
             { "$push": { "CoinflipItems": { "$each": coinflipData } } },
             upsert=True 
         )
