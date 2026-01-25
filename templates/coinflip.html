@@ -504,7 +504,7 @@ body {
             </div>
         </div>
 
-        {% for match in matches %}
+    {% for match in matches %}
         <div class="match-card" data-id="{{ match.id }}">
             <div class="players">
                 <div class="player">
@@ -525,7 +525,7 @@ body {
             </div>
 
             <div class="items-preview">
-                {% set display_items = match.items[:5] %}
+                {% set display_items = match["items"][:5] %}
                 {% for item in display_items %}
                 <div class="preview-item">
                     <img src="{{ item.image }}" alt="">
