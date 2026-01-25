@@ -787,7 +787,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     }
 
 @app.get("/GetActiveCoinflips")
-def GetActiveCoinflips(SessionId: str = Cookie(None)):
+def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
 
@@ -800,25 +800,44 @@ def GetActiveCoinflips(SessionId: str = Cookie(None)):
     Documents = list(Documents)
 
     UserIds = ""
- 
+    AssetIdParam = ""
+
     for i,v in enumerate(Documents):
         UserIds = UserIds + str(v["UserId"]) + ","
+        for i,v in enumerate(Documents["CoinflipItems"]):
+            AssetIdParam = AssetIdParam + str(v["itemid"]) + ","
 
     UserIds = UserIds[:-1]
+    AssetIdParam = AssetIdParam[:-1]
+
     # bandwidth might be insane if theres lots of data ill optimize it later trust
-    RobloxThumbnailEndpoint = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" + UserIds + "&size=420x420&format=Png&isCircular=false"
+    response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
+    decodedResponse = response.json()
+    decodedResponseData = decodedResponse.get("data")
+    RobloxThumbnailEndpoint = f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={UserIds}&size=420x420&format=Png&isCircular=false"
     RobloxThumbnailUrls = requests.get(RobloxThumbnailEndpoint)
     RobloxThumbnailUrls = RobloxThumbnailUrls.json().get("data",[])
 
     for item in RobloxThumbnailUrls:
         for i,v in enumerate(Documents):
-            if v["_id"]:
+            if "_id" in v:
                 v["_id"] = str(v["_id"])
             if int(item["targetId"]) == int(v["UserId"]):
                 v["ImageUrl"] = item["imageUrl"]
-                break
+                v["player1"] = {"username": str(v["Username"]), "avatar": item["imageUrl"]}
+                v["player2"] = {"username": "", "avatar": ""}
+                for i2,v2 in enumerate(Documents["CoinflipItems"]):
+                    decodedResponseData
+                    for thumb in decodedResponseData:
+                        if int(thumb["targetId"]) == int(v2["itemid"]):
+                            v["items"] = [{"image": "https://example.com/item.png"}]  
+                            break
 
-    return JSONResponse({"CoinflipData": Documents}, status_code=400)
+
+    return templates.TemplateResponse(
+        "matches.html", {"request": request, "matches": Documents}
+    )
+
 
 
 
