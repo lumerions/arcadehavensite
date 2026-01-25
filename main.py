@@ -835,7 +835,7 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
 
 
     return templates.TemplateResponse(
-        "matches.html", {"request": request, "matches": Documents}
+        "coinflip.html", {"request": request, "matches": Documents}
     )
 
 
