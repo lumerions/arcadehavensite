@@ -824,13 +824,14 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
                 v["_id"] = str(v["_id"])
             if int(item["targetId"]) == int(v["UserId"]):
                 v["ImageUrl"] = item["imageUrl"]
+                v["total_value"] = 0
                 v["player1"] = {"username": str(v["Username"]), "avatar": item["imageUrl"]}
                 v["player2"] = {"username": "", "avatar": ""}
                 for i2,v2 in enumerate(v["CoinflipItems"]):
                     decodedResponseData
                     for thumb in decodedResponseData:
                         if int(thumb["targetId"]) == int(v2["itemid"]):
-                            v["items"] = [{"image": "https://example.com/item.png"}]  
+                            v["items"] = [{"image": thumb["imageUrl"]}]  
                             break
 
 
