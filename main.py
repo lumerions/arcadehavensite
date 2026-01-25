@@ -798,40 +798,46 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     )
 
     Documents = list(Documents)
+    if not Documents:
+        return templates.TemplateResponse("coinflip.html", {"request": request, "matches": []})
+    
     UserIds = ",".join(str(v["UserId"]) for v in Documents if "UserId" in v)
     AssetIdParam = ",".join(str(item["itemid"]) for v in Documents for item in v.get("CoinflipItems", []))
-
-    if len(UserIds) > 0:
-        UserIds = UserIds[:-1]
-    if len(AssetIdParam) > 0:
-        AssetIdParam = AssetIdParam[:-1]
 
     # bandwidth might be insane if theres lots of data ill optimize it later trust
     print(AssetIdParam)
     print(UserIds)
     if AssetIdParam:
-        response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
-        decodedResponse = response.json()
-        decodedResponseData = decodedResponse.get("data",[])
-        thumbnailsDict = {int(v["targetId"]): v["imageUrl"] for v in decodedResponseData}
+        try:
+            response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
+            decodedResponse = response.json()
+            decodedResponseData = decodedResponse.get("data",[])
+            thumbnailsDict = {int(v["targetId"]): v["imageUrl"] for v in decodedResponseData}
+        except Exception as e:
+            print(str(e))
+            return JSONResponse({"error": str(e)}, status_code=400)
     if UserIds:
-        RobloxThumbnailEndpoint = f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={UserIds}&size=420x420&format=Png&isCircular=false"
-        RobloxThumbnailEndpointResponse = requests.get(RobloxThumbnailEndpoint)
-        RobloxThumbnailUrls = RobloxThumbnailEndpointResponse.json().get("data",[])
-        avatarDict = {int(v["targetId"]): v["imageUrl"] for v in RobloxThumbnailUrls}
+        try:
+            RobloxThumbnailEndpoint = f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={UserIds}&size=420x420&format=Png&isCircular=false"
+            RobloxThumbnailEndpointResponse = requests.get(RobloxThumbnailEndpoint)
+            RobloxThumbnailUrls = RobloxThumbnailEndpointResponse.json().get("data",[])
+            avatarDict = {int(v["targetId"]): v["imageUrl"] for v in RobloxThumbnailUrls}
+        except Exception as e:
+            print(str(e))
+            return JSONResponse({"error": str(e)}, status_code=400)
 
-        for v in Documents:
-            CoinflipItems = v.get("CoinflipItems", [])
-            v["total_value"] = 0
-            v["total_items"] = len(CoinflipItems)
-            if "_id" in v:
-                v["_id"] = str(v["_id"])
-            UserId = int(v.get("UserId", 1))
-            avatarUrl = avatarDict.get(UserId, "")
-            v["ImageUrl"] = avatarUrl
-            v["player1"] = {"username": v.get("Username", "Unknown"), "avatar": avatarUrl}
-            v["player2"] = {"username": "", "avatar": ""}
-            v["items"] = [{"image": thumbnailsDict.get(item["itemid"], "")} for item in CoinflipItems]
+    for v in Documents:
+        CoinflipItems = v.get("CoinflipItems", [])
+        v["total_value"] = 0
+        v["total_items"] = len(CoinflipItems)
+        if "_id" in v:
+            v["_id"] = str(v["_id"])
+        UserId = int(v.get("UserId", 0))
+        avatarUrl = avatarDict.get(UserId, "")
+        v["ImageUrl"] = avatarUrl
+        v["player1"] = {"username": v.get("Username", "Unknown"), "avatar": avatarUrl}
+        v["player2"] = {"username": "", "avatar": ""}
+        v["items"] = [{"image": thumbnailsDict.get(int(item["itemid"]), "")} for item in CoinflipItems]
 
     return templates.TemplateResponse(
         "coinflip.html", {"request": request, "matches": Documents}
