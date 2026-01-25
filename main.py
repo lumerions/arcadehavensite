@@ -804,8 +804,8 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
 
     for i,v in enumerate(Documents):
         UserIds = UserIds + str(v["UserId"]) + ","
-        for i,v in enumerate(Documents["CoinflipItems"]):
-            AssetIdParam = AssetIdParam + str(v["itemid"]) + ","
+        for v2 in v["CoinflipItems"]:
+            AssetIdParam = AssetIdParam + str(v2["itemid"]) + ","
 
     UserIds = UserIds[:-1]
     AssetIdParam = AssetIdParam[:-1]
@@ -826,7 +826,7 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
                 v["ImageUrl"] = item["imageUrl"]
                 v["player1"] = {"username": str(v["Username"]), "avatar": item["imageUrl"]}
                 v["player2"] = {"username": "", "avatar": ""}
-                for i2,v2 in enumerate(Documents["CoinflipItems"]):
+                for i2,v2 in enumerate(v["CoinflipItems"]):
                     decodedResponseData
                     for thumb in decodedResponseData:
                         if int(thumb["targetId"]) == int(v2["itemid"]):
