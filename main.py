@@ -809,9 +809,9 @@ def GetActiveCoinflips(SessionId: str = Cookie(None)):
     RobloxThumbnailEndpoint = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" + UserIds + "&size=420x420&format=Png&isCircular=false"
     RobloxThumbnailUrls = requests.get(RobloxThumbnailEndpoint)
     RobloxThumbnailUrls = RobloxThumbnailUrls.json().get("data",[])
-    
+
     for item in RobloxThumbnailUrls:
-        for i,v in enumerate(Documents["items"]):
+        for i,v in enumerate(Documents):
             if int(item["targetId"]) == int(v["UserId"]):
                 v["ImageUrl"] = item["imageUrl"]
                 break
