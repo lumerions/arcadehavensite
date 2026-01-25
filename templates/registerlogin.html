@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+     <title>{% block title %}Home - AH Gambling{% endblock %}</title>  
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header { border-bottom: 1px solid #333; background: #000; position: sticky; top: 0; z-index: 1000; }
+        nav { width: 100%; padding: 1rem 1.75rem; display: flex; align-items: center; gap: 2rem; }
+        .logo { font-size: 1.25rem; font-weight: 600; color: #fff; text-decoration: none; }
+
+        .balance-wrapper { margin-left: auto; position: relative; }
+        .balance-btn {
+            background-color: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 100px; 
+        }
+        .balance-btn:hover { background-color: #222; border-color: #555; }
+        .balance-menu {
+            position: absolute;
+            right: 0;
+            top: 120%;
+            background-color: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            min-width: 160px;
+            padding: 0.5rem 0;
+            display: none;
+            z-index: 100;
+        }
+        .balance-menu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        .balance-menu a:hover { background-color: #222; }
+        .divider { height: 1px; background-color: #333; margin: 0.4rem 0; }
+        .balance-wrapper.open .balance-menu { display: block; }
+
+        .app-container { display: flex; flex: 1; }
+        .sidebar {
+            width: 240px;
+            background: #0b0b0b;
+            border-right: 1px solid #333;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: sticky;
+            top: 61px;
+            height: calc(100vh - 61px);
+        }
+        .sidebar-label { 
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; 
+            color: #666; margin: 1.5rem 0 0.5rem 0.75rem; 
+        }
+        .sidebar-label:first-child { margin-top: 0; }
+        .sidebar-link { 
+            display: flex; align-items: center; padding: 0.75rem 1rem; 
+            color: #9ca3af; text-decoration: none; border-radius: 8px; 
+            font-size: 0.95rem; transition: all 0.2s ease; flex-shrink: 0; 
+        }
+        .sidebar-link:hover { background: #1a1a1a; color: #fff; }
+        .sidebar-link.active { background: #2563eb; color: #fff; font-weight: 500; }
+
+        main { 
+            flex: 1; display: flex; justify-content: center; padding: 3rem 1rem; 
+            width: 100%; opacity: 0; transition: opacity 0.3s ease; /* fade in to prevent shake */ 
+        }
+
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        .modal.open { display: flex; }
+        .wallet { background: #1c2433; border-radius: 14px; width: 100%; max-width: 420px; padding: 24px; }
+        .wallet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .close { cursor: pointer; font-size: 1.5rem; color: #9ca3af; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; background: #2a3448; color: #cbd5f5; font-weight: 500; }
+        .tab.active.deposit { background: #16a34a; color: #fff; }
+        .tab.active.withdraw { background: #2563eb; color: #fff; }
+        label { display: block; font-size: .85rem; margin-bottom: 8px; color: #cbd5f5; }
+        input { width: 100%; padding: 12px; background: #2a3448; border: 2px solid #334155; border-radius: 8px; color: #fff; margin-bottom: 16px; outline: none; }
+        input:focus { border-color: #7c3aed; }
+        .instructions { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; font-size: .85rem; color: #94a3b8; margin-bottom: 20px; line-height: 1.4; }
+        .action-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem; }
+        .action-btn.small { width: auto; padding: 6px 10px; font-size: 0.8rem; border-radius: 6px; }
+        .action-btn.deposit { background: #16a34a; color: #fff; }
+        .action-btn.withdraw { background: #2563eb; color: #fff; }
+        .error-message { background: rgba(248, 113, 113, 0.1); color: #f87171; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; border: 1px solid rgba(248, 113, 113, 0.2); }
+
+        .inventory-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
+            gap: 8px; margin-top: 10px; max-height: 400px; min-height: 400px; /* reserve space */ 
+            overflow-y: auto; padding-right: 6px; 
+        }
+        .inventory-item { 
+            background: #111827; border-radius: 6px; padding: 6px; display: flex; flex-direction: column; 
+            align-items: center; font-size: 0.7rem; cursor: pointer; overflow: hidden; text-align: center; 
+        }
+        .inventory-item img { width: 36px; height: 36px; border-radius: 4px; margin-bottom: 4px; }
+        .inventory-item .serial { color: #94a3b8; font-size: 0.6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .inventory-item .name { font-weight: 500; font-size: 0.7rem; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .inventory-item .value { color: #16a34a; font-weight: 600; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .inventory-item.selected { outline: none; border: 2px solid #16a34a; box-sizing: border-box; }
+        .inventory-item .select-box { width: 100%; height: 4px; margin-bottom: 4px; }
+
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; flex-direction: row; overflow-x: auto; padding: 0.75rem; border-right: none; border-bottom: 1px solid #333; }
+            .sidebar-label { display: none; }
+            .sidebar-link { white-space: nowrap; padding: 0.5rem 1rem; }
+            main { padding: 2rem 1rem; }
+            nav { justify-content: center; padding: 1rem; }
+            .logo { margin-left: 0 !important; font-size: 1.1rem; }
+            .balance-wrapper { margin-left: auto; }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+   <nav>
+    <a href="/" class="logo">AH Gambling</a>
+
+    <div class="balance-wrapper">
+        <button class="balance-btn"></button>
+        <div class="balance-menu">
+            <a id="openDeposit">Deposit</a>
+            <a id="openWithdraw">Withdraw</a>
+            <a id="Inventory">Inventory</a>
+            <div class="divider"></div>
+            <a href="/logout">Log out</a>
+        </div>
+    </div>
+</nav>
+</header>
+
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="sidebar-label">Navigation</div>
+        <a href="/" class="sidebar-link">Home</a>
+        <div class="sidebar-label">Games</div>
+        <a href="/towers" class="sidebar-link">Towers</a>
+        <a href="/mines" class="sidebar-link">Mines</a>
+    </aside>
+        <main>
+         {% block content %}{% endblock %} 
+    </main>
+</div>
+
+<div class="modal" id="inventoryActionModal">
+    <div class="wallet">
+
+        <div class="wallet-header">
+            <h2 id="inventoryActionTitle">Inventory</h2>
+            <span class="close" id="closeInventoryAction">&times;</span>
+        </div>
+
+        <div class="instructions" id="inventoryInstructions">
+            1. Click initiate<br>
+            2. Join the game via the link<br>
+            3. Complete transaction in-game
+        </div>
+
+        <button class="action-btn deposit" id="inventoryActionBtn">
+            Confirm
+        </button>
+
+    </div>
+</div>
+
+<div class="modal" id="walletModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Wallet</h2>
+            <span class="close">&times;</span>
+        </div>
+
+        <div class="tabs">
+            <button class="tab deposit active">Deposit</button>
+            <button class="tab withdraw">Withdraw</button>
+        </div>
+
+        {% if wallet_error %}
+            <p class="error-message">
+                <strong>Error:</strong> {{ wallet_error }}
+            </p>
+        {% endif %}
+
+        <label>Amount</label>
+        <input type="text" id="amount" placeholder="Enter amount">
+        <div class="instructions" id="instructions"></div>
+
+        <button class="action-btn deposit" id="depositBtn">Initiate Deposit</button>
+        <button class="action-btn withdraw" id="withdrawBtn" style="display:none;">Initiate Withdrawal</button>
+    </div>
+</div>
+
+<div class="modal" id="inventoryModal">
+<div class="wallet">
+    <div class="wallet-header">
+        <h2>Inventory</h2>
+        <span class="close">&times;</span>
+    </div>
+
+    <input id="inventorySearch" placeholder="Search items...">
+
+    <div id="totalValue" style="display:flex; justify-content:space-between; margin-top:10px;">
+        <div>Total Value: <strong>$250</strong></div>
+        <button class="action-btn deposit small" id="InventoryDepositBtn">Deposit</button>
+    </div>
+
+    <div class="inventory-grid"></div>
+
+    <div style="text-align:right; margin-top:12px;">
+        <button class="action-btn withdraw" id="InventoryWithdrawBtn">Withdraw</button>
+    </div>
+</div>
+</div>
+
+  
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const wrapper = document.querySelector('.balance-wrapper');
+    const modal = document.getElementById('walletModal');
+    const inventoryModal = document.getElementById('inventoryModal');
+    const inventoryActionModal = document.getElementById('inventoryActionModal');
+    const closeBtn = modal?.querySelector('.close');
+    const closeInventoryBtn = inventoryModal?.querySelector('.close');
+    const closeInventoryActionBtn = document.getElementById('closeInventoryAction');
+    const tabs = document.querySelectorAll('.tab');
+    const depositBtn = document.getElementById('depositBtn');
+    const withdrawBtn = document.getElementById('withdrawBtn');
+    const instructions = document.getElementById('instructions');
+    const inputField = document.getElementById('amount');
+    const openDepositBtn = document.getElementById('openDeposit');
+    const openWithdrawBtn = document.getElementById('openWithdraw');
+    const openInventoryBtn = document.getElementById('Inventory');
+    const sortBtn = document.getElementById('sortBtn');
+    const sortDropdown = document.getElementById('sortDropdown');
+    const InventoryDepositBtn = document.getElementById('InventoryDepositBtn');
+    const InventoryWithdrawBtn = document.getElementById('InventoryWithdrawBtn');
+    const inventoryActionTitle = document.getElementById('inventoryActionTitle');
+    const inventoryInstructions = document.getElementById('inventoryInstructions');
+    const inventoryActionBtn = document.getElementById('inventoryActionBtn');
+    const totalValueLabel = document.querySelector('#totalValue strong');
+    const searchInput = document.getElementById('inventorySearch');
+    let TotalValue = 0;
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+
+        const inventoryItems = document.querySelectorAll('.inventory-item');
+
+        inventoryItems.forEach(item => {
+            const name = item.querySelector('.name')?.textContent.toLowerCase() || '';
+            const serial = item.querySelector('.serial')?.textContent.toLowerCase() || '';
+
+            if (name.includes(query) || serial.includes(query)) {
+                item.style.display = 'inline-block'; 
+            } else {
+                item.style.display = 'none'; 
+            }
+        });
+    });
+
+    async function updateBalance() {
+        try {
+            const response = await fetch('/getbalance');
+            const data = await response.text(); 
+            const number = parseFloat(data);
+            if (!isNaN(number)) {
+                const balanceBtn = document.querySelector('.balance-btn');
+                if (balanceBtn) balanceBtn.textContent = `$${number.toLocaleString()}`;
+            }
+        } catch (error) {
+            console.error('Error fetching balance:', error);
+        }
+    }
+    updateBalance();
+
+    wrapper?.querySelector('.balance-btn')?.addEventListener('click', e => {
+        e.stopPropagation();
+        wrapper.classList.toggle('open');
+    });
+
+    window.addEventListener('click', () => {
+        wrapper?.classList.remove('open');
+        if (sortDropdown) sortDropdown.style.display = 'none';
+    });
+
+    function openWallet(type) {
+        inventoryModal?.classList.remove('open');
+        modal?.classList.add('open');
+        switchTab(type);
+    }
+
+    function switchTab(type) {
+        tabs.forEach(tab => tab.classList.remove('active'));
+        const activeTab = document.querySelector('.tab.' + type);
+        if (activeTab) activeTab.classList.add('active');
+
+        if (type === 'deposit') {
+            depositBtn.style.display = 'block';
+            withdrawBtn.style.display = 'none';
+            if (instructions) instructions.innerHTML = `1. Enter amount<br>2. Click Initiate<br>3. Complete in-game`;
+        } else {
+            depositBtn.style.display = 'none';
+            withdrawBtn.style.display = 'block';
+            if (instructions) instructions.innerHTML = `1. Enter amount<br>2. Click Initiate<br>3. Complete in-game`;
+        }
+    }
+
+    openDepositBtn?.addEventListener('click', () => openWallet('deposit'));
+    openWithdrawBtn?.addEventListener('click', () => openWallet('withdraw'));
+    
+    closeBtn?.addEventListener('click', () => {
+        modal?.classList.remove('open');
+    });
+    closeInventoryBtn?.addEventListener('click', () => {
+        inventoryActionModal?.classList.remove('open'); 
+        inventoryModal?.classList.remove('open');
+    });
+
+    modal?.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => switchTab(tab.classList.contains('deposit') ? 'deposit' : 'withdraw'));
+    });
+
+    depositBtn?.addEventListener('click', () => {
+        const val = parseFloat(inputField?.value);
+        if (val > 0) window.location.href = `/deposit?amount=${val}`;
+    });
+
+    withdrawBtn?.addEventListener('click', () => {
+        const val = parseFloat(inputField?.value);
+        if (val > 0) window.location.href = `/withdraw?amount=${val}&page=home`;
+    });
+
+    function UpdateTotalValueLabel() {
+        const formatted = TotalValue.toLocaleString();
+        if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
+    }
+
+    openInventoryBtn?.addEventListener('click', e => {
+        e.stopPropagation();
+        modal?.classList.remove('open');
+        inventoryModal?.classList.add('open');
+        TotalValue = 0
+        UpdateTotalValueLabel();
+        const grid = document.querySelector('.inventory-grid');
+        grid.replaceChildren(); 
+        async function FillGrid() {
+            try {
+                const response = await fetch('/GetInventory');
+                const data = await response.json(); 
+
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'inventory-item';
+
+                    div.innerHTML = `
+                        <div class="select-box"></div>
+                        <img src="${item.ImageUrl}">
+                        <span class="serial">#${item.serial}</span>
+                        <span class="name">${item.itemname}</span>
+                        <span class="value">${item.Value}</span>
+                    `;
+
+                    div.addEventListener('click', () => {
+                        const valueEl = div.querySelector('.value');
+                        const itemNameEl = div.querySelector('.name');
+                        const serialEl = div.querySelector('.serial');
+
+                        if (!valueEl || !itemNameEl || !serialEl) return;
+
+                        const itemName = itemNameEl.textContent;
+                        const serial = serialEl.textContent;
+
+                        const CleanedValue = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+
+                        const isSelected = div.classList.contains('selected');
+
+                        div.classList.toggle('selected');
+            
+                        if (isSelected) {
+                            TotalValue -= CleanedValue;
+                            if (ToWithdraw[itemName]) {
+                                delete ToWithdraw[itemName][serial];
+                                if (Object.keys(ToWithdraw[itemName]).length === 0) {
+                                    delete ToWithdraw[itemName];
+                                }
+                            }
+
+                        } else {
+                            TotalValue += CleanedValue;
+                            if (!ToWithdraw[itemName]) ToWithdraw[itemName] = {};
+                            ToWithdraw[itemName][serial] = true;
+                        }
+
+                        UpdateTotalValueLabel();
+                    });
+                    
+                    grid.appendChild(div);
+                });
+
+            } catch (error) {
+                console.error('Error fetching', error);
+            }
+        }
+
+        FillGrid();
+    });
+
+    ToWithdraw = {}
+
+    inventoryActionBtn?.addEventListener('click', async e => {
+        if (inventoryActionBtn.textContent === 'Initiate Deposit') {
+            window.location.href = '/deposititems';
+        } else {
+            const itemdata = ToWithdraw; 
+
+            try {
+                const response = await fetch('/withdrawitems', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ itemdata })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Request failed');
+                }
+
+                const data = await response.json();
+
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    console.error('No redirect URL returned');
+                }
+            } catch (err) {
+                console.error('Error withdrawing items:', err.message);
+            }
+
+        }
+    });
+
+    inventoryModal?.addEventListener('click', e => { if (e.target === inventoryModal) inventoryModal.classList.remove('open'); });
+
+    sortBtn?.addEventListener('click', e => {
+        e.stopPropagation();
+        if (sortDropdown) sortDropdown.style.display = sortDropdown.style.display === 'block' ? 'none' : 'block';
+    });
+
+    InventoryDepositBtn?.addEventListener('click', () => openInventoryAction('deposit'));
+    InventoryWithdrawBtn?.addEventListener('click', () => openInventoryAction('withdraw'));
+
+    function openInventoryAction(type) {
+        if (TotalValue == 0 && type !== 'deposit' ) {
+            return
+        }
+
+        inventoryModal?.classList.remove('open');
+
+        if (inventoryActionTitle) inventoryActionTitle.textContent =
+            type === 'deposit' ? 'Inventory Deposit' : 'Inventory Withdraw';
+
+        if (inventoryActionBtn) {
+            inventoryActionBtn.className = `action-btn ${type}`;
+            inventoryActionBtn.textContent = type === 'deposit' ? 'Initiate Deposit' : 'Initiate Withdraw';
+        }
+
+        if (inventoryInstructions) inventoryInstructions.innerHTML = `
+            1. Click the button below to open Roblox<br>
+            2. Join the game to complete the transaction<br>
+            3. Complete deposit in-game
+        `;
+
+        inventoryActionModal?.classList.add('open');
+    }
+
+    closeInventoryActionBtn?.addEventListener('click', () => {
+        console.log(inventoryActionModal?.classList.contains('open'))
+        if (inventoryActionModal?.classList.contains('open')) {
+            inventoryActionModal?.classList.remove('open');
+            inventoryModal?.classList.add('open');
+        } else {
+            if (inventoryModal?.classList.contains('open')) {
+                inventoryModal?.classList.remove('open');
+            } else {
+                inventoryActionModal?.classList.add('open');
+            }
+        }
+    });
+
+    inventoryActionModal?.addEventListener('click', e => { if (e.target === inventoryActionModal) inventoryActionModal.classList.remove('open'); });
+
+    const currentPath = window.location.pathname;
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    sidebarLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === currentPath) link.classList.add('active');
+    });
+
+    document.querySelectorAll('.inventory-item').forEach(item => {
+        item.addEventListener('click', e => {
+            e.stopPropagation();
+
+            console.log(ToWithdraw)
+
+        });
+    });
+
+
+    UpdateTotalValueLabel();
+});
+</script>
+
+</body>
+</html>
+
+
+
