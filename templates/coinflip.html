@@ -376,6 +376,35 @@ body {
 
 .modal.open { display: flex; }
 
+.coinflip-side-select {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.side-option {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    background: #111;
+    border: 1px solid #333;
+    transition: all 0.2s;
+}
+
+.side-option:hover {
+    background: #1f2937;
+}
+
+.side-option.selected {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #fff;
+}
+
+
 </style>
 
 <div class="modal" id="createCoinflipModal">
@@ -391,6 +420,12 @@ body {
             <div>Total Selected: <strong id="totalSelected">0 items</strong></div>
             <div>Total Value: <strong id="totalValue">$0</strong></div>
         </div>
+
+        <div class="coinflip-side-select">
+            <div class="side-option selected" data-side="heads">🪙 Heads</div>
+            <div class="side-option" data-side="tails">🪙 Tails</div>
+        </div>
+
 
         <div class="inventory-grid" id="coinflipInventory">
             <div class="inventory-item">
@@ -533,7 +568,7 @@ window.addEventListener("click", (e) => {
 
 const grid = document.querySelector('.inventory-grid');
 grid.replaceChildren(); 
-CreateCoinflipItems = {}
+let Side = "Heads";
 const totalValueLabel = document.getElementById('totalValue');
 const totalSelectedLabel = document.getElementById("totalSelected");
 const coinflipCancelBtn = document.getElementById("coinflipCancelBtn");
@@ -568,7 +603,7 @@ coinflipStartBtn.addEventListener("click", async () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ coinflipData })
+            body: JSON.stringify({ coinflipData,Side })
         });
 
         if (!response.ok) {
@@ -583,6 +618,18 @@ coinflipStartBtn.addEventListener("click", async () => {
         console.error('Error:', err.message);
     }
 });
+
+
+document.querySelectorAll('.side-option').forEach(option => {
+    option.addEventListener('click', () => {
+        document.querySelectorAll('.side-option')
+            .forEach(o => o.classList.remove('selected'));
+
+        option.classList.add('selected');
+        Side = option.dataset.side;
+    });
+});
+
 
 
 function UpdateTotalValueLabel() {
