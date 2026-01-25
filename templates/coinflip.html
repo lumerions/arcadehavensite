@@ -531,9 +531,9 @@ body {
                     <img src="{{ item.image }}" alt="">
                 </div>
                 {% endfor %}
-                {% if match.items|length > 5 %}
+                {% if match["items"]|length > 5 %}
                 <div class="preview-item more">
-                    +{{ match.items|length - 5 }}
+                    +{{ match["items"]|length - 5 }}
                 </div>
                 {% endif %}
             </div>
