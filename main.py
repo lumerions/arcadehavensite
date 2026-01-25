@@ -788,24 +788,33 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
 
 @app.get("/GetActiveCoinflips")
 def GetActiveCoinflips(SessionId: str = Cookie(None)):
+    if not SessionId:
+        return JSONResponse({"error": "SessionId missing"}, status_code=400)
+
     CoinflipCollection = getCoinflipMongo()["collection"]
 
     Documents = CoinflipCollection.find(
         {},
     )
 
+    Documents = list(Documents)
 
     UserIds = ""
+ 
+    for i,v in enumerate(Documents["items"]):
+        UserIds = UserIds + str(v["UserId"]) + ","
 
-    for i,v in enumerate(document["items"]):
-        UserIds = UserIds + str(v["itemid"]) + ","
+    UserIds = UserIds[:-1]
+    # bandwidth might be insane if theres lots of data ill optimize it later trust
+    RobloxThumbnailEndpoint = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" + UserIds + "&size=420x420&format=Png&isCircular=false"
+    RobloxThumbnailUrls = requests.get(RobloxThumbnailEndpoint)
+    RobloxThumbnailUrls = RobloxThumbnailUrls.json()
 
-    AssetIdParam = AssetIdParam[:-1]
-
-    RobloxThumbnailEndpoint = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" + 123456 + "&size=420x420&format=Png&isCircular=false"
-
-    for item in Documents:
-        Documents
+    for item in RobloxThumbnailUrls:
+        for i,v in enumerate(Documents["items"])
+            if int(item["targetId"]) == int(v["UserId"]):
+                v["ImageUrl"] = item["imageUrl"]
+                break
 
     return JSONResponse({"CoinflipData": Documents}, status_code=400)
 
