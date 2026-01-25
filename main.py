@@ -820,11 +820,11 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
 
     for item in RobloxThumbnailUrls:
         for i,v in enumerate(Documents):
+            v["total_value"] = 0
             if "_id" in v:
                 v["_id"] = str(v["_id"])
             if int(item["targetId"]) == int(v["UserId"]):
                 v["ImageUrl"] = item["imageUrl"]
-                v["total_value"] = 0
                 v["player1"] = {"username": str(v["Username"]), "avatar": item["imageUrl"]}
                 v["player2"] = {"username": "", "avatar": ""}
                 for i2,v2 in enumerate(v["CoinflipItems"]):
