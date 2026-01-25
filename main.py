@@ -811,7 +811,7 @@ def GetActiveCoinflips(SessionId: str = Cookie(None)):
     RobloxThumbnailUrls = RobloxThumbnailUrls.json()
 
     for item in RobloxThumbnailUrls:
-        for i,v in enumerate(Documents["items"])
+        for i,v in enumerate(Documents["items"]):
             if int(item["targetId"]) == int(v["UserId"]):
                 v["ImageUrl"] = item["imageUrl"]
                 break
@@ -1484,14 +1484,14 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
             return JSONResponse({"error": "Coinflip already exists!"}, status_code=400)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
-
+#
     try:
         url = f"https://www.roblox.com/users/profile?username={RobloxUsername}"
         response = requests.get(url, allow_redirects=False)  
         redirect_url = response.headers.get("Location")
 
         if redirect_url:
-            UserId = int(redirect_url.split("/")[4]))
+            UserId = int(redirect_url.split("/")[4])
             CoinflipCollection.update_one(
                 {"SessionId": SessionId, "Username": Username,"UserId": UserId,"Side":Side},
                 { "$push": { "CoinflipItems": { "$each": coinflipData } } },
