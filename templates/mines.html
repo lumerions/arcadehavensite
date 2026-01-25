@@ -9,23 +9,45 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body, main {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: #000;
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+        .panel-card {
+            background: linear-gradient(180deg, #1e2140, #15162b);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid #2e2f55;
         }
+
+        header { border-bottom: 1px solid #333; }
+
+        @media (max-width: 900px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                padding: 10px 10px; 
+            }
+
+            .side-panel {
+                width: 100%;
+                max-width: 520px;
+                position: sticky; 
+                top: 0;           
+                padding: 10px 0;
+                z-index: 101;     
+            }
+
+            .card {
+                width: 100%;
+                margin-top: 10px; 
+            }
+        }
+
+
 
         main {
             flex: 1;
             display: flex;
             justify-content: center;
             padding: 3rem 1rem;
-            width: 100%;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            width: 100%; 
         }
 
         .card {
@@ -36,8 +58,8 @@
             text-align: center;
             max-width: 520px;
             width: 100%;
-            min-height: 420px; 
         }
+
 
         .grid {
             display: grid;
@@ -46,28 +68,38 @@
             gap: clamp(5px, 1.7vw, 13px);
             justify-content: center;
             margin: 1.25rem 0;
-            min-height: calc(5 * 33px + 4 * 5px); 
         }
-
+        
         .cell {
             width: 100%;
             aspect-ratio: 1 / 1;
             border-radius: 8px;
             background: #222;
             border: 1px solid #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #fff;
-            text-align: center;
+            touch-action: manipulation;
+            display: flex;             
+            justify-content: center;   
+            align-items: center;      
+            font-size: 2.5em;          
+            font-weight: bold;      
+            color: #fff;              
+            text-align: center;       
         }
+
+        
+
 
         .cell.mine { background: #b91c1c; }
         .cell.empty { background: #555; }
-        .cell.clicked { background: #22c55e; }
-        .cell.reveal { background: #22c55e; filter: brightness(0.4); }
+
+        .cell.clicked {
+            background: #22c55e;
+        }
+
+        .cell.reveal {
+            background: #22c55e;
+            filter: brightness(0.4);
+        }
 
         button {
             padding: 0.7rem 1.5rem;
@@ -77,34 +109,27 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.95rem;
-            width: 100%;
-            max-width: 100%; 
-            box-sizing: border-box;
-            margin-top: 12px;
-            min-width: 120px; 
+            width: 100%;           
+            max-width: none;       
+            box-sizing: border-box; 
+            margin-top: 12px;      
         }
+
         button:hover {
             background: #333;
             border-color: #555;
         }
 
-        .side-panel {
-            width: 300px;
-            flex-shrink: 0;
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-            background-color: #000;
-            height: fit-content;
+        .error-message {
+            color: #ff5555;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
         }
 
-        .panel-card {
-            background: linear-gradient(180deg, #1e2140, #15162b);
-            border-radius: 14px;
-            padding: 16px;
-            border: 1px solid #2e2f55;
-            min-height: 90px; 
-            text-align: center;
+        @media (max-width: 420px) {
+            .card {
+                padding: 1.25rem 1rem;
+            }
         }
 
         .error-message {
@@ -115,12 +140,22 @@
             font-size: 0.85rem;
             margin-top: 16px;
             text-align: left;
-            border: 1px solid #7c3aed;
+            border: 1px solid #7c3aed; 
             font-weight: 500;
-            min-height: 42px; 
         }
-
-        input, .input2 {
+        
+        .error-message strong {
+            font-weight: 600; 
+        }
+        
+        label {
+            display: block;
+            font-size: .85rem;
+            margin-bottom: 6px;
+            color: #cbd5f5;
+        }
+        
+        input {
             width: 100%;
             padding: 12px;
             background: #2a3448;
@@ -128,18 +163,29 @@
             border-radius: 8px;
             color: #fff;
             margin-bottom: 14px;
+        
         }
 
-        .game-container {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            gap: 24px;
+        .input2 {
             width: 100%;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px;
+            padding: 12px;
+            background: #2a3448;
+            border: 2px solid #7c3aed;
+            border-radius: 8px;
+            color: #fff;
+            margin-bottom: 14px;
+            position: relative;
+            top: 4px;
+            -moz-appearance: textfield;
         }
+        
+        .input2::-webkit-inner-spin-button,
+        .input2::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        
         .game-layout {
             display: flex;
             gap: 24px;
@@ -147,17 +193,75 @@
             max-width: 1200px;
         }
 
+        .side-panel {
+            width: 300px;
+            flex-shrink: 0;
+            position: sticky; 
+            top: 20px;
+            z-index: 100;          
+            background-color: #000;
+            height: fit-content;   
+        }
+
+        .panel-card {
+            background: linear-gradient(180deg, #1e2140, #15162b);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid #2e2f55;
+        }
+
+        .field {
+            margin-bottom: 3px;
+        }
+
+        .field-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: #c7c9ff;
+        }
+
+        .muted {
+            opacity: 0.6;
+        }
+
+        .currency,
+        .emoji {
+            opacity: 0.7;
+            font-size: 0.9rem; 
+        }
+
         @media (max-width: 900px) {
-            .game-container, .game-layout {
+            .game-layout {
                 flex-direction: column;
-                align-items: center;
             }
+
             .side-panel {
                 width: 100%;
             }
-            .card { width: 100%; margin-top: 10px; }
         }
 
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: row; 
+            align-items: flex-start; 
+            gap: 24px;
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto; 
+            padding: 20px;
+        }
     </style>
 </head>
 

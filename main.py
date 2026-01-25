@@ -1586,9 +1586,6 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
             return JSONResponse({"success": True}, status_code=200)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
-#
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
-
-
-
