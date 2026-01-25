@@ -786,7 +786,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
         "multiplier": current_multiplier
     }
 
-@app.get("/GetActiveCoinflips")
+@app.get("/GetActiveCoinflips",response_class=HTMLResponse)
 def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
@@ -813,7 +813,7 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     # bandwidth might be insane if theres lots of data ill optimize it later trust
     response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
     decodedResponse = response.json()
-    decodedResponseData = decodedResponse.get("data")
+    decodedResponseData = decodedResponse.get("data",[])
     RobloxThumbnailEndpoint = f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={UserIds}&size=420x420&format=Png&isCircular=false"
     RobloxThumbnailUrls = requests.get(RobloxThumbnailEndpoint)
     RobloxThumbnailUrls = RobloxThumbnailUrls.json().get("data",[])
