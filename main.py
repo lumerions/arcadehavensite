@@ -798,43 +798,40 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     )
 
     Documents = list(Documents)
+    UserIds = ",".join(str(v["UserId"]) for v in Documents if "UserId" in v)
+    AssetIdParam = ",".join(str(item["itemid"]) for v in Documents for item in v.get("CoinflipItems", []))
 
-    UserIds = ""
-    AssetIdParam = ""
-
-    for i,v in enumerate(Documents):
-        UserIds = UserIds + str(v["UserId"]) + ","
-        for v2 in v["CoinflipItems"]:
-            AssetIdParam = AssetIdParam + str(v2["itemid"]) + ","
-
-    UserIds = UserIds[:-1]
-    AssetIdParam = AssetIdParam[:-1]
+    if len(UserIds) > 0:
+        UserIds = UserIds[:-1]
+    if len(AssetIdParam) > 0:
+        AssetIdParam = AssetIdParam[:-1]
 
     # bandwidth might be insane if theres lots of data ill optimize it later trust
-    response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
-    decodedResponse = response.json()
-    decodedResponseData = decodedResponse.get("data",[])
-    RobloxThumbnailEndpoint = f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={UserIds}&size=420x420&format=Png&isCircular=false"
-    RobloxThumbnailUrls = requests.get(RobloxThumbnailEndpoint)
-    RobloxThumbnailUrls = RobloxThumbnailUrls.json().get("data",[])
+    print(AssetIdParam)
+    print(UserIds)
+    if AssetIdParam:
+        response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
+        decodedResponse = response.json()
+        decodedResponseData = decodedResponse.get("data",[])
+        thumbnailsDict = {int(v["targetId"]): v["imageUrl"] for v in decodedResponseData}
+    if UserIds:
+        RobloxThumbnailEndpoint = f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={UserIds}&size=420x420&format=Png&isCircular=false"
+        RobloxThumbnailEndpointResponse = requests.get(RobloxThumbnailEndpoint)
+        RobloxThumbnailUrls = RobloxThumbnailEndpointResponse.json().get("data",[])
+        avatarDict = {int(v["targetId"]): v["imageUrl"] for v in RobloxThumbnailUrls}
 
-    for item in RobloxThumbnailUrls:
-        for i,v in enumerate(Documents):
+        for v in Documents:
+            CoinflipItems = v.get("CoinflipItems", [])
             v["total_value"] = 0
-            v["total_items"] = len(v.get("CoinflipItems", []))
+            v["total_items"] = len(CoinflipItems)
             if "_id" in v:
                 v["_id"] = str(v["_id"])
-            if int(item["targetId"]) == int(v["UserId"]):
-                v["ImageUrl"] = item["imageUrl"]
-                v["player1"] = {"username": str(v["Username"]), "avatar": item["imageUrl"]}
-                v["player2"] = {"username": "", "avatar": ""}
-                for i2,v2 in enumerate(v["CoinflipItems"]):
-                    decodedResponseData
-                    for thumb in decodedResponseData:
-                        if int(thumb["targetId"]) == int(v2["itemid"]):
-                            v["items"] = [{"image": thumb["imageUrl"]}]  
-                            break
-
+            UserId = int(v.get("UserId", 1))
+            avatarUrl = avatarDict.get(UserId, "")
+            v["ImageUrl"] = avatarUrl
+            v["player1"] = {"username": v.get("Username", "Unknown"), "avatar": avatarUrl}
+            v["player2"] = {"username": "", "avatar": ""}
+            v["items"] = [{"image": thumbnailsDict.get(item["itemid"], "")} for item in CoinflipItems]
 
     return templates.TemplateResponse(
         "coinflip.html", {"request": request, "matches": Documents}
