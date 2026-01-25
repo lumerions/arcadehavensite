@@ -801,15 +801,15 @@ def GetActiveCoinflips(SessionId: str = Cookie(None)):
 
     UserIds = ""
  
-    for i,v in enumerate(Documents["items"]):
+    for i,v in enumerate(Documents):
         UserIds = UserIds + str(v["UserId"]) + ","
 
     UserIds = UserIds[:-1]
     # bandwidth might be insane if theres lots of data ill optimize it later trust
     RobloxThumbnailEndpoint = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" + UserIds + "&size=420x420&format=Png&isCircular=false"
     RobloxThumbnailUrls = requests.get(RobloxThumbnailEndpoint)
-    RobloxThumbnailUrls = RobloxThumbnailUrls.json()
-
+    RobloxThumbnailUrls = RobloxThumbnailUrls.json().get("data",[])
+    
     for item in RobloxThumbnailUrls:
         for i,v in enumerate(Documents["items"]):
             if int(item["targetId"]) == int(v["UserId"]):
