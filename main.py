@@ -193,7 +193,7 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
 
-    response, logged_in  CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
+    response, logged_in =  CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
 
     if not logged_in:
         return response
