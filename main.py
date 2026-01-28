@@ -1408,7 +1408,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
 
     try:
         Side = str(Side)
-        if Side != "Heads" or Side != "Tails":
+        if Side not in ("Heads", "Tails"):
             Username = JSONResponse({"error": "Must be heads or tails"}, status_code=400)
             raise ValueError("Not heads or tails")
         Username = CheckIfUserIsLoggedIn(request,"register.html","coinflip.html",True)
