@@ -189,8 +189,7 @@ def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
 @app.get("/coinflipgame", response_class=HTMLResponse)
-def coinflipHome(request: Request):
-    def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
+def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
 
