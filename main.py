@@ -131,7 +131,7 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
                 
                 if result and result[0] == SessionId:
                     if returnusername is None:
-                        return templates.TemplateResponse(htmlfile2, {"request": request}), True
+                        return templates.TemplateResponse(htmlfile2, {"request": request})
                     else:
                         return {"siteuser":result[1],"robloxuser":result[2]}
                 else:
@@ -193,10 +193,26 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
 
-    response, logged_in =  CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
-
-    if not logged_in:
-        return response
+    try:
+        conn = getPostgresConnection() 
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT sessionid,username,robloxusername FROM accounts WHERE sessionid = %s", (SessionId,))
+            
+            result = cursor.fetchone()  
+            
+            if result and result[0] == SessionId:
+                return templates.TemplateResponse("coinflip.html", {"request": request})
+            else:
+                response = templates.TemplateResponse("register.html", {"request": request})
+                response.delete_cookie("SessionId")
+                return response
+    
+    except Exception as error:
+        return templates.TemplateResponse(
+            htmlfile,
+            {"request": request, "error": f"{error}"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
     CoinflipCollection = getCoinflipMongo()["collection"]
 
@@ -253,7 +269,8 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
-    return CheckIfUserIsLoggedIn(request,"register.html","home.html")
+    Result = CheckIfUserIsLoggedIn(request,"register.html","home.html")
+    return Result
 
 @app.get("/home")
 def home(request: Request):
