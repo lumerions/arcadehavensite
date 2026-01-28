@@ -404,6 +404,58 @@ body {
     color: #fff;
 }
 
+.player-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-avatar-view {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #333;
+    margin-bottom: 8px;
+}
+
+.player-items {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.top-items {
+    justify-content: center;
+}
+
+.preview-item {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #222;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-item.more {
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #ccc;
+}
+
 
 </style>
 
@@ -792,9 +844,55 @@ window.addEventListener('click', (e) => {
 
 </script>
 
-<!-- JOIN COINFLIP MODAL -->
+<div class="modal" id="viewCoinflipModal">
+    <div class="wallet" style="max-width:500px;">
+        <div class="wallet-header">
+            <h2>Coinflip Details</h2>
+            <span class="close" data-close="viewCoinflipModal">&times;</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div class="player-container">
+                <img src="/static/images/player1.png" class="player-avatar-view" alt="Player 1">
+                <div class="player-items top-items">
+                    <div class="preview-item">
+                        <img src="/static/images/item1.png" alt="Item">
+                    </div>
+                </div>
+            </div>
+
+            <div class="vs-text" style="font-size:1.5rem; font-weight:bold;">VS</div>
+
+            <div class="player-container">
+                <img src="/static/images/player2.png" class="player-avatar-view" alt="Player 2">
+                <div class="player-items top-items">
+                    <div class="preview-item">
+                        <img src="/static/images/item2.png" alt="Item">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="items-bottom-container" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <div class="preview-item">
+                <img src="/static/images/item3.png" alt="Item">
+            </div>
+            <div class="preview-item">
+                <img src="/static/images/item4.png" alt="Item">
+            </div>
+            <div class="preview-item more">+1</div>
+        </div>
+
+        <div class="coinflip-modal-actions" style="margin-top:16px;">
+            <button class="action-btn deposit" data-close="viewCoinflipModal">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="joinCoinflipModal">
-    <div class="wallet">
+    <div class="wallet" style="max-width:500px;">
         <div class="wallet-header">
             <h2>Join Coinflip</h2>
             <span class="close" data-close="joinCoinflipModal">&times;</span>
@@ -814,6 +912,19 @@ window.addEventListener('click', (e) => {
             <div class="side-option" data-side="Tails">🪙 Tails</div>
         </div>
 
+        <div class="join-items-container" style="display:flex; justify-content:space-between; margin:16px 0;">
+            <div class="player-items">
+                <div class="preview-item">
+                    <img src="/static/images/item1.png" alt="Item">
+                </div>
+            </div>
+            <div class="player-items">
+                <div class="preview-item">
+                    <img src="/static/images/item2.png" alt="Item">
+                </div>
+            </div>
+        </div>
+
         <div class="coinflip-modal-actions">
             <button class="action-btn withdraw" data-close="joinCoinflipModal">
                 Cancel
@@ -824,23 +935,6 @@ window.addEventListener('click', (e) => {
         </div>
     </div>
 </div>
-
-
-<div class="modal" id="viewCoinflipModal">
-    <div class="wallet">
-        <div class="wallet-header">
-            <h2>Coinflip Details</h2>
-            <span class="close" data-close="viewCoinflipModal">&times;</span>
-        </div>
-
-        <div id="viewCoinflipContent"></div>
-
-        <div class="coinflip-modal-actions">
-            <button class="action-btn deposit" data-close="viewCoinflipModal">
-                Close
-            </button>
-        </div>
-    </div>
 </div>
 
 
