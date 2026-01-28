@@ -599,250 +599,6 @@ body {
     </div>
 </div>
 
-<script>
-const createMatchBtn = document.getElementById("createMatchBtn");
-const createModal = document.getElementById("createCoinflipModal");
-const modalClose = createModal.querySelector(".close");
-
-createMatchBtn.addEventListener("click", () => {
-    createModal.classList.add("open");
-});
-
-modalClose.addEventListener("click", () => {
-    createModal.classList.remove("open");
-});
-
-window.addEventListener("click", (e) => {
-    if (e.target === createModal) {
-        createModal.classList.remove("open");
-    }
-});
-
-const grid = document.querySelector('.inventory-grid');
-grid.replaceChildren(); 
-let Side = "Heads";
-const totalValueLabel = document.getElementById('totalValue');
-const totalSelectedLabel = document.getElementById("totalSelected");
-const coinflipCancelBtn = document.getElementById("coinflipCancelBtn");
-const coinflipStartBtn = document.getElementById("coinflipCreateBtn");
-let TotalValue = 0;
-
-coinflipCancelBtn.addEventListener("click", async () => {
-    try {
-        const response = await fetch('/cancelcoinflip', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-        });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Request failed');
-        }
-
-        const data = await response.json();
-
-        
-    } catch (err) {
-        console.error('Error:', err.message);
-    }
-});
-
-
-coinflipStartBtn.addEventListener("click", async () => {
-    try {
-        const response = await fetch('/createcoinflip', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ coinflipData,Side })
-        });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Request failed');
-        }
-
-        const data = await response.json();
-
-        
-    } catch (err) {
-        console.error('Error:', err.message);
-    }
-});
-
-
-document.querySelectorAll('.side-option').forEach(option => {
-    option.addEventListener('click', () => {
-        document.querySelectorAll('.side-option')
-            .forEach(o => o.classList.remove('selected'));
-
-        option.classList.add('selected');
-        Side = option.dataset.side;
-    });
-});
-
-
-
-function UpdateTotalValueLabel() {
-    const formatted = TotalValue.toLocaleString();
-    if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
-}
-
-let coinflipData = [];
-
-async function FillGrid() {
-    try {
-        const response = await fetch('/GetInventory');
-        const data = await response.json(); 
-
-        data.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'inventory-item';
-
-            div.innerHTML = `
-                <div class="select-box" data-itemid="${item.itemid}"></div>
-                <img src="${item.ImageUrl}">
-                <span class="serial">#${item.serial}</span>
-                <span class="name">${item.itemname}</span>
-                <span class="value">${item.Value}</span>
-            `;
-
-            div.addEventListener('click', () => {
-                const valueEl = div.querySelector('.value');
-                const itemNameEl = div.querySelector('.name');
-                const serialEl = div.querySelector('.serial');
-                const itemId = div.querySelector('.select-box').dataset.itemid;
-
-                if (!valueEl || !itemNameEl || !serialEl) return;
-
-                const itemName = itemNameEl.textContent;
-                const serial = serialEl.textContent;
-
-                const CleanedValue = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
-
-                const isSelected = div.classList.contains('selected');
-
-                div.classList.toggle('selected');
-    
-                if (isSelected) {
-                    TotalValue -= CleanedValue;
-                    const index = coinflipData.findIndex(i => i.itemid === itemId);
-
-                    if (index !== -1) {
-                        coinflipData.splice(index, 1);
-                        console.log(`Item with itemid ${itemId} removed.`);
-                    } else {
-                        console.log(`Item with itemid ${itemId} does not exist.`);
-                    }
-
-                } else {
-                    TotalValue += CleanedValue;
-                    coinflipData.push({
-                        itemname: itemName,
-                        serial: serial,
-                        itemid: itemId
-                     });
-                }
-
-                UpdateTotalValueLabel();
-            });
-            
-            grid.appendChild(div);
-        });
-
-    } catch (error) {
-        console.error('Error fetching', error);
-    }
-}
-
-FillGrid();
-UpdateTotalValueLabel();
-
-let selectedJoinMatchId = null;
-let joinSide = "Heads";
-
-document.querySelectorAll('.join-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const matchCard = e.target.closest('.match-card');
-        selectedJoinMatchId = matchCard.dataset.id;
-
-        document.getElementById('joinMatchId').textContent = selectedJoinMatchId;
-        document.getElementById('joinCoinflipModal').classList.add('open');
-    });
-});
-
-document.querySelectorAll('.view-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const matchCard = e.target.closest('.match-card');
-        const matchId = matchCard.dataset.id;
-
-        const players = matchCard.querySelectorAll('.player-avatar');
-        const items = matchCard.querySelectorAll('.preview-item img');
-
-        let html = `<p><strong>Match ID:</strong> ${matchId}</p>`;
-
-        html += `<div style="display:flex; gap:12px; margin:12px 0;">`;
-        players.forEach(p => {
-            html += `<img src="${p.src}" style="width:60px;height:60px;border-radius:50%;">`;
-        });
-        html += `</div>`;
-
-        html += `<div style="display:flex;gap:6px;flex-wrap:wrap;">`;
-        items.forEach(i => {
-            html += `<img src="${i.src}" style="width:40px;height:40px;border-radius:6px;">`;
-        });
-        html += `</div>`;
-
-        document.getElementById('viewCoinflipContent').innerHTML = html;
-        document.getElementById('viewCoinflipModal').classList.add('open');
-    });
-});
-
-document.querySelectorAll('#joinCoinflipModal .side-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-        document
-            .querySelectorAll('#joinCoinflipModal .side-option')
-            .forEach(o => o.classList.remove('selected'));
-
-        opt.classList.add('selected');
-        joinSide = opt.dataset.side;
-    });
-});
-
-document.getElementById('confirmJoinBtn').addEventListener('click', async () => {
-    try {
-        const res = await fetch('/joincoinflip', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                matchId: selectedJoinMatchId,
-                side: joinSide
-            })
-        });
-
-        if (!res.ok) throw new Error('Failed to join');
-
-        document.getElementById('joinCoinflipModal').classList.remove('open');
-    } catch (err) {
-        console.error(err);
-    }
-});
-
-document.querySelectorAll('[data-close]').forEach(el => {
-    el.addEventListener('click', () => {
-        document.getElementById(el.dataset.close).classList.remove('open');
-    });
-});
-
-window.addEventListener('click', (e) => {
-    document.querySelectorAll('.modal').forEach(modal => {
-        if (e.target === modal) modal.classList.remove('open');
-    });
-});
-
-</script>
 
 <div class="modal" id="viewCoinflipModal">
     <div class="wallet" style="max-width:500px;">
@@ -851,42 +607,11 @@ window.addEventListener('click', (e) => {
             <span class="close" data-close="viewCoinflipModal">&times;</span>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <div class="player-container">
-                <img src="/static/images/player1.png" class="player-avatar-view" alt="Player 1">
-                <div class="player-items top-items">
-                    <div class="preview-item">
-                        <img src="/static/images/item1.png" alt="Item">
-                    </div>
-                </div>
-            </div>
-
-            <div class="vs-text" style="font-size:1.5rem; font-weight:bold;">VS</div>
-
-            <div class="player-container">
-                <img src="/static/images/player2.png" class="player-avatar-view" alt="Player 2">
-                <div class="player-items top-items">
-                    <div class="preview-item">
-                        <img src="/static/images/item2.png" alt="Item">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="items-bottom-container" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-            <div class="preview-item">
-                <img src="/static/images/item3.png" alt="Item">
-            </div>
-            <div class="preview-item">
-                <img src="/static/images/item4.png" alt="Item">
-            </div>
-            <div class="preview-item more">+1</div>
-        </div>
+        <!-- FIXED: Missing container -->
+        <div id="viewCoinflipContent"></div>
 
         <div class="coinflip-modal-actions" style="margin-top:16px;">
-            <button class="action-btn deposit" data-close="viewCoinflipModal">
-                Close
-            </button>
+            <button class="action-btn deposit" data-close="viewCoinflipModal">Close</button>
         </div>
     </div>
 </div>
@@ -899,14 +624,10 @@ window.addEventListener('click', (e) => {
         </div>
 
         <p style="margin-bottom:10px;">
-            You are about to join coinflip:
-            <strong id="joinMatchId"></strong>
+            You are about to join coinflip: <strong id="joinMatchId"></strong>
         </p>
 
-        <div style="margin-bottom:12px;">
-            Select your side:
-        </div>
-
+        <div style="margin-bottom:12px;">Select your side:</div>
         <div class="coinflip-side-select">
             <div class="side-option selected" data-side="Heads">🪙 Heads</div>
             <div class="side-option" data-side="Tails">🪙 Tails</div>
@@ -914,28 +635,202 @@ window.addEventListener('click', (e) => {
 
         <div class="join-items-container" style="display:flex; justify-content:space-between; margin:16px 0;">
             <div class="player-items">
-                <div class="preview-item">
-                    <img src="/static/images/item1.png" alt="Item">
-                </div>
+                <div class="preview-item"><img src="/static/images/item1.png" alt="Item"></div>
             </div>
             <div class="player-items">
-                <div class="preview-item">
-                    <img src="/static/images/item2.png" alt="Item">
-                </div>
+                <div class="preview-item"><img src="/static/images/item2.png" alt="Item"></div>
             </div>
         </div>
 
         <div class="coinflip-modal-actions">
-            <button class="action-btn withdraw" data-close="joinCoinflipModal">
-                Cancel
-            </button>
-            <button class="action-btn deposit" id="confirmJoinBtn">
-                Join Coinflip
-            </button>
+            <button class="action-btn withdraw" data-close="joinCoinflipModal">Cancel</button>
+            <button class="action-btn deposit" id="confirmJoinBtn">Join Coinflip</button>
         </div>
     </div>
 </div>
-</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const createMatchBtn = document.getElementById("createMatchBtn");
+    const createModal = document.getElementById("createCoinflipModal");
+    const modalClose = createModal?.querySelector(".close");
+
+    if (createMatchBtn && createModal && modalClose) {
+        createMatchBtn.addEventListener("click", () => createModal.classList.add("open"));
+        modalClose.addEventListener("click", () => createModal.classList.remove("open"));
+    }
+
+    window.addEventListener("click", (e) => {
+        if (e.target === createModal) createModal.classList.remove("open");
+    });
+
+    const grid = document.getElementById('coinflipInventory');
+    grid?.replaceChildren();
+
+    let Side = "Heads";
+    let TotalValue = 0;
+    let coinflipData = [];
+
+    const totalValueLabel = document.getElementById('totalValue');
+    const totalSelectedLabel = document.getElementById("totalSelected");
+
+    function UpdateTotalValueLabel() {
+        if (totalValueLabel) totalValueLabel.textContent = `$${TotalValue.toLocaleString()}`;
+        if (totalSelectedLabel) totalSelectedLabel.textContent = `${coinflipData.length} items`;
+    }
+
+    async function FillGrid() {
+        try {
+            const response = await fetch('/GetInventory');
+            const data = await response.json();
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'inventory-item';
+                div.innerHTML = `
+                    <div class="select-box" data-itemid="${item.itemid}"></div>
+                    <img src="${item.ImageUrl}">
+                    <span class="serial">#${item.serial}</span>
+                    <span class="name">${item.itemname}</span>
+                    <span class="value">${item.Value}</span>
+                `;
+
+                div.addEventListener('click', () => {
+                    const valueEl = div.querySelector('.value');
+                    const nameEl = div.querySelector('.name');
+                    const serialEl = div.querySelector('.serial');
+                    const itemId = div.querySelector('.select-box')?.dataset.itemid;
+                    if (!valueEl || !nameEl || !serialEl || !itemId) return;
+
+                    const CleanedValue = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+                    const isSelected = div.classList.contains('selected');
+
+                    div.classList.toggle('selected');
+
+                    if (isSelected) {
+                        TotalValue -= CleanedValue;
+                        const index = coinflipData.findIndex(i => i.itemid === itemId);
+                        if (index !== -1) coinflipData.splice(index, 1);
+                    } else {
+                        TotalValue += CleanedValue;
+                        coinflipData.push({ itemname: nameEl.textContent, serial: serialEl.textContent, itemid: itemId });
+                    }
+
+                    UpdateTotalValueLabel();
+                });
+
+                grid.appendChild(div);
+            });
+        } catch (err) { console.error('Error fetching inventory:', err); }
+    }
+
+    FillGrid();
+    UpdateTotalValueLabel();
+
+    document.querySelectorAll('.side-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.side-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            Side = opt.dataset.side;
+        });
+    });
+
+    const coinflipCancelBtn = document.getElementById("coinflipCancelBtn");
+    if (coinflipCancelBtn) {
+        coinflipCancelBtn.addEventListener('click', async () => {
+            try { await fetch('/cancelcoinflip', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include'}); } 
+            catch(err) { console.error(err); }
+        });
+    }
+
+    const coinflipStartBtn = document.getElementById("coinflipCreateBtn");
+    if (coinflipStartBtn) {
+        coinflipStartBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/createcoinflip', { 
+                    method:'POST', 
+                    headers:{'Content-Type':'application/json'}, 
+                    credentials:'include', 
+                    body: JSON.stringify({ coinflipData, Side })
+                });
+            } catch(err){ console.error(err); }
+        });
+    }
+
+    document.querySelector('.coinflip-container')?.addEventListener('click', e => {
+        const matchCard = e.target.closest('.match-card');
+        if (!matchCard) return;
+        const matchId = matchCard.dataset.id;
+
+        if (e.target.classList.contains('join-btn')) {
+            const joinModal = document.getElementById('joinCoinflipModal');
+            const joinMatchIdEl = document.getElementById('joinMatchId');
+            if (joinModal && joinMatchIdEl) {
+                joinMatchIdEl.textContent = matchId;
+                joinModal.classList.add('open');
+            }
+        }
+
+        if (e.target.classList.contains('view-btn')) {
+            const viewModal = document.getElementById('viewCoinflipModal');
+            const contentEl = document.getElementById('viewCoinflipContent');
+            if (!viewModal || !contentEl) return;
+
+            const players = matchCard.querySelectorAll('.player-avatar');
+            const items = matchCard.querySelectorAll('.preview-item img');
+
+            let html = `<p><strong>Match ID:</strong> ${matchId}</p>`;
+            html += `<div style="display:flex; gap:12px; margin:12px 0;">`;
+            players.forEach(p => html += `<img src="${p.src}" style="width:60px;height:60px;border-radius:50%;">`);
+            html += `</div><div style="display:flex;gap:6px;flex-wrap:wrap;">`;
+            items.forEach(i => html += `<img src="${i.src}" style="width:40px;height:40px;border-radius:6px;">`);
+            html += `</div>`;
+
+            contentEl.innerHTML = html;
+            viewModal.classList.add('open');
+        }
+    });
+
+    document.querySelectorAll('[data-close]').forEach(el => {
+        el.addEventListener('click', () => {
+            const modal = document.getElementById(el.dataset.close);
+            if(modal) modal.classList.remove('open');
+        });
+    });
+
+    window.addEventListener('click', e => {
+        document.querySelectorAll('.modal').forEach(modal => { if(e.target===modal) modal.classList.remove('open'); });
+    });
+
+    document.querySelectorAll('#joinCoinflipModal .side-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('#joinCoinflipModal .side-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+        });
+    });
+
+    const confirmJoinBtn = document.getElementById('confirmJoinBtn');
+    if(confirmJoinBtn) {
+        confirmJoinBtn.addEventListener('click', async () => {
+            const joinModal = document.getElementById('joinCoinflipModal');
+            const selectedSide = joinModal.querySelector('.side-option.selected')?.dataset.side || "Heads";
+            const matchId = document.getElementById('joinMatchId')?.textContent;
+            try {
+                if(matchId) {
+                    await fetch('/joincoinflip', {
+                        method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        credentials:'include',
+                        body: JSON.stringify({ matchId, side:selectedSide })
+                    });
+                    if(joinModal) joinModal.classList.remove('open');
+                }
+            } catch(err){ console.error(err); }
+        });
+    }
+
+});
+</script>
 
 
 {% endblock %}
