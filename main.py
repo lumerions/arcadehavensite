@@ -131,7 +131,7 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
                 
                 if result and result[0] == SessionId:
                     if returnusername is None:
-                        return templates.TemplateResponse(htmlfile2, {"request": request})
+                        return templates.TemplateResponse(htmlfile2, {"request": request}), True
                     else:
                         return {"siteuser":result[1],"robloxuser":result[2]}
                 else:
@@ -190,7 +190,67 @@ def towers(request: Request):
 
 @app.get("/coinflipgame", response_class=HTMLResponse)
 def coinflipHome(request: Request):
-    return CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
+    def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
+    if not SessionId:
+        return JSONResponse({"error": "SessionId missing"}, status_code=400)
+
+    response, logged_in  CheckIfUserIsLoggedIn(request,"register.html","coinflip.html")
+
+    if not logged_in:
+        return response
+
+    CoinflipCollection = getCoinflipMongo()["collection"]
+
+    Documents = CoinflipCollection.find(
+        {},
+    )
+
+    Documents = list(Documents)
+    if not Documents:
+        return templates.TemplateResponse("coinflip.html", {"request": request, "matches": []})
+    
+    UserIds = ",".join(str(v["UserId"]) for v in Documents if "UserId" in v)
+    AssetIdParam = ",".join(str(item["itemid"]) for v in Documents for item in v.get("CoinflipItems", []))
+
+    # bandwidth might be insane if theres lots of data ill optimize it later trust
+    print(AssetIdParam)
+    print(UserIds)
+    if AssetIdParam:
+        try:
+            response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
+            decodedResponse = response.json()
+            decodedResponseData = decodedResponse.get("data",[])
+            thumbnailsDict = {int(v["targetId"]): v["imageUrl"] for v in decodedResponseData}
+        except Exception as e:
+            print(str(e))
+            return JSONResponse({"error": str(e)}, status_code=400)
+    if UserIds:
+        try:
+            RobloxThumbnailEndpoint = f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={UserIds}&size=420x420&format=Png&isCircular=false"
+            RobloxThumbnailEndpointResponse = requests.get(RobloxThumbnailEndpoint)
+            RobloxThumbnailUrls = RobloxThumbnailEndpointResponse.json().get("data",[])
+            avatarDict = {int(v["targetId"]): v["imageUrl"] for v in RobloxThumbnailUrls}
+        except Exception as e:
+            print(str(e))
+            return JSONResponse({"error": str(e)}, status_code=400)
+
+    for v in Documents:
+        CoinflipItems = v.get("CoinflipItems", [])
+        v["total_value"] = 0
+        v["total_items"] = len(CoinflipItems)
+        if "_id" in v:
+            v["_id"] = str(v["_id"])
+        UserId = int(v.get("UserId", 0))
+        avatarUrl = avatarDict.get(UserId, "")
+        v["ImageUrl"] = avatarUrl
+        v["player1"] = {"username": v.get("Username", "Unknown"), "avatar": avatarUrl}
+        v["player2"] = {"username": "", "avatar": ""}
+        v["items"] = [{"image": thumbnailsDict.get(int(item["itemid"]), "")} for item in CoinflipItems]
+
+    return templates.TemplateResponse(
+        "coinflip.html", {"request": request, "matches": Documents}
+    )
+
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
@@ -785,66 +845,6 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
         "amountafter": amountafternexttile,
         "multiplier": current_multiplier
     }
-
-@app.get("/GetActiveCoinflips",response_class=HTMLResponse)
-def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
-    if not SessionId:
-        return JSONResponse({"error": "SessionId missing"}, status_code=400)
-
-    CoinflipCollection = getCoinflipMongo()["collection"]
-
-    Documents = CoinflipCollection.find(
-        {},
-    )
-
-    Documents = list(Documents)
-    if not Documents:
-        return templates.TemplateResponse("coinflip.html", {"request": request, "matches": []})
-    
-    UserIds = ",".join(str(v["UserId"]) for v in Documents if "UserId" in v)
-    AssetIdParam = ",".join(str(item["itemid"]) for v in Documents for item in v.get("CoinflipItems", []))
-
-    # bandwidth might be insane if theres lots of data ill optimize it later trust
-    print(AssetIdParam)
-    print(UserIds)
-    if AssetIdParam:
-        try:
-            response = requests.get(f"https://thumbnails.roproxy.com/v1/assets?assetIds={AssetIdParam}&size=512x512&format=Png")
-            decodedResponse = response.json()
-            decodedResponseData = decodedResponse.get("data",[])
-            thumbnailsDict = {int(v["targetId"]): v["imageUrl"] for v in decodedResponseData}
-        except Exception as e:
-            print(str(e))
-            return JSONResponse({"error": str(e)}, status_code=400)
-    if UserIds:
-        try:
-            RobloxThumbnailEndpoint = f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={UserIds}&size=420x420&format=Png&isCircular=false"
-            RobloxThumbnailEndpointResponse = requests.get(RobloxThumbnailEndpoint)
-            RobloxThumbnailUrls = RobloxThumbnailEndpointResponse.json().get("data",[])
-            avatarDict = {int(v["targetId"]): v["imageUrl"] for v in RobloxThumbnailUrls}
-        except Exception as e:
-            print(str(e))
-            return JSONResponse({"error": str(e)}, status_code=400)
-
-    for v in Documents:
-        CoinflipItems = v.get("CoinflipItems", [])
-        v["total_value"] = 0
-        v["total_items"] = len(CoinflipItems)
-        if "_id" in v:
-            v["_id"] = str(v["_id"])
-        UserId = int(v.get("UserId", 0))
-        avatarUrl = avatarDict.get(UserId, "")
-        v["ImageUrl"] = avatarUrl
-        v["player1"] = {"username": v.get("Username", "Unknown"), "avatar": avatarUrl}
-        v["player2"] = {"username": "", "avatar": ""}
-        v["items"] = [{"image": thumbnailsDict.get(int(item["itemid"]), "")} for item in CoinflipItems]
-
-    return templates.TemplateResponse(
-        "coinflip.html", {"request": request, "matches": Documents}
-    )
-
-
-
 
 @app.get("/GetInventory")
 def getInventory(SessionId: str = Cookie(None)):

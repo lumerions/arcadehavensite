@@ -706,6 +706,142 @@ async function FillGrid() {
 
 FillGrid();
 UpdateTotalValueLabel();
+
+let selectedJoinMatchId = null;
+let joinSide = "Heads";
+
+document.querySelectorAll('.join-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const matchCard = e.target.closest('.match-card');
+        selectedJoinMatchId = matchCard.dataset.id;
+
+        document.getElementById('joinMatchId').textContent = selectedJoinMatchId;
+        document.getElementById('joinCoinflipModal').classList.add('open');
+    });
+});
+
+document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const matchCard = e.target.closest('.match-card');
+        const matchId = matchCard.dataset.id;
+
+        const players = matchCard.querySelectorAll('.player-avatar');
+        const items = matchCard.querySelectorAll('.preview-item img');
+
+        let html = `<p><strong>Match ID:</strong> ${matchId}</p>`;
+
+        html += `<div style="display:flex; gap:12px; margin:12px 0;">`;
+        players.forEach(p => {
+            html += `<img src="${p.src}" style="width:60px;height:60px;border-radius:50%;">`;
+        });
+        html += `</div>`;
+
+        html += `<div style="display:flex;gap:6px;flex-wrap:wrap;">`;
+        items.forEach(i => {
+            html += `<img src="${i.src}" style="width:40px;height:40px;border-radius:6px;">`;
+        });
+        html += `</div>`;
+
+        document.getElementById('viewCoinflipContent').innerHTML = html;
+        document.getElementById('viewCoinflipModal').classList.add('open');
+    });
+});
+
+document.querySelectorAll('#joinCoinflipModal .side-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+        document
+            .querySelectorAll('#joinCoinflipModal .side-option')
+            .forEach(o => o.classList.remove('selected'));
+
+        opt.classList.add('selected');
+        joinSide = opt.dataset.side;
+    });
+});
+
+document.getElementById('confirmJoinBtn').addEventListener('click', async () => {
+    try {
+        const res = await fetch('/joincoinflip', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                matchId: selectedJoinMatchId,
+                side: joinSide
+            })
+        });
+
+        if (!res.ok) throw new Error('Failed to join');
+
+        document.getElementById('joinCoinflipModal').classList.remove('open');
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+document.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', () => {
+        document.getElementById(el.dataset.close).classList.remove('open');
+    });
+});
+
+window.addEventListener('click', (e) => {
+    document.querySelectorAll('.modal').forEach(modal => {
+        if (e.target === modal) modal.classList.remove('open');
+    });
+});
+
 </script>
+
+<!-- JOIN COINFLIP MODAL -->
+<div class="modal" id="joinCoinflipModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Join Coinflip</h2>
+            <span class="close" data-close="joinCoinflipModal">&times;</span>
+        </div>
+
+        <p style="margin-bottom:10px;">
+            You are about to join coinflip:
+            <strong id="joinMatchId"></strong>
+        </p>
+
+        <div style="margin-bottom:12px;">
+            Select your side:
+        </div>
+
+        <div class="coinflip-side-select">
+            <div class="side-option selected" data-side="Heads">🪙 Heads</div>
+            <div class="side-option" data-side="Tails">🪙 Tails</div>
+        </div>
+
+        <div class="coinflip-modal-actions">
+            <button class="action-btn withdraw" data-close="joinCoinflipModal">
+                Cancel
+            </button>
+            <button class="action-btn deposit" id="confirmJoinBtn">
+                Join Coinflip
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="viewCoinflipModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Coinflip Details</h2>
+            <span class="close" data-close="viewCoinflipModal">&times;</span>
+        </div>
+
+        <div id="viewCoinflipContent"></div>
+
+        <div class="coinflip-modal-actions">
+            <button class="action-btn deposit" data-close="viewCoinflipModal">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
 
 {% endblock %}
