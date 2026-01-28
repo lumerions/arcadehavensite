@@ -200,9 +200,7 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
             
             result = cursor.fetchone()  
             
-            if result and result[0] == SessionId:
-                return templates.TemplateResponse("coinflip.html", {"request": request})
-            else:
+            if result and result[0] != SessionId:
                 response = templates.TemplateResponse("register.html", {"request": request})
                 response.delete_cookie("SessionId")
                 return response
