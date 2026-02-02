@@ -23,7 +23,13 @@ app = FastAPI(
     version="1.0.0",
 )
 
-limiter = Limiter(key_func=lambda request: request.cookies.get("SessionId") or request.client.host)
+def LimiterFunction(request):
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip()
+    
+
+limiter = Limiter(key_func=LimiterFunction)
 app.add_middleware(SlowAPIMiddleware)
 app.state.limiter = limiter
 
