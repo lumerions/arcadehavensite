@@ -369,7 +369,7 @@ async def depositget(request : Request,amount: float, SessionId: str = Cookie(No
 
 @app.get("/withdraw",response_class =  HTMLResponse)
 @limiter.limit("50/minute")
-async def withdrawget(amount: float, page: str, request: Request, SessionId: str = Cookie(None)):
+async def withdrawget(request: Request,amount: float, page: str, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
