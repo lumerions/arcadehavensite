@@ -1109,7 +1109,7 @@ def print_endpoint(Request: Request,data: MinesClick, SessionId: str = Cookie(No
 
 @app.post("/games/start",response_class=HTMLResponse)
 @limiter.limit("50/minute")
-async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
+async def gamestart(request : Request,SessionId: str = Cookie(None)):
 
     data = await request.json()
     bet_amount = data.get("betAmount")
