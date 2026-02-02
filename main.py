@@ -24,11 +24,8 @@ app = FastAPI(
 )
 
 def LimiterFunction(request):
-    xff = request.headers.get("x-forwarded-for")
-    if xff:
-        return xff.split(",")[0].strip()
+    return request.cookies.get('SessionId')  
     
-
 limiter = Limiter(key_func=LimiterFunction)
 app.add_middleware(SlowAPIMiddleware)
 app.state.limiter = limiter
@@ -170,7 +167,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     )
 
 @app.get("/register", response_class=HTMLResponse)
-@limiter.limit("2/minute")
+@limiter.limit("50/minute")
 def readregister(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","home.html")
 
@@ -204,7 +201,7 @@ def readlogin(request: Request):
             )
         
 @app.get("/mines",response_class =  HTMLResponse)
-@limiter.limit("50/minute")
+@limiter.limit("5/minute")
 def loadmines(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","mines.html")
 
