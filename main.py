@@ -978,7 +978,7 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
 
 @app.post("/games/click")
 @limiter.limit("50/minute")
-def print_endpoint(Request: Request,data: MinesClick, SessionId: str = Cookie(None)):
+def print_endpoint(request: Request,data: MinesClick, SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
 
@@ -1258,7 +1258,7 @@ async def gamestart(request : Request,SessionId: str = Cookie(None)):
 
 @app.post("/games/cashout")
 @limiter.limit("50/minute")
-def cashout(Request: Request,SessionId: str = Cookie(None)):
+def cashout(request: Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
     
