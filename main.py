@@ -23,7 +23,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=lambda request: request.cookies.get("SessionId") or request.client.host)
 app.add_middleware(SlowAPIMiddleware)
 app.state.limiter = limiter
 
