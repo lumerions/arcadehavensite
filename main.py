@@ -13,7 +13,8 @@ from typing import List, Dict, Any
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from fastapi.responses import JSONResponse
+from slowapi.middleware import SlowAPIMiddleware
+
 place_id = 97090711812957
 
 app = FastAPI(
@@ -23,6 +24,8 @@ app = FastAPI(
 )
 
 limiter = Limiter(key_func=get_remote_address)
+app.add_middleware(SlowAPIMiddleware)
+app.state.limiter = limiter
 
 def getMongoClient(ConnectionURI = None):
     if not ConnectionURI:
