@@ -10,6 +10,10 @@ import json,requests,time,uvicorn,certifi,base64,math,random,string,secrets,os,b
 from pydantic import BaseModel
 from pymongo import MongoClient,UpdateOne,ReturnDocument
 from typing import List, Dict, Any
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from fastapi.responses import JSONResponse
 place_id = 97090711812957
 
 app = FastAPI(
@@ -17,6 +21,8 @@ app = FastAPI(
     description="AH Gambling",
     version="1.0.0",
 )
+
+limiter = Limiter(key_func=get_remote_address)
 
 def getMongoClient(ConnectionURI = None):
     if not ConnectionURI:
@@ -147,12 +153,21 @@ def CheckIfUserIsLoggedIn(request,htmlfile,htmlfile2,returnusername = None):
             )
 
 
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests"}
+    )
+
 @app.get("/register", response_class=HTMLResponse)
+@limiter.limit("2/minute")
 def readregister(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","home.html")
 
 
 @app.get("/login",response_class =  HTMLResponse)
+@limiter.limit("50/minute")
 def readlogin(request: Request):
     SessionId = request.cookies.get('SessionId')  
     if not SessionId:
@@ -180,15 +195,18 @@ def readlogin(request: Request):
             )
         
 @app.get("/mines",response_class =  HTMLResponse)
+@limiter.limit("50/minute")
 def loadmines(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","mines.html")
 
 
 @app.get("/towers",response_class =  HTMLResponse)
+@limiter.limit("50/minute")
 def towers(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","towers.html")
 
 @app.get("/coinflipgame", response_class=HTMLResponse)
+@limiter.limit("50/minute")
 def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
@@ -266,16 +284,19 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
 
 
 @app.get("/", response_class=HTMLResponse)
-def read_root(request: Request):
+@limiter.limit("50/minute")
+def readroot(request: Request):
     Result = CheckIfUserIsLoggedIn(request,"register.html","home.html")
     return Result
 
 @app.get("/home")
+@limiter.limit("50/minute")
 def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 
 @app.get("/logout")
+@limiter.limit("50/minute")
 def logout():
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="SessionId")
@@ -283,6 +304,7 @@ def logout():
 
 
 @app.get("/getbalance")
+@limiter.limit("50/minute")
 def get(SessionId: str = Cookie(None)):
 
     RedisGet = redis.get(SessionId)
@@ -307,6 +329,7 @@ def get(SessionId: str = Cookie(None)):
         return int(redis.get(SessionId))
 
 @app.get("/deposit")
+@limiter.limit("50/minute")
 async def depositget(amount: float, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
@@ -345,6 +368,7 @@ async def depositget(amount: float, SessionId: str = Cookie(None)):
     return RedirectResponse(roblox_url)
 
 @app.get("/withdraw",response_class =  HTMLResponse)
+@limiter.limit("50/minute")
 async def withdrawget(amount: float, page: str, request: Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
@@ -409,6 +433,7 @@ async def withdrawget(amount: float, page: str, request: Request, SessionId: str
 
 
 @app.post("/withdrawitems",response_class =  HTMLResponse)
+@limiter.limit("50/minute")
 async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
@@ -474,6 +499,7 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
     return JSONResponse({"redirect": roblox_url})
 
 @app.post("/earnings")
+@limiter.limit("50/minute")
 def depositearnings(data: deposit):
 
     if not data.robloxusername:
@@ -559,6 +585,7 @@ def depositearnings(data: deposit):
         return {"success": True, "type": "withdraw", "amount": amount}
     
 @app.post("/earningsitems")
+@limiter.limit("50/minute")
 def depositearnings(data: DepositItems):
 
     if not data.robloxusername:
@@ -779,6 +806,7 @@ def depositearnings(data: DepositItems):
 
 
 @app.get("/games/getCurrentData")
+@limiter.limit("50/minute")
 def get(Game : str,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
@@ -796,6 +824,7 @@ def get(Game : str,SessionId: str = Cookie(None)):
     return existing_array
 
 @app.get("/games/cashoutamount")
+@limiter.limit("50/minute")
 def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
@@ -861,6 +890,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     }
 
 @app.get("/GetInventory")
+@limiter.limit("50/minute")
 def getInventory(SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
@@ -905,6 +935,7 @@ def getInventory(SessionId: str = Cookie(None)):
 
 
 @app.get("/deposititems")
+@limiter.limit("50/minute")
 async def depositget(request : Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
@@ -943,6 +974,7 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
 
 
 @app.post("/games/click")
+@limiter.limit("50/minute")
 def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
@@ -1073,6 +1105,7 @@ def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
 
 
 @app.post("/games/start",response_class=HTMLResponse)
+@limiter.limit("50/minute")
 async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
     data = await request.json()
@@ -1221,6 +1254,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
 
 @app.post("/games/cashout")
+@limiter.limit("50/minute")
 def cashout(SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
@@ -1294,6 +1328,7 @@ def cashout(SessionId: str = Cookie(None)):
 
 
 @app.post("/register", response_class=HTMLResponse)
+@limiter.limit("50/minute")
 def register(
     request: Request,  
     username: str = Form(...),
@@ -1412,6 +1447,7 @@ def login_post(
 
 
 @app.post("/createcoinflip", response_class=HTMLResponse)
+@limiter.limit("50/minute")
 async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
@@ -1546,6 +1582,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
     
 
 @app.post("/cancelcoinflip", response_class=HTMLResponse)
+@limiter.limit("50/minute")
 async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
