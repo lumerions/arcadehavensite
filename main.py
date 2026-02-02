@@ -297,7 +297,7 @@ def home(request: Request):
 
 @app.get("/logout")
 @limiter.limit("50/minute")
-def logout():
+def logout(request : Request):
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="SessionId")
     return response
@@ -305,7 +305,7 @@ def logout():
 
 @app.get("/getbalance")
 @limiter.limit("50/minute")
-def get(SessionId: str = Cookie(None)):
+def get(request : Request,SessionId: str = Cookie(None)):
 
     RedisGet = redis.get(SessionId)
 
@@ -330,7 +330,7 @@ def get(SessionId: str = Cookie(None)):
 
 @app.get("/deposit")
 @limiter.limit("50/minute")
-async def depositget(amount: float, SessionId: str = Cookie(None)):
+async def depositget(request : Request,amount: float, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
     
@@ -500,7 +500,7 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
 @app.post("/earnings")
 @limiter.limit("50/minute")
-def depositearnings(data: deposit):
+def depositearnings(request : Request,data: deposit):
 
     if not data.robloxusername:
         return JSONResponse({"error": "Roblox username missing"}, status_code=400)
@@ -586,7 +586,7 @@ def depositearnings(data: deposit):
     
 @app.post("/earningsitems")
 @limiter.limit("50/minute")
-def depositearnings(data: DepositItems):
+def depositearnings(request : Request,data: DepositItems):
 
     if not data.robloxusername:
         return JSONResponse({"error": "Roblox username missing"}, status_code=400)
@@ -807,7 +807,7 @@ def depositearnings(data: DepositItems):
 
 @app.get("/games/getCurrentData")
 @limiter.limit("50/minute")
-def get(Game : str,SessionId: str = Cookie(None)):
+def get(request : Request,Game : str,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
     keys = [
@@ -825,7 +825,7 @@ def get(Game : str,SessionId: str = Cookie(None)):
 
 @app.get("/games/cashoutamount")
 @limiter.limit("50/minute")
-def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
+def getcashoutAmount(request : Request,Game: str, Row: int = 0, SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
     
@@ -891,7 +891,7 @@ def getcashoutAmount(Game: str, Row: int = 0, SessionId: str = Cookie(None)):
 
 @app.get("/GetInventory")
 @limiter.limit("50/minute")
-def getInventory(SessionId: str = Cookie(None)):
+def getInventory(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
     
@@ -975,7 +975,7 @@ async def depositget(request : Request, SessionId: str = Cookie(None)):
 
 @app.post("/games/click")
 @limiter.limit("50/minute")
-def print_endpoint(data: MinesClick, SessionId: str = Cookie(None)):
+def print_endpoint(Request: Request,data: MinesClick, SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
 
@@ -1255,7 +1255,7 @@ async def print_endpoint(request : Request,SessionId: str = Cookie(None)):
 
 @app.post("/games/cashout")
 @limiter.limit("50/minute")
-def cashout(SessionId: str = Cookie(None)):
+def cashout(Request: Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "No session"}, status_code=400)
     
@@ -1329,12 +1329,7 @@ def cashout(SessionId: str = Cookie(None)):
 
 @app.post("/register", response_class=HTMLResponse)
 @limiter.limit("50/minute")
-def register(
-    request: Request,  
-    username: str = Form(...),
-    password: str = Form(...),
-    confirm_password: str = Form(...)
-):
+def register(request: Request,  username: str = Form(...),password: str = Form(...),confirm_password: str = Form(...)):
     if password != confirm_password:
         return templates.TemplateResponse(
             "register.html",
@@ -1408,11 +1403,9 @@ def register(
     return response
 
 @app.post("/login")
-def login_post(
-    request: Request,  
-    username: str = Form(...),
-    password: str = Form(...),
-):
+@limiter.limit("50/minute")
+
+def login_post( request: Request,  username: str = Form(...),password: str = Form(...),):
 
     try:
         conn = getPostgresConnection() 
