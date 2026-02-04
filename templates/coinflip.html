@@ -22,6 +22,7 @@
         align-items: center;
     }
 
+    /* Stats & Controls */
     .coinflip-controls {
         display: flex;
         flex-direction: column;
@@ -70,6 +71,7 @@
 
     .create-btn:hover { background: #1d4ed8; }
 
+    /* Match Cards */
     .coinflip-container {
         width: 100%;
         max-height: 900px; 
@@ -78,24 +80,6 @@
         flex-direction: column;
         gap: 16px;
         padding: 0 8px;
-    }
-
-    /* Side Badge Styling */
-    .side-badge {
-        position: absolute;
-        top: -5px;
-        left: -5px;
-        background: #2a2a3d;
-        border: 1px solid #444;
-        border-radius: 50%;
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.9rem;
-        z-index: 10;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
     .match-card {
@@ -120,6 +104,23 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+
+    .side-badge {
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        background: #2a2a3d;
+        border: 1px solid #444;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
     .player-avatar {
@@ -210,8 +211,10 @@
         background: #1c2433;
         border-radius: 14px;
         width: 100%;
-        max-width: 420px;
+        max-width: 450px;
         padding: 24px;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .wallet-header {
@@ -223,25 +226,42 @@
 
     .close { cursor: pointer; font-size: 1.5rem; }
 
+    /* Inventory Selection */
     .inventory-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 8px;
-        max-height: 300px;
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+        gap: 10px;
+        max-height: 250px;
         overflow-y: auto;
         margin-top: 12px;
+        background: #0f172a;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #333;
     }
 
     .inventory-item {
-        background: #111827;
+        background: #1e293b;
         border-radius: 6px;
-        padding: 6px;
+        padding: 8px;
         text-align: center;
         cursor: pointer;
         border: 2px solid transparent;
+        transition: transform 0.1s;
     }
 
-    .inventory-item.selected { border-color: #16a34a; }
+    .inventory-item:hover { transform: scale(1.02); }
+
+    .inventory-item.selected {
+        border-color: #16a34a;
+        background: #064e3b;
+    }
+
+    .item-val {
+        font-size: 10px;
+        color: #22c55e;
+        font-weight: bold;
+    }
 
     .coinflip-side-select {
         display: flex;
@@ -287,11 +307,11 @@
             <span class="close">&times;</span>
         </div>
 
-        <input id="itemSearch" placeholder="Enter an item name..." style="width:100%; padding:10px; background:#111; border:1px solid #333; color:white; border-radius:8px; margin-bottom:12px;" />
+        <input id="createSearch" placeholder="Search items..." style="width:100%; padding:10px; background:#111; border:1px solid #333; color:white; border-radius:8px; margin-bottom:12px;" />
 
-        <div id="selectedItems" style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem;">
-            <div>Total Selected: <strong id="totalSelected">0 items</strong></div>
-            <div>Total Value: <strong id="totalValue">$0</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem;">
+            <div>Total Selected: <strong id="createTotalItems">0</strong></div>
+            <div>Value: <strong id="createTotalValue">$0</strong></div>
         </div>
 
         <div class="coinflip-side-select">
@@ -299,10 +319,10 @@
             <div class="side-option" data-side="Tails">💰 Tails</div>
         </div>
 
-        <div class="inventory-grid" id="coinflipInventory"></div>
+        <div class="inventory-grid" id="createInventory"></div>
 
         <div class="match-actions" style="margin-top:16px;">
-            <button class="action-btn withdraw" id="coinflipCancelBtn">Cancel</button>
+            <button class="action-btn withdraw" data-close="createCoinflipModal">Cancel</button>
             <button class="action-btn deposit" id="coinflipCreateBtn">Create Match</button>
         </div>
     </div>
@@ -329,18 +349,15 @@
                 <div class="player">
                     <div class="side-badge">🪙</div>
                     <img class="player-avatar" src="/static/images/player1.png" alt="P1">
-                    <img class="player-item" src="/static/images/item1.png" alt="Item">
                 </div>
                 <div class="vs-text">VS</div>
                 <div class="player">
                     <div class="side-badge">💰</div>
                     <img class="player-avatar" src="/static/images/player2.png" alt="P2">
-                    <img class="player-item" src="/static/images/item2.png" alt="Item">
                 </div>
             </div>
             <div class="items-preview">
                 <div class="preview-item"><img src="/static/images/item1.png"></div>
-                <div class="preview-item"><img src="/static/images/item2.png"></div>
                 <div class="preview-item more">+1</div>
             </div>
             <div class="match-actions">
@@ -355,31 +372,17 @@
                 <div class="player">
                     <div class="side-badge">{{ "🪙" if match.side == "Heads" else "💰" }}</div>
                     <img class="player-avatar" src="{{ match.player1.avatar }}">
-                    {% if match.player1_item %}<img class="player-item" src="{{ match.player1_item.image }}">{% endif %}
                 </div>
-
                 <div class="vs-text">VS</div>
-
                 <div class="player">
                     {% if match.player2 %}
                         <div class="side-badge">{{ "💰" if match.side == "Heads" else "🪙" }}</div>
                         <img class="player-avatar" src="{{ match.player2.avatar }}">
-                        {% if match.player2_item %}<img class="player-item" src="{{ match.player2_item.image }}">{% endif %}
                     {% else %}
                         <div class="player-avatar" style="display:flex; align-items:center; justify-content:center; color:#444;">?</div>
                     {% endif %}
                 </div>
             </div>
-
-            <div class="items-preview">
-                {% for item in match["items"][:5] %}
-                <div class="preview-item"><img src="{{ item.image }}"></div>
-                {% endfor %}
-                {% if match["items"]|length > 5 %}
-                <div class="preview-item more">+{{ match["items"]|length - 5 }}</div>
-                {% endif %}
-            </div>
-
             <div class="match-actions">
                 <button class="match-btn join-btn">Join</button>
                 <button class="match-btn view-btn">View</button>
@@ -390,9 +393,9 @@
 </div>
 
 <div class="modal" id="viewCoinflipModal">
-    <div class="wallet" style="max-width:500px;">
+    <div class="wallet">
         <div class="wallet-header">
-            <h2>Coinflip Details</h2>
+            <h2>Match Details</h2>
             <span class="close" data-close="viewCoinflipModal">&times;</span>
         </div>
         <div id="viewCoinflipContent"></div>
@@ -403,17 +406,21 @@
 </div>
 
 <div class="modal" id="joinCoinflipModal">
-    <div class="wallet" style="max-width:500px;">
+    <div class="wallet">
         <div class="wallet-header">
             <h2>Join Coinflip</h2>
             <span class="close" data-close="joinCoinflipModal">&times;</span>
         </div>
-        <p>Joining Match: <strong id="joinMatchId"></strong></p>
-        <div class="coinflip-side-select" style="margin-top:10px;">
-            <div class="side-option selected" data-side="Heads">🪙 Heads</div>
-            <div class="side-option" data-side="Tails">💰 Tails</div>
+        <p style="font-size: 0.9rem; margin-bottom: 10px;">Match ID: <strong id="joinMatchIdDisplay"></strong></p>
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8rem; background: #0b0b0b; padding: 8px; border-radius: 5px;">
+            <div>Items: <strong id="joinTotalItems">0</strong></div>
+            <div>Value: <strong id="joinTotalValue">$0</strong></div>
         </div>
-        <div class="match-actions">
+
+        <div class="inventory-grid" id="joinInventory"></div>
+
+        <div class="match-actions" style="margin-top:16px;">
             <button class="action-btn withdraw" data-close="joinCoinflipModal">Cancel</button>
             <button class="action-btn deposit" id="confirmJoinBtn">Confirm Join</button>
         </div>
@@ -422,96 +429,149 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const createMatchBtn = document.getElementById("createMatchBtn");
-    const createModal = document.getElementById("createCoinflipModal");
-    
-    createMatchBtn?.addEventListener("click", () => createModal.classList.add("open"));
-    
-    document.querySelectorAll('.close, [data-close]').forEach(btn => {
+    let globalInventory = [];
+    let createSelection = [];
+    let joinSelection = [];
+    let currentJoinMatchId = null;
+
+    // --- Helper: Update Stats Labels ---
+    function updateStats(prefix, selection) {
+        const totalItems = selection.length;
+        const totalValue = selection.reduce((sum, item) => sum + (parseFloat(item.Value) || 0), 0);
+        
+        const itemsLabel = document.getElementById(`${prefix}TotalItems`);
+        const valueLabel = document.getElementById(`${prefix}TotalValue`);
+        
+        if(itemsLabel) itemsLabel.textContent = totalItems;
+        if(valueLabel) valueLabel.textContent = `$${totalValue.toLocaleString()}`;
+    }
+
+    // --- Helper: Render Inventory ---
+    function renderInventory(containerId, selectionArr, prefix) {
+        const grid = document.getElementById(containerId);
+        if(!grid) return;
+        grid.innerHTML = '';
+
+        globalInventory.forEach(item => {
+            const div = document.createElement('div');
+            div.className = `inventory-item ${selectionArr.some(i => i.itemid === item.itemid) ? 'selected' : ''}`;
+            div.innerHTML = `
+                <img src="${item.ImageUrl}" style="width:40px; height:40px; object-fit:contain;">
+                <div style="font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.itemname}</div>
+                <div class="item-val">$${item.Value}</div>
+            `;
+            
+            div.onclick = () => {
+                const index = selectionArr.findIndex(i => i.itemid === item.itemid);
+                if(index > -1) selectionArr.splice(index, 1);
+                else selectionArr.push(item);
+                
+                div.classList.toggle('selected');
+                updateStats(prefix, selectionArr);
+            };
+            grid.appendChild(div);
+        });
+    }
+
+    // --- Modal Management ---
+    document.getElementById("createMatchBtn")?.addEventListener("click", () => {
+        createSelection = [];
+        updateStats('create', createSelection);
+        renderInventory('createInventory', createSelection, 'create');
+        document.getElementById("createCoinflipModal").classList.add("open");
+    });
+
+    document.querySelectorAll('[data-close]').forEach(btn => {
         btn.addEventListener('click', () => {
             const modalId = btn.dataset.close;
-            if (modalId) document.getElementById(modalId)?.classList.remove('open');
-            else btn.closest('.modal').classList.remove('open');
+            document.getElementById(modalId)?.classList.remove('open');
         });
     });
 
-    let Side = "Heads";
-    document.querySelectorAll('.side-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            opt.parentElement.querySelectorAll('.side-option').forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-            Side = opt.dataset.side;
-        });
-    });
-
+    // --- Join Button Logic ---
     document.querySelector('.coinflip-container')?.addEventListener('click', e => {
         const matchCard = e.target.closest('.match-card');
         if (!matchCard) return;
 
-        const matchId = matchCard.dataset.id;
-        const p1Side = matchCard.dataset.side;
-
         if (e.target.classList.contains('join-btn')) {
-            document.getElementById('joinMatchId').textContent = matchId;
+            currentJoinMatchId = matchCard.dataset.id;
+            joinSelection = [];
+            document.getElementById('joinMatchIdDisplay').textContent = currentJoinMatchId;
+            updateStats('join', joinSelection);
+            renderInventory('joinInventory', joinSelection, 'join');
             document.getElementById('joinCoinflipModal').classList.add('open');
         }
 
         if (e.target.classList.contains('view-btn')) {
+            // View logic from previous prompt remains the same
+            const p1Side = matchCard.dataset.side;
             const contentEl = document.getElementById('viewCoinflipContent');
             const players = matchCard.querySelectorAll('.player');
-            const items = matchCard.querySelectorAll('.preview-item img');
-
-            let html = `<div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:20px;">`;
-            
-            players.forEach((p, index) => {
-                const avatarImg = p.querySelector('.player-avatar');
-                const src = avatarImg.src || "";
-                const isPlaceholder = avatarImg.textContent === "?";
-                
-                // Logic: Show side icons only if player is not empty
-                let sideBadgeHtml = "";
-                if (!isPlaceholder) {
-                    const icon = (index === 0) 
-                        ? (p1Side === "Heads" ? "🪙" : "💰") 
-                        : (p1Side === "Heads" ? "💰" : "🪙");
-                    sideBadgeHtml = `<div class="side-badge">${icon}</div>`;
-                }
-
-                html += `
-                    <div class="player">
-                        ${sideBadgeHtml}
-                        <img src="${src}" class="player-avatar" style="width:70px; height:70px;">
-                    </div>
-                `;
-                if (index === 0) html += `<div class="vs-text">VS</div>`;
+            let html = `<div style="display:flex; justify-content:center; align-items:center; gap:20px;">`;
+            players.forEach((p, idx) => {
+                const src = p.querySelector('.player-avatar').src || "";
+                const isEmpty = p.querySelector('.player-avatar').textContent === "?";
+                const sideIcon = !isEmpty ? (idx === 0 ? (p1Side === "Heads" ? "🪙" : "💰") : (p1Side === "Heads" ? "💰" : "🪙")) : "";
+                html += `<div class="player">${sideIcon ? `<div class="side-badge">${sideIcon}</div>`:''}<img src="${src}" class="player-avatar" style="width:60px;height:60px;"></div>`;
+                if(idx === 0) html += `<div class="vs-text">VS</div>`;
             });
             html += `</div>`;
-
-            html += `<div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">`;
-            items.forEach(img => html += `<div class="preview-item"><img src="${img.src}"></div>`);
-            html += `</div>`;
-
             contentEl.innerHTML = html;
             document.getElementById('viewCoinflipModal').classList.add('open');
         }
     });
 
-    async function FillGrid() {
-        const grid = document.getElementById('coinflipInventory');
-        if (!grid) return;
+    // --- API Requests ---
+    async function fetchInventory() {
         try {
             const res = await fetch('/GetInventory');
-            const items = await res.json();
-            items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'inventory-item';
-                div.innerHTML = `<img src="${item.ImageUrl}" style="width:40px;"><div style="font-size:10px;">${item.itemname}</div>`;
-                div.onclick = () => div.classList.toggle('selected');
-                grid.appendChild(div);
-            });
-        } catch (e) { console.log("Inventory fetch error - use static for testing"); }
+            globalInventory = await res.json();
+        } catch (e) { 
+            console.error("Failed to load inventory. Using dummy data for UI.");
+            globalInventory = [
+                { itemid: "1", itemname: "Knife | Doppler", Value: "450.00", ImageUrl: "/static/images/item1.png" },
+                { itemid: "2", itemname: "AK-47 | Vulcan", Value: "120.00", ImageUrl: "/static/images/item2.png" }
+            ];
+        }
     }
-    FillGrid();
+
+    document.getElementById('confirmJoinBtn')?.addEventListener('click', async () => {
+        if(!currentJoinMatchId || joinSelection.length === 0) {
+            alert("Please select at least one item.");
+            return;
+        }
+
+        try {
+            const response = await fetch('/joincoinflip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    matchId: currentJoinMatchId,
+                    items: joinSelection.map(i => i.itemid)
+                })
+            });
+            if(response.ok) location.reload();
+            else alert("Error joining match.");
+        } catch (e) { console.error(e); }
+    });
+
+    document.getElementById('coinflipCreateBtn')?.addEventListener('click', async () => {
+        if(createSelection.length === 0) return;
+        const side = document.querySelector('.side-option.selected').dataset.side;
+        try {
+            const response = await fetch('/createcoinflip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    side: side,
+                    items: createSelection.map(i => i.itemid)
+                })
+            });
+            if(response.ok) location.reload();
+        } catch (e) { console.error(e); }
+    });
+
+    fetchInventory();
 });
 </script>
 {% endblock %}
