@@ -283,16 +283,15 @@
             .balance-wrapper { margin-left: auto; }
         }
 
-                    /* Ensure the modal content can actually grow and show the grid */
             .wallet {
                 background: #1c2433;
                 border-radius: 14px;
-                width: 95%;            /* Use more width on mobile */
-                max-width: 500px;      /* Increased size */
+                width: 95%;          
+                max-width: 500px;     
                 padding: 24px;
-                display: flex;         /* Added */
-                flex-direction: column; /* Added */
-                max-height: 90vh;      /* Prevents modal from going off-screen */
+                display: flex;         
+                flex-direction: column; 
+                max-height: 90vh;     
             }
 
         
@@ -303,26 +302,24 @@
             margin-bottom: 20px;
         }
             
-            /* Force the grid to be visible and scrollable */
             .inventory-grid {
-                display: grid !important; /* Force grid layout */
+                display: grid !important; 
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
                 gap: 12px;
                 margin-top: 15px;
-                flex: 1;                /* Take up remaining space */
-                overflow-y: auto;       /* Enable scrolling */
-                min-height: 300px;      /* Ensure it doesn't collapse to 0px */
+                flex: 1;                
+                overflow-y: auto;       
+                min-height: 300px;     
                 padding: 10px;
                 background: rgba(0,0,0,0.2);
                 border-radius: 8px;
             }
             
-            /* Ensure the items have a physical size */
             .inventory-item {
                 background: #111827 !important;
                 border: 1px solid #334155;
                 padding: 10px;
-                min-height: 140px;      /* Crucial: prevents 0px height */
+                min-height: 140px;     
                 display: flex !important;
                 flex-direction: column;
                 align-items: center;
@@ -614,16 +611,14 @@ document.addEventListener('DOMContentLoaded', () => {
 openInventoryBtn?.addEventListener('click', async (e) => {
     e.stopPropagation();
     
-    // 1. Open the specific modal
     const targetModal = document.getElementById('inventoryModal');
     targetModal.classList.add('open');
     
-    // 2. Target the grid specifically INSIDE that modal
     const grid = targetModal.querySelector('.inventory-grid');
     
-    console.log("Grid Parent Modal ID:", grid.closest('.modal').id); // This will tell us which modal is getting the items
+    console.log("Grid Parent Modal ID:", grid.closest('.modal').id); 
     
-    grid.innerHTML = ''; // Clear it
+    grid.innerHTML = ''; 
 
     try {
         const response = await fetch('/GetInventory');
@@ -633,7 +628,6 @@ openInventoryBtn?.addEventListener('click', async (e) => {
             const div = document.createElement('div');
             div.className = 'inventory-item';
             
-            // Adding inline styles to bypass any broken CSS
             div.style.cssText = "display:flex !important; flex-direction:column; min-height:150px; background:#111827; border:1px solid #334155; padding:10px; border-radius:8px;";
 
             div.innerHTML = `
@@ -643,12 +637,24 @@ openInventoryBtn?.addEventListener('click', async (e) => {
                 <span class="value" style="color:#16a34a; font-size:11px;">$${item.Value}</span>
             `;
 
-            div.addEventListener('click', () => {
-                div.classList.toggle('selected');
-                div.style.borderColor = div.classList.contains('selected') ? '#16a34a' : '#334155';
-                // ... (your existing TotalValue logic)
-            });
-
+             div.addEventListener('click', () => {
+                        const CleanedValue = parseFloat(item.Value) || 0;
+                        const isSelected = div.classList.contains('selected');
+                        div.classList.toggle('selected');
+        
+                        if (isSelected) {
+                            TotalValue -= CleanedValue;
+                            if (ToWithdraw[item.itemname]) {
+                                delete ToWithdraw[item.itemname][item.serial];
+                                if (Object.keys(ToWithdraw[item.itemname]).length === 0) delete ToWithdraw[item.itemname];
+                            }
+                        } else {
+                            TotalValue += CleanedValue;
+                            if (!ToWithdraw[item.itemname]) ToWithdraw[item.itemname] = {};
+                            ToWithdraw[item.itemname][item.serial] = true;
+                        }
+                        UpdateTotalValueLabel();
+                    });
             grid.appendChild(div);
         });
         
