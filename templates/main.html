@@ -180,32 +180,10 @@
         .wallet {
             background: #1c2433;
             border-radius: 14px;
-            width: 420px;          
-            height: 80vh;          
+            width: 100%;
+            max-width: 420px;
             padding: 24px;
-            display: flex;
-            flex-direction: column;
         }
-
-        .wallet > * {
-            min-height: 0;
-        }
-
-
-        #inventoryModal .wallet {
-            min-height: 400px;
-        }
-
-        .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 8px;
-            flex: 1;             
-            overflow-y: auto;
-            min-height: 0;        
-        }
-
-
 
         .wallet-header {
             display: flex;
@@ -320,11 +298,18 @@
             .balance-wrapper { margin-left: auto; }
         }
 
-
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 400px;   
+            overflow-y: auto;    
+            padding-right: 6px;   
+        }
 
         .inventory-item {
             background: #111827;
-            min-height: 90px;
             border-radius: 6px;
             padding: 6px;
             display: flex;
@@ -339,7 +324,6 @@
         .inventory-item img {
             width: 36px;
             height: 36px;
-            display: block;
             border-radius: 4px;
             margin-bottom: 4px;
         }
@@ -516,7 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalValueLabel = document.querySelector('#totalValue strong');
     const searchInput = document.getElementById('inventorySearch');
     let TotalValue = 0;
-    let ToWithdraw = {};
 
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.toLowerCase();
@@ -528,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const serial = item.querySelector('.serial')?.textContent.toLowerCase() || '';
 
             if (name.includes(query) || serial.includes(query)) {
-                item.style.display = 'flex';
+                item.style.display = 'inline-block'; 
             } else {
                 item.style.display = 'none'; 
             }
@@ -627,15 +610,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/GetInventory');
                 const data = await response.json(); 
 
-                console.log("items received:", data.length);
-
-                console.log(data)
-
                 data.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'inventory-item';
-
-                    div.style.display = 'flex';
 
                     div.innerHTML = `
                         <div class="select-box"></div>
@@ -690,6 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
         FillGrid();
     });
 
+    ToWithdraw = {}
 
     inventoryActionBtn?.addEventListener('click', async e => {
         if (inventoryActionBtn.textContent === 'Initiate Deposit') {
@@ -781,13 +759,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (link.getAttribute('href') === currentPath) link.classList.add('active');
     });
 
+    document.querySelectorAll('.inventory-item').forEach(item => {
+        item.addEventListener('click', e => {
+            e.stopPropagation();
+
+            console.log(ToWithdraw)
+
+        });
+    });
+
+
     UpdateTotalValueLabel();
 });
 </script>
 
 </body>
 </html>
-
 
 
 
