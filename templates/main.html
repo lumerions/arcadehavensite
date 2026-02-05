@@ -325,6 +325,7 @@
         .inventory-item img {
             width: 36px;
             height: 36px;
+            display: block;
             border-radius: 4px;
             margin-bottom: 4px;
         }
@@ -625,6 +626,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="name">${item.itemname}</span>
                         <span class="value">${item.Value}</span>
                     `;
+
+                    div.innerHTML = `TEST`;
 
                     div.addEventListener('click', () => {
                         const valueEl = div.querySelector('.value');
