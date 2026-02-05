@@ -300,25 +300,30 @@
 
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+            gap: 15px;
             margin-top: 15px;
-            max-height: 450px; 
+            max-height: 600px; 
             overflow-y: auto;
-            padding: 10px 5px;
+            padding: 10px;
+            min-height: 200px; 
+            border: 1px solid #2a3448;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
         }
         
         .inventory-item {
             background: #111827;
-            border: 1px solid #334155; 
-            border-radius: 8px;
-            padding: 10px; 
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.1s ease, border-color 0.2s;
+            transition: all 0.2s ease;
             cursor: pointer;
-            min-height: 120px; 
+            min-height: 160px; 
+            text-align: center;
         }
         
         .inventory-item img {
