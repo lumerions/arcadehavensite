@@ -183,6 +183,9 @@
             width: 100%;
             max-width: 420px;
             padding: 24px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .wallet-header {
@@ -300,12 +303,11 @@
 
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
             gap: 8px;
-            margin-top: 10px;
-            max-height: 400px;   
-            overflow-y: auto;    
-            padding-right: 6px;   
+            width: 100%;
+            min-height: 200px;
+            flex-grow: 1;
         }
 
         .inventory-item {
