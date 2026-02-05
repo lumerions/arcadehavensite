@@ -366,7 +366,7 @@
 
         .inventory-item.selected {
             outline: none;
-            border: 2px solid #16a34a; 
+            border: 2px solid #16a34a !important;
             box-sizing: border-box; 
         }
 
@@ -615,10 +615,12 @@ openInventoryBtn?.addEventListener('click', async (e) => {
     targetModal.classList.add('open');
     
     const grid = targetModal.querySelector('.inventory-grid');
-    
-    console.log("Grid Parent Modal ID:", grid.closest('.modal').id); 
-    
     grid.innerHTML = ''; 
+
+    // Reset selection values when opening
+    TotalValue = 0;
+    ToWithdraw = {};
+    UpdateTotalValueLabel();
 
     try {
         const response = await fetch('/GetInventory');
@@ -626,39 +628,40 @@ openInventoryBtn?.addEventListener('click', async (e) => {
 
         data.forEach(item => {
             const div = document.createElement('div');
-            div.className = 'inventory-item';
+            div.className = 'inventory-item'; // Let the CSS handle the looks
             
-            div.style.cssText = "display:flex !important; flex-direction:column; min-height:150px; background:#111827; border:1px solid #334155; padding:10px; border-radius:8px;";
-
             div.innerHTML = `
-                <img src="${item.ImageUrl}" style="width:60px; height:60px; object-fit:contain;">
-                <span class="serial" style="font-size:10px; color:gray;">#${item.serial}</span>
-                <span class="name" style="font-size:11px; font-weight:bold;">${item.itemname}</span>
-                <span class="value" style="color:#16a34a; font-size:11px;">$${item.Value}</span>
+                <div class="select-box"></div>
+                <img src="${item.ImageUrl}" alt="${item.itemname}">
+                <span class="serial">#${item.serial}</span>
+                <span class="name">${item.itemname}</span>
+                <span class="value">$${item.Value.toLocaleString()}</span>
             `;
 
-             div.addEventListener('click', () => {
-                        const CleanedValue = parseFloat(item.Value) || 0;
-                        const isSelected = div.classList.contains('selected');
-                        div.classList.toggle('selected');
-        
-                        if (isSelected) {
-                            TotalValue -= CleanedValue;
-                            if (ToWithdraw[item.itemname]) {
-                                delete ToWithdraw[item.itemname][item.serial];
-                                if (Object.keys(ToWithdraw[item.itemname]).length === 0) delete ToWithdraw[item.itemname];
-                            }
-                        } else {
-                            TotalValue += CleanedValue;
-                            if (!ToWithdraw[item.itemname]) ToWithdraw[item.itemname] = {};
-                            ToWithdraw[item.itemname][item.serial] = true;
+            div.addEventListener('click', () => {
+                const val = parseFloat(item.Value) || 0;
+                
+                // Toggle the class - your CSS .selected will now trigger!
+                const isNowSelected = div.classList.toggle('selected');
+
+                if (isNowSelected) {
+                    TotalValue += val;
+                    if (!ToWithdraw[item.itemname]) ToWithdraw[item.itemname] = {};
+                    ToWithdraw[item.itemname][item.serial] = true;
+                } else {
+                    TotalValue -= val;
+                    if (ToWithdraw[item.itemname]) {
+                        delete ToWithdraw[item.itemname][item.serial];
+                        if (Object.keys(ToWithdraw[item.itemname]).length === 0) {
+                            delete ToWithdraw[item.itemname];
                         }
-                        UpdateTotalValueLabel();
-                    });
+                    }
+                }
+                UpdateTotalValueLabel();
+            });
+
             grid.appendChild(div);
         });
-        
-        console.log("Successfully attached 26 items to:", grid);
 
     } catch (error) {
         console.error('Fetch Error:', error);
