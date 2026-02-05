@@ -180,14 +180,17 @@
         .wallet {
             background: #1c2433;
             border-radius: 14px;
-            width: 100%;
-            max-width: 420px;
+            width: 420px;          
+            height: 80vh;          
             padding: 24px;
             display: flex;
             flex-direction: column;
-            max-height: 80vh;
-            overflow-y: auto;
         }
+
+        .wallet > * {
+            min-height: 0;
+        }
+
 
         #inventoryModal .wallet {
             min-height: 400px;
@@ -197,10 +200,9 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
             gap: 8px;
-            width: 100%;
-            min-height: 200px;
-            flex: 1;
+            flex: 1;             
             overflow-y: auto;
+            min-height: 0;        
         }
 
 
