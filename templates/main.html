@@ -597,76 +597,78 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
     }
 
-    openInventoryBtn?.addEventListener('click', async (e) => {
-        e.stopPropagation();
+        let globalInventory = [];
+        let ToWithdraw = {}; 
         
-        modal?.classList.remove('open');
-        inventoryModal?.classList.add('open');
-        if (searchInput) searchInput.value = ''; 
-        
-        TotalValue = 0;
-        UpdateTotalValueLabel();
-        
-        const grid = document.querySelector('.inventory-grid');
-        if (!grid) return;
-        grid.innerHTML = '<p style="padding:10px; color:#666;">Loading items...</p>';
-    
-        try {
-            const response = await fetch('/GetInventory');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        openInventoryBtn?.addEventListener('click', async (e) => {
+            e.stopPropagation();
             
-            const data = await response.json();
-            grid.innerHTML = ''; 
-    
-            if (!data || data.length === 0) {
-                grid.innerHTML = '<p style="padding:10px; color:#666;">No items found in inventory.</p>';
-                return;
-            }
-    
-            data.forEach(item => {
-                const name = item.itemname || item.ItemName || "Unknown Item";
-                const val = item.Value || item.value || 0;
-                const img = item.ImageUrl || item.image_url || "";
-                const serial = item.serial || item.Serial || "0000";
-    
-                const div = document.createElement('div');
-                div.className = 'inventory-item';
-                div.innerHTML = `
-                    <div class="select-box"></div>
-                    <img src="${img}" alt="${name}" onerror="this.src='https://placehold.co/40x40?text=Item'">
-                    <span class="serial">#${serial}</span>
-                    <span class="name">${name}</span>
-                    <span class="value">$${val.toLocaleString()}</span>
-                `;
-    
-                div.addEventListener('click', () => {
-                    const isSelected = div.classList.toggle('selected');
-                    const numericValue = parseFloat(val) || 0;
-    
-                    if (isSelected) {
-                        TotalValue += numericValue;
-                        if (!ToWithdraw[name]) ToWithdraw[name] = {};
-                        ToWithdraw[name][serial] = true;
-                    } else {
-                        TotalValue -= numericValue;
-                        if (ToWithdraw[name]) {
-                            delete ToWithdraw[name][serial];
-                            if (Object.keys(ToWithdraw[name]).length === 0) delete ToWithdraw[name];
-                        }
+            modal?.classList.remove('open');
+            inventoryModal?.classList.add('open');
+            const grid = document.querySelector('.inventory-grid');
+            if (!grid) return;
+        
+            grid.innerHTML = '<div style="padding:20px; color:#666;">Loading...</div>';
+            TotalValue = 0;
+            UpdateTotalValueLabel();
+        
+            try {
+                const response = await fetch('/GetInventory');
+                globalInventory = await response.json();
+                
+                grid.innerHTML = ''; 
+        
+                if (globalInventory.length === 0) {
+                    grid.innerHTML = '<div style="padding:20px; color:#666;">Inventory is empty.</div>';
+                    return;
+                }
+        
+                globalInventory.forEach(item => {
+                    const itemIdentifier = `${item.itemname}#${item.serial}`;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'inventory-item';
+                    if (ToWithdraw[item.itemname] && ToWithdraw[item.itemname][item.serial]) {
+                        div.classList.add('selected');
                     }
-                    UpdateTotalValueLabel();
+        
+                    div.innerHTML = `
+                        <div class="select-box"></div>
+                        <img src="${item.ImageUrl || item.image}">
+                        <span class="serial">#${item.serial}</span>
+                        <span class="name">${item.itemname}</span>
+                        <span class="value">$${parseFloat(item.Value).toLocaleString()}</span>
+                    `;
+        
+                    div.onclick = () => {
+                        const isSelected = div.classList.toggle('selected');
+                        const val = parseFloat(item.Value) || 0;
+        
+                        if (isSelected) {
+                            TotalValue += val;
+                            if (!ToWithdraw[item.itemname]) ToWithdraw[item.itemname] = {};
+                            ToWithdraw[item.itemname][item.serial] = true;
+                        } else {
+                            TotalValue -= val;
+                            if (ToWithdraw[item.itemname]) {
+                                delete ToWithdraw[item.itemname][item.serial];
+                                if (Object.keys(ToWithdraw[item.itemname]).length === 0) {
+                                    delete ToWithdraw[item.itemname];
+                                }
+                            }
+                        }
+                        UpdateTotalValueLabel();
+                    };
+        
+                    grid.appendChild(div);
                 });
-    
-                grid.appendChild(div);
-            });
-    
-        } catch (error) {
-            console.error('Inventory Load Error:', error);
-            grid.innerHTML = '<p style="padding:10px; color:#f87171;">Failed to load inventory.</p>';
-        }
-    });
+        
+            } catch (error) {
+                console.error('Error:', error);
+                grid.innerHTML = '<div style="padding:20px; color:red;">Failed to load inventory.</div>';
+            }
+        });
 
-    ToWithdraw = {}
 
     inventoryActionBtn?.addEventListener('click', async e => {
         if (inventoryActionBtn.textContent === 'Initiate Deposit') {
