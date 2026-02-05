@@ -500,6 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalValueLabel = document.querySelector('#totalValue strong');
     const searchInput = document.getElementById('inventorySearch');
     let TotalValue = 0;
+    let ToWithdraw = {};
 
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.toLowerCase();
@@ -610,6 +611,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/GetInventory');
                 const data = await response.json(); 
 
+                console.log("items received:", data.length);
+
                 data.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'inventory-item';
@@ -667,7 +670,6 @@ document.addEventListener('DOMContentLoaded', () => {
         FillGrid();
     });
 
-    ToWithdraw = {}
 
     inventoryActionBtn?.addEventListener('click', async e => {
         if (inventoryActionBtn.textContent === 'Initiate Deposit') {
