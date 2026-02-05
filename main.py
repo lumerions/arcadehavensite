@@ -11,7 +11,6 @@ from pydantic import BaseModel
 from pymongo import MongoClient,UpdateOne,ReturnDocument
 from typing import List, Dict, Any
 from slowapi import Limiter
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 import secrets
@@ -234,7 +233,7 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     
     except Exception as error:
         return templates.TemplateResponse(
-            htmlfile,
+            "coinflip.html",
             {"request": request, "error": f"{error}"},
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
@@ -282,7 +281,9 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
             return JSONResponse({"error": str(e)}, status_code=400)
 
     for v in Documents:
+        MatchId = v.get("MatchId", "nil")
         CoinflipItems = v.get("CoinflipItems", [])
+        v["id"] = MatchId
         v["total_value"] = 0
         v["total_items"] = len(CoinflipItems)
         if "_id" in v:
@@ -1577,9 +1578,9 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
 
         if redirect_url:
             UserId = int(redirect_url.split("/")[4])
-            secrets.token_urlsafe(16)
+            matchId = secrets.token_urlsafe(16)
             CoinflipCollection.update_one(
-                {"SessionId": SessionId, "Username": Username,"UserId": UserId,"Side":Side,"MatchId":Side},
+                {"SessionId": SessionId, "Username": Username,"UserId": UserId,"Side":Side,"MatchId":matchId},
                 { "$push": { "CoinflipItems": { "$each": coinflipData } } },
                 upsert=True 
             )
