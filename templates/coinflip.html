@@ -375,7 +375,7 @@
                 <div class="vs-text">VS</div>
 
                 <div class="player">
-                    {% if match.player2 != "" %}
+                    {% if match.player2.username != "" %}
                         <div class="side-badge">{{ "💰" if match.side == "Heads" else "🪙" }}</div>
                         <img class="player-avatar" src="{{ match.player2.avatar }}">
                     {% else %}
@@ -389,7 +389,7 @@
                 {% endfor %}
             </div>
             <div class="match-actions">
-                <button class="match-btn join-btn" {% if match.player2 != "" %}disabled{% endif %}>Join</button>
+                <button class="match-btn join-btn" {% if match.player2.username != "" %}disabled{% endif %}>Join</button>
                 <button class="match-btn view-btn">View</button>
             </div>
         </div>
