@@ -615,6 +615,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 console.log("items received:", data.length);
 
+                console.log(data)
+
                 data.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'inventory-item';
@@ -626,8 +628,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="name">${item.itemname}</span>
                         <span class="value">${item.Value}</span>
                     `;
-
-                    div.innerHTML = `TEST`;
 
                     div.addEventListener('click', () => {
                         const valueEl = div.querySelector('.value');
