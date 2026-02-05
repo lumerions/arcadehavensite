@@ -4,247 +4,522 @@
 
 {% block content %}
 <style>
-*{box-sizing:border-box;}
-body{margin:0;font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;}
+    * { box-sizing: border-box; }
 
-.coinflip-page{max-width:1200px;margin:40px auto;display:flex;flex-direction:column;gap:24px;align-items:center;}
-.coinflip-controls{display:flex;flex-direction:column;gap:16px;align-items:center;}
-.stats-cards{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0b0b0b;
+        color: #fff;
+    }
 
-.stat-card{background:#1e1e2e;border:1px solid #333;border-radius:12px;padding:16px;text-align:center;min-width:100px;}
-.stat-value{font-size:1.2rem;font-weight:600;color:#22c55e;}
-.stat-title{font-size:.85rem;color:#9ca3af;margin-bottom:6px;}
+    .coinflip-page {
+        max-width: 1200px;
+        margin: 40px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+    }
 
-.create-btn{padding:14px 30px;background:#2563eb;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;}
-.create-btn:hover{background:#1d4ed8;}
+    .coinflip-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+    }
 
-.coinflip-container{width:100%;max-height:900px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;padding:0 8px;}
+    .stats-cards {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 
-.match-card{background:#1e1e2e;border:1px solid #333;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;}
-.players{display:flex;align-items:center;gap:16px;justify-content:center;}
-.player{position:relative;display:flex;flex-direction:column;align-items:center;}
+    .stat-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        min-width: 100px;
+    }
 
-.player-avatar{width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #333;background:#111;}
-.vs-text{font-weight:700;font-size:1.2rem;}
+    .stat-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #22c55e;
+    }
 
-.side-badge{position:absolute;top:-5px;left:-5px;background:#2a2a3d;border:1px solid #444;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+    .stat-title {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-bottom: 6px;
+    }
 
-.items-preview{display:flex;gap:6px;justify-content:center;}
-.preview-item{width:40px;height:40px;border-radius:6px;background:#222;border:1px solid #333;display:flex;align-items:center;justify-content:center;}
-.preview-item img{width:100%;height:100%;object-fit:cover;}
+    .create-btn {
+        padding: 14px 30px;
+        background: #2563eb;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
 
-.match-actions{display:flex;gap:8px;justify-content:center;}
-.match-btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:600;}
-.join-btn{background:#16a34a;color:#fff;}
-.view-btn{background:#2563eb;color:#fff;}
+    .create-btn:hover { background: #1d4ed8; }
 
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9999;}
-.modal.open{display:flex;}
+    .coinflip-container {
+        width: 100%;
+        max-height: 900px; 
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 0 8px;
+    }
 
-.wallet{background:#1c2433;border-radius:14px;width:100%;max-width:450px;padding:24px;max-height:90vh;overflow-y:auto;}
-.wallet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.close{cursor:pointer;font-size:1.5rem;}
+    .side-badge {
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        background: #2a2a3d;
+        border: 1px solid #444;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
 
-.inventory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;max-height:250px;overflow-y:auto;margin-top:12px;background:#0f172a;padding:10px;border-radius:8px;border:1px solid #333;}
+    .match-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 
-.inventory-item{background:#1e293b;border-radius:6px;padding:8px;text-align:center;cursor:pointer;border:2px solid transparent;}
-.inventory-item.selected{border-color:#16a34a;background:#064e3b;}
+    .players {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        justify-content: center;
+    }
 
-.coinflip-side-select{display:flex;gap:12px;margin-bottom:14px;}
-.side-option{flex:1;padding:12px;text-align:center;border-radius:10px;cursor:pointer;background:#111;border:1px solid #333;}
-.side-option.selected{background:#16a34a;border-color:#16a34a;}
+    .player {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-.action-btn{flex:1;padding:12px;border-radius:8px;border:none;font-weight:600;cursor:pointer;}
-.deposit{background:#2563eb;color:#fff;}
-.withdraw{background:#dc2626;color:#fff;}
+    .player-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #333;
+        background: #111;
+    }
+
+    .vs-text {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #fff;
+    }
+
+    .items-preview {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+    }
+
+    .preview-item {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        background: #222;
+        border: 1px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+
+    .preview-item.more {
+        background: #111;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: #ccc;
+    }
+
+    .match-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .match-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    .join-btn { background: #16a34a; color: #fff; }
+    .view-btn { background: #2563eb; color: #fff; }
+
+    /* Modals */
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.85);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .modal.open { display: flex; }
+
+    .wallet {
+        background: #1c2433;
+        border-radius: 14px;
+        width: 100%;
+        max-width: 450px;
+        padding: 24px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .wallet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .close { cursor: pointer; font-size: 1.5rem; }
+
+    .inventory-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+        gap: 10px;
+        max-height: 250px;
+        overflow-y: auto;
+        margin-top: 12px;
+        background: #0f172a;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #333;
+    }
+
+    .inventory-item {
+        background: #1e293b;
+        border-radius: 6px;
+        padding: 8px;
+        text-align: center;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: transform 0.1s;
+    }
+
+    .inventory-item:hover { transform: scale(1.02); }
+    .inventory-item.selected { border-color: #16a34a; background: #064e3b; }
+
+    .item-val { font-size: 10px; color: #22c55e; font-weight: bold; }
+
+    .coinflip-side-select {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .side-option {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        background: #111;
+        border: 1px solid #333;
+    }
+
+    .side-option.selected {
+        background: #16a34a;
+        border-color: #16a34a;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .action-btn.deposit { background: #2563eb; color: #fff; }
+    .action-btn.withdraw { background: #dc2626; color: #fff; }
+
+    @media (max-width: 800px) {
+        .players { flex-direction: column; gap: 8px; }
+    }
 </style>
 
-<div class="modal" id="coinflipModal">
-<div class="wallet">
+<div class="modal" id="createCoinflipModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Create Coinflip</h2>
+            <span class="close" data-close="createCoinflipModal">&times;</span>
+        </div>
 
-<div class="wallet-header">
-<h2 id="coinflipModalTitle">Coinflip</h2>
-<span class="close" data-close="coinflipModal">&times;</span>
-</div>
+        <input id="createSearch" placeholder="Search items..." style="width:100%; padding:10px; background:#111; border:1px solid #333; color:white; border-radius:8px; margin-bottom:12px;" />
 
-<input id="coinflipSearch" placeholder="Search items..."
-style="width:100%;padding:10px;background:#111;border:1px solid #333;color:white;border-radius:8px;margin-bottom:12px;"/>
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem;">
+            <div>Total Selected: <strong id="createTotalItems">0</strong></div>
+            <div>Value: <strong id="createTotalValue">$0</strong></div>
+        </div>
 
-<p id="coinflipMatchIdRow" style="font-size:.85rem;margin-bottom:10px;display:none;">
-Match ID: <strong id="coinflipMatchIdDisplay"></strong>
-</p>
+        <div class="coinflip-side-select">
+            <div class="side-option selected" data-side="Heads">🪙 Heads</div>
+            <div class="side-option" data-side="Tails">💰 Tails</div>
+        </div>
 
-<div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:.9rem;">
-<div>Total Selected: <strong id="coinflipTotalItems">0</strong></div>
-<div>Value: <strong id="coinflipTotalValue">$0</strong></div>
-</div>
+        <div class="inventory-grid" id="createInventory"></div>
 
-<div id="coinflipSideSelect" class="coinflip-side-select">
-<div class="side-option selected" data-side="Heads">🪙 Heads</div>
-<div class="side-option" data-side="Tails">💰 Tails</div>
-</div>
-
-<div class="inventory-grid" id="coinflipInventory"></div>
-
-<div class="match-actions" style="margin-top:16px;">
-<button class="action-btn withdraw" data-close="coinflipModal">Cancel</button>
-<button class="action-btn deposit" id="coinflipConfirmBtn">Confirm</button>
-</div>
-
-</div>
+        <div class="match-actions" style="margin-top:16px;">
+            <button class="action-btn withdraw" data-close="createCoinflipModal">Cancel</button>
+            <button class="action-btn deposit" id="coinflipCreateBtn">Create Match</button>
+        </div>
+    </div>
 </div>
 
 <div class="coinflip-page">
+    <div class="coinflip-controls">
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-title">Active Coinflips</div>
+                <div class="stat-value">{{ matches|length + 1 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Items Value</div>
+                <div class="stat-value">${{ matches|sum(attribute='total_value') + 50 }}</div>
+            </div>
+        </div>
+        <button class="create-btn" id="createMatchBtn">Create Match</button>
+    </div>
 
-<div class="coinflip-controls">
-<div class="stats-cards">
-<div class="stat-card">
-<div class="stat-title">Active Coinflips</div>
-<div class="stat-value">{{ matches|length }}</div>
-</div>
-<div class="stat-card">
-<div class="stat-title">Total Items Value</div>
-<div class="stat-value">${{ matches|sum(attribute='total_value') }}</div>
-</div>
+    <div class="coinflip-container">
+        <div class="match-card" data-id="example-123" data-side="Heads">
+            <div class="players">
+                <div class="player">
+                    <div class="side-badge">🪙</div>
+                    <img class="player-avatar" src="/static/images/player1.png" alt="P1">
+                </div>
+                <div class="vs-text">VS</div>
+                <div class="player">
+                    <div class="side-badge">💰</div>
+                    <img class="player-avatar" src="/static/images/player2.png" alt="P2">
+                </div>
+            </div>
+            <div class="items-preview">
+                <div class="preview-item"><img src="/static/images/item1.png"></div>
+                <div class="preview-item"><img src="/static/images/item2.png"></div>
+            </div>
+            <div class="match-actions">
+                <button class="match-btn join-btn">Join</button>
+                <button class="match-btn view-btn">View</button>
+            </div>
+        </div>
+
+        {% for match in matches %}
+        <div class="match-card" data-id="{{ match.id }}" data-side="{{ match.side }}">
+            <div class="players">
+                <div class="player">
+                    <div class="side-badge">{{ "🪙" if match.side == "Heads" else "💰" }}</div>
+                    <img class="player-avatar" src="{{ match.player1.avatar }}">
+                </div>
+                <div class="vs-text">VS</div>
+                <div class="player">
+                    {% if match.player2 %}
+                        <div class="side-badge">{{ "💰" if match.side == "Heads" else "🪙" }}</div>
+                        <img class="player-avatar" src="{{ match.player2.avatar }}">
+                    {% else %}
+                        <div class="player-avatar" style="display:flex; align-items:center; justify-content:center; color:#444;">?</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="items-preview">
+                {% for item in match["items"][:5] %}
+                <div class="preview-item"><img src="{{ item.image }}"></div>
+                {% endfor %}
+                {% if match["items"]|length > 5 %}
+                <div class="preview-item more">+{{ match["items"]|length - 5 }}</div>
+                {% endif %}
+            </div>
+            <div class="match-actions">
+                <button class="match-btn join-btn">Join</button>
+                <button class="match-btn view-btn">View</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
-<button class="create-btn" id="createMatchBtn">Create Match</button>
+<div class="modal" id="viewCoinflipModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Match Details</h2>
+            <span class="close" data-close="viewCoinflipModal">&times;</span>
+        </div>
+        <div id="viewCoinflipContent"></div>
+        <div class="match-actions" style="margin-top:16px;">
+            <button class="action-btn deposit" data-close="viewCoinflipModal">Close</button>
+        </div>
+    </div>
 </div>
 
-<div class="coinflip-container">
+<div class="modal" id="joinCoinflipModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Join Coinflip</h2>
+            <span class="close" data-close="joinCoinflipModal">&times;</span>
+        </div>
+        <p style="font-size: 0.9rem; margin-bottom: 10px;">Match ID: <strong id="joinMatchIdDisplay"></strong></p>
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8rem; background: #0b0b0b; padding: 8px; border-radius: 5px;">
+            <div>Items: <strong id="joinTotalItems">0</strong></div>
+            <div>Value: <strong id="joinTotalValue">$0</strong></div>
+        </div>
 
-{% for match in matches %}
-<div class="match-card" data-id="{{match.id}}" data-side="{{match.side}}" data-value="{{match.total_value}}">
-<div class="players">
-<div class="player">
-<div class="side-badge">{{"🪙" if match.side=="Heads" else "💰"}}</div>
-<img class="player-avatar" src="{{match.player1.avatar}}">
-</div>
-<div class="vs-text">VS</div>
-<div class="player">
-{% if match.player2 %}
-<img class="player-avatar" src="{{match.player2.avatar}}">
-{% else %}
-<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;color:#444;">?</div>
-{% endif %}
-</div>
-</div>
+        <div class="inventory-grid" id="joinInventory"></div>
 
-<div class="items-preview">
-{% for item in match["items"][:5] %}
-<div class="preview-item"><img src="{{item.image}}"></div>
-{% endfor %}
-</div>
-
-<div class="match-actions">
-<button class="match-btn join-btn">Join</button>
-<button class="match-btn view-btn">View</button>
-</div>
-</div>
-{% endfor %}
-
-</div>
+        <div class="match-actions" style="margin-top:16px;">
+            <button class="action-btn withdraw" data-close="joinCoinflipModal">Cancel</button>
+            <button class="action-btn deposit" id="confirmJoinBtn">Confirm Join</button>
+        </div>
+    </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener('DOMContentLoaded', () => {
+    let globalInventory = [];
+    let createSelection = [];
+    let joinSelection = [];
+    let currentJoinMatchId = null;
 
-let globalInventory=[];
-let modalSelection=[];
-let modalMode=null;
-let requiredJoinValue=0;
-let currentJoinMatchId=null;
+    function updateStats(prefix, selection) {
+        const totalItems = selection.length;
+        const totalValue = selection.reduce((sum, item) => sum + (parseFloat(item.Value) || 0), 0);
+        document.getElementById(`${prefix}TotalItems`).textContent = totalItems;
+        document.getElementById(`${prefix}TotalValue`).textContent = `$${totalValue.toLocaleString()}`;
+    }
 
-function updateStats(){
-const totalItems=modalSelection.length;
-const totalValue=modalSelection.reduce((s,i)=>s+(parseFloat(i.Value)||0),0);
+    function renderInventory(containerId, selectionArr, prefix) {
+        const grid = document.getElementById(containerId);
+        if(!grid) return;
+        grid.innerHTML = '';
 
-coinflipTotalItems.textContent=totalItems;
-coinflipTotalValue.textContent=`$${totalValue.toLocaleString()}`;
+        globalInventory.forEach(item => {
+            const div = document.createElement('div');
+            div.className = `inventory-item ${selectionArr.some(i => i.itemid === item.itemid) ? 'selected' : ''}`;
+            div.innerHTML = `
+                <img src="${item.ImageUrl}" style="width:40px; height:40px; object-fit:contain;">
+                <div style="font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.itemname}</div>
+                <div class="item-val">$${item.Value}</div>
+            `;
+            
+            div.onclick = () => {
+                const index = selectionArr.findIndex(i => i.itemid === item.itemid);
+                if(index > -1) selectionArr.splice(index, 1);
+                else selectionArr.push(item);
+                div.classList.toggle('selected');
+                updateStats(prefix, selectionArr);
+            };
+            grid.appendChild(div);
+        });
+    }
 
-if(modalMode==="join"){
-coinflipConfirmBtn.disabled=Math.abs(totalValue-requiredJoinValue)>0.01;
-}
-}
+    // Modal Control
+    document.getElementById("createMatchBtn")?.addEventListener("click", () => {
+        createSelection = [];
+        updateStats('create', createSelection);
+        renderInventory('createInventory', createSelection, 'create');
+        document.getElementById("createCoinflipModal").classList.add("open");
+    });
 
-function renderInventory(){
-coinflipInventory.innerHTML="";
-globalInventory.forEach(item=>{
-const div=document.createElement("div");
-div.className=`inventory-item ${modalSelection.some(i=>i.itemid===item.itemid)?"selected":""}`;
+    document.querySelectorAll('.close, [data-close]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modalId = btn.dataset.close || btn.closest('.modal').id;
+            document.getElementById(modalId).classList.remove('open');
+        });
+    });
 
-div.innerHTML=`
-<img src="${item.ImageUrl}" style="width:40px;height:40px;object-fit:contain;">
-<div style="font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-${item.itemname}
-</div>
-<div class="item-val">$${item.Value}</div>
-`;
+    // Container Logic
+    document.querySelector('.coinflip-container')?.addEventListener('click', e => {
+        const matchCard = e.target.closest('.match-card');
+        if (!matchCard) return;
 
-div.onclick=()=>{
-const idx=modalSelection.findIndex(i=>i.itemid===item.itemid);
-if(idx>-1) modalSelection.splice(idx,1);
-else modalSelection.push(item);
-div.classList.toggle("selected");
-updateStats();
-};
+        if (e.target.classList.contains('join-btn')) {
+            currentJoinMatchId = matchCard.dataset.id;
+            joinSelection = [];
+            document.getElementById('joinMatchIdDisplay').textContent = currentJoinMatchId;
+            updateStats('join', joinSelection);
+            renderInventory('joinInventory', joinSelection, 'join');
+            document.getElementById('joinCoinflipModal').classList.add('open');
+        }
 
-coinflipInventory.appendChild(div);
-});
-}
+        if (e.target.classList.contains('view-btn')) {
+            const p1Side = matchCard.dataset.side;
+            const contentEl = document.getElementById('viewCoinflipContent');
+            const players = matchCard.querySelectorAll('.player');
+            const items = matchCard.querySelectorAll('.preview-item img');
 
-function openCreate(){
-modalMode="create";
-modalSelection=[];
-coinflipModalTitle.textContent="Create Coinflip";
-coinflipSideSelect.style.display="flex";
-coinflipMatchIdRow.style.display="none";
-coinflipConfirmBtn.disabled=false;
-updateStats();
-renderInventory();
-coinflipModal.classList.add("open");
-}
+            let html = `<div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:20px;">`;
+            players.forEach((p, idx) => {
+                const src = p.querySelector('.player-avatar').src || "";
+                const isEmpty = p.querySelector('.player-avatar').textContent === "?";
+                const sideIcon = !isEmpty ? (idx === 0 ? (p1Side === "Heads" ? "🪙" : "💰") : (p1Side === "Heads" ? "💰" : "🪙")) : "";
+                html += `<div class="player">${sideIcon ? `<div class="side-badge">${sideIcon}</div>`:''}<img src="${src}" class="player-avatar" style="width:60px;height:60px;"></div>`;
+                if(idx === 0) html += `<div class="vs-text">VS</div>`;
+            });
+            html += `</div>`;
+            
+            // Re-adding item icons to view modal
+            html += `<div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; border-top: 1px solid #333; padding-top:15px;">`;
+            items.forEach(img => {
+                html += `<div class="preview-item"><img src="${img.src}"></div>`;
+            });
+            html += `</div>`;
 
-function openJoin(card){
-modalMode="join";
-modalSelection=[];
-requiredJoinValue=parseFloat(card.dataset.value||0);
-currentJoinMatchId=card.dataset.id;
+            contentEl.innerHTML = html;
+            document.getElementById('viewCoinflipModal').classList.add('open');
+        }
+    });
 
-coinflipModalTitle.textContent="Join Coinflip";
-coinflipSideSelect.style.display="none";
-coinflipMatchIdRow.style.display="block";
-coinflipMatchIdDisplay.textContent=currentJoinMatchId;
-
-updateStats();
-renderInventory();
-coinflipModal.classList.add("open");
-}
-
-createMatchBtn.onclick=openCreate;
-
-document.querySelector(".coinflip-container")
-.addEventListener("click",e=>{
-const card=e.target.closest(".match-card");
-if(!card) return;
-if(e.target.classList.contains("join-btn")) openJoin(card);
-});
-
-document.querySelectorAll("[data-close]").forEach(btn=>{
-btn.onclick=()=>coinflipModal.classList.remove("open");
-});
-
-async function fetchInventory(){
-try{
-const res=await fetch("/GetInventory");
-globalInventory=await res.json();
-}catch{
-globalInventory=[];
-}
-}
-fetchInventory();
-
+    async function fetchInventory() {
+        try {
+            const res = await fetch('/GetInventory');
+            globalInventory = await res.json();
+        } catch (e) {
+            globalInventory = [
+                { itemid: "1", itemname: "Knife | Doppler", Value: "450.00", ImageUrl: "/static/images/item1.png" },
+                { itemid: "2", itemname: "AK-47 | Vulcan", Value: "120.00", ImageUrl: "/static/images/item2.png" }
+            ];
+        }
+    }
+    fetchInventory();
 });
 </script>
-
 {% endblock %}
