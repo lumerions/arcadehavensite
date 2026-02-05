@@ -7,261 +7,367 @@
      <title>{% block title %}Home - AH Gambling{% endblock %}</title>  
 
     <style>
-    * { 
-        margin: 0; 
-        padding: 0; 
-        box-sizing: border-box; 
-    }
-
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-            'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-        background-color: #000000;
-        color: #ffffff;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    header { 
-        border-bottom: 1px solid #333333; 
-        background: #000;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-    }
-
-    nav {
-        width: 100%;
-        padding: 1rem 1.75rem;
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-    }
-
-    .logo {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #ffffff;
-        text-decoration: none;
-    }
-
-    .balance-wrapper {
-        margin-left: auto;
-        position: relative;
-    }
-
-    .balance-btn {
-        background-color: #111111;
-        border: 1px solid #333333;
-        color: #ffffff;
-        padding: 0.5rem 1.25rem;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .balance-btn:hover {
-        background-color: #222222;
-        border-color: #555555;
-    }
-
-    .app-container {
-        display: flex;
-        flex: 1;
-    }
-
-    .sidebar {
-        width: 240px;
-        background: #0b0b0b;
-        border-right: 1px solid #333333;
-        padding: 2rem 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        position: sticky;
-        top: 61px;
-        height: calc(100vh - 61px);
-    }
-
-    .sidebar-label {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #666;
-        margin: 1.5rem 0 0.5rem 0.75rem;
-    }
-
-    .sidebar-link {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        color: #9ca3af;
-        text-decoration: none;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        transition: all 0.2s ease;
-    }
-
-    .sidebar-link:hover, .sidebar-link.active {
-        background: #1a1a1a;
-        color: #ffffff;
-    }
-
-    .sidebar-link.active {
-        background: #2563eb;
-    }
-
-    main {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        padding: 3rem 1rem;
-    }
-
-    .modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,.85);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-
-    .modal.open { display: flex; }
-
-    .wallet {
-        background: #1c2433;
-        border-radius: 14px;
-        width: 100%;
-        max-width: 480px; 
-        padding: 24px;
-        border: 1px solid #334155;
-    }
-
-    .wallet-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .close { cursor: pointer; font-size: 1.5rem; color: #94a3b8; }
-
-    .modal-stat-bar {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        font-size: 0.9rem;
-        background: #0f172a;
-        padding: 12px;
-        border-radius: 8px;
-        border: 1px solid #333;
-        color: #94a3b8;
-    }
-
-    .modal-stat-bar strong { color: #fff; }
-
-    .inventory-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
-        gap: 10px;
-        max-height: 300px;
-        overflow-y: auto;
-        background: #0f172a;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #333;
-        margin-top: 10px;
-    }
-
-    .inventory-grid::-webkit-scrollbar { width: 6px; }
-    .inventory-grid::-webkit-scrollbar-thumb {
-        background: #334155;
-        border-radius: 10px;
-    }
-
-    .inventory-item {
-        background: #1e293b;
-        border-radius: 6px;
-        padding: 8px;
-        text-align: center;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: 0.1s;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-    }
-
-    .inventory-item:hover { background: #2d3748; }
-
-    .inventory-item.selected { 
-        border-color: #16a34a; 
-        background: #064e3b; 
-    }
-
-    .inventory-item img {
-        width: 40px;
-        height: 40px;
-        object-fit: contain;
-    }
-
-    .inventory-item .name {
-        font-size: 10px;
-        color: #fff;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        width: 100%;
-    }
-
-    .inventory-item .value {
-        font-size: 10px;
-        color: #22c55e;
-        font-weight: bold;
-    }
-
-    .modal-search {
-        width: 100%;
-        padding: 12px;
-        background: #0b0b0b;
-        border: 1px solid #333;
-        color: white;
-        border-radius: 8px;
-        margin-bottom: 12px;
-        outline: none;
-    }
-
-    .action-btn {
-        width: 100%;
-        padding: 14px;
-        border-radius: 10px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 1rem;
-        margin-top: 15px;
-    }
-
-    .action-btn.withdraw { background: #2563eb; color: #fff; }
-    .action-btn.deposit { background: #16a34a; color: #fff; }
-
-    @media (max-width: 768px) {
-        .app-container { flex-direction: column; }
-        .sidebar {
-            width: 100%; height: auto; position: static;
-            flex-direction: row; overflow-x: auto;
-            padding: 0.75rem; border-right: none; border-bottom: 1px solid #333;
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
         }
-        .sidebar-label { display: none; }
-        .sidebar-link { white-space: nowrap; }
-    }
-</style>
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+                'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header { 
+            border-bottom: 1px solid #333333; 
+            background: #000;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            width: 100%;
+            padding: 1rem 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-decoration: none;
+            margin-left: 0; 
+        }
+
+        .balance-wrapper {
+            margin-left: auto;
+            position: relative;
+        }
+
+        .balance-btn {
+            background-color: #111111;
+            border: 1px solid #333333;
+            color: #ffffff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .balance-btn:hover {
+            background-color: #222222;
+            border-color: #555555;
+        }
+
+        .balance-menu {
+            position: absolute;
+            right: 0;
+            top: 120%;
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            min-width: 160px;
+            padding: 0.5rem 0;
+            display: none;
+            z-index: 100;
+        }
+
+        .balance-menu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .balance-menu a:hover {
+            background-color: #222222;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #333333;
+            margin: 0.4rem 0;
+        }
+
+        .balance-wrapper.open .balance-menu {
+            display: block;
+        }
+
+        .app-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #0b0b0b;
+            border-right: 1px solid #333333;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: sticky;
+            top: 61px;
+            height: calc(100vh - 61px);
+        }
+
+        .sidebar-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+            margin: 1.5rem 0 0.5rem 0.75rem;
+        }
+
+        .sidebar-label:first-child { 
+            margin-top: 0; 
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #9ca3af;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .sidebar-link.active {
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 3rem 1rem;
+            width: 100%; 
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal.open { display: flex; }
+
+        .wallet {
+            background: #1c2433;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 420px;
+            padding: 24px;
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close { 
+            cursor: pointer; 
+            font-size: 1.5rem; 
+            color: #9ca3af; 
+        }
+
+        .tabs { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 20px; 
+        }
+
+        .tab {
+            flex: 1; 
+            padding: 10px; 
+            border-radius: 8px; 
+            border: none;
+            cursor: pointer; 
+            background: #2a3448; 
+            color: #cbd5f5; 
+            font-weight: 500;
+        }
+
+        .tab.active.deposit { background: #16a34a; color:#fff; }
+        .tab.active.withdraw { background: #2563eb; color:#fff; }
+
+        label { 
+            display: block; 
+            font-size: .85rem; 
+            margin-bottom: 8px; 
+            color: #cbd5f5; 
+        }
+
+        input {
+            width: 100%; 
+            padding: 12px; 
+            background: #2a3448;
+            border: 2px solid #334155; 
+            border-radius: 8px;
+            color: #fff; 
+            margin-bottom: 16px; 
+            outline: none;
+        }
+
+        input:focus { border-color: #7c3aed; }
+
+        .instructions {
+            background: rgba(0,0,0,0.2); 
+            padding: 12px;
+            border-radius: 8px; 
+            font-size: .85rem;
+            color: #94a3b8; 
+            margin-bottom: 20px; 
+            line-height: 1.4;
+        }
+
+        .action-btn {
+            width: 100%; 
+            padding: 14px; 
+            border-radius: 10px;
+            border: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 1rem;
+        }
+
+        .action-btn.small {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        .action-btn.deposit { background: #16a34a; color: #fff; }
+        .action-btn.withdraw { background: #2563eb; color: #fff; }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171; 
+            padding: 12px; 
+            border-radius: 8px;
+            font-size: 0.85rem; 
+            margin-bottom: 16px;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+            .sidebar {
+                width: 100%; 
+                height: auto; 
+                position: static;
+                flex-direction: row; 
+                overflow-x: auto; 
+                padding: 0.75rem;
+                border-right: none; 
+                border-bottom: 1px solid #333;
+            }
+            .sidebar-label { display: none; }
+            .sidebar-link { white-space: nowrap; padding: 0.5rem 1rem; }
+            main { padding: 2rem 1rem; }
+            nav { justify-content: center; padding: 1rem; }
+            .logo { margin-left: 0 !important; font-size: 1.1rem; }
+            .balance-wrapper { margin-left: auto; }
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 400px;   
+            overflow-y: auto;    
+            padding-right: 6px;   
+        }
+
+        .inventory-item {
+            background: #111827;
+            border-radius: 6px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .inventory-item img {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+
+        .inventory-item .serial {
+            color: #94a3b8;
+            font-size: 0.6rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .inventory-item .name {
+            font-weight: 500;
+            font-size: 0.7rem;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .inventory-item .value {
+            color: #16a34a;
+            font-weight: 600;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .inventory-item.selected {
+            outline: none;
+            border: 2px solid #16a34a; 
+            box-sizing: border-box; 
+        }
+
+        .inventory-item .select-box {
+            width: 100%;
+            height: 4px;
+            margin-bottom: 4px;
+        }
+
+
+    </style>
 </head>
 
 <body>
@@ -491,78 +597,77 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
     }
 
-        let globalInventory = [];
-        let ToWithdraw = {}; 
-        
-        openInventoryBtn?.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            
-            modal?.classList.remove('open');
-            inventoryModal?.classList.add('open');
-            const grid = document.querySelector('.inventory-grid');
-            if (!grid) return;
-        
-            grid.innerHTML = '<div style="padding:20px; color:#666;">Loading...</div>';
-            TotalValue = 0;
-            UpdateTotalValueLabel();
-        
+    openInventoryBtn?.addEventListener('click', e => {
+        e.stopPropagation();
+        modal?.classList.remove('open');
+        inventoryModal?.classList.add('open');
+        TotalValue = 0
+        UpdateTotalValueLabel();
+        const grid = document.querySelector('.inventory-grid');
+        grid.replaceChildren(); 
+        async function FillGrid() {
             try {
                 const response = await fetch('/GetInventory');
-                globalInventory = await response.json();
-                
-                grid.innerHTML = ''; 
-        
-                if (globalInventory.length === 0) {
-                    grid.innerHTML = '<div style="padding:20px; color:#666;">Inventory is empty.</div>';
-                    return;
-                }
-        
-                globalInventory.forEach(item => {
-                    const itemIdentifier = `${item.itemname}#${item.serial}`;
-                    
+                const data = await response.json(); 
+
+                data.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'inventory-item';
-                    if (ToWithdraw[item.itemname] && ToWithdraw[item.itemname][item.serial]) {
-                        div.classList.add('selected');
-                    }
-        
+
                     div.innerHTML = `
                         <div class="select-box"></div>
-                        <img src="${item.ImageUrl || item.image}">
+                        <img src="${item.ImageUrl}">
                         <span class="serial">#${item.serial}</span>
                         <span class="name">${item.itemname}</span>
-                        <span class="value">$${parseFloat(item.Value).toLocaleString()}</span>
+                        <span class="value">${item.Value}</span>
                     `;
-        
-                    div.onclick = () => {
-                        const isSelected = div.classList.toggle('selected');
-                        const val = parseFloat(item.Value) || 0;
-        
+
+                    div.addEventListener('click', () => {
+                        const valueEl = div.querySelector('.value');
+                        const itemNameEl = div.querySelector('.name');
+                        const serialEl = div.querySelector('.serial');
+
+                        if (!valueEl || !itemNameEl || !serialEl) return;
+
+                        const itemName = itemNameEl.textContent;
+                        const serial = serialEl.textContent;
+
+                        const CleanedValue = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+
+                        const isSelected = div.classList.contains('selected');
+
+                        div.classList.toggle('selected');
+            
                         if (isSelected) {
-                            TotalValue += val;
-                            if (!ToWithdraw[item.itemname]) ToWithdraw[item.itemname] = {};
-                            ToWithdraw[item.itemname][item.serial] = true;
-                        } else {
-                            TotalValue -= val;
-                            if (ToWithdraw[item.itemname]) {
-                                delete ToWithdraw[item.itemname][item.serial];
-                                if (Object.keys(ToWithdraw[item.itemname]).length === 0) {
-                                    delete ToWithdraw[item.itemname];
+                            TotalValue -= CleanedValue;
+                            if (ToWithdraw[itemName]) {
+                                delete ToWithdraw[itemName][serial];
+                                if (Object.keys(ToWithdraw[itemName]).length === 0) {
+                                    delete ToWithdraw[itemName];
                                 }
                             }
+
+                        } else {
+                            TotalValue += CleanedValue;
+                            if (!ToWithdraw[itemName]) ToWithdraw[itemName] = {};
+                            ToWithdraw[itemName][serial] = true;
                         }
+
                         UpdateTotalValueLabel();
-                    };
-        
+                    });
+                    
                     grid.appendChild(div);
                 });
-        
-            } catch (error) {
-                console.error('Error:', error);
-                grid.innerHTML = '<div style="padding:20px; color:red;">Failed to load inventory.</div>';
-            }
-        });
 
+            } catch (error) {
+                console.error('Error fetching', error);
+            }
+        }
+
+        FillGrid();
+    });
+
+    ToWithdraw = {}
 
     inventoryActionBtn?.addEventListener('click', async e => {
         if (inventoryActionBtn.textContent === 'Initiate Deposit') {
@@ -654,15 +759,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (link.getAttribute('href') === currentPath) link.classList.add('active');
     });
 
+    document.querySelectorAll('.inventory-item').forEach(item => {
+        item.addEventListener('click', e => {
+            e.stopPropagation();
+
+            console.log(ToWithdraw)
+
+        });
+    });
+
+
     UpdateTotalValueLabel();
 });
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
