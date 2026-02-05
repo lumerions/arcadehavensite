@@ -183,9 +183,6 @@
             width: 100%;
             max-width: 420px;
             padding: 24px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
         }
 
         .wallet-header {
@@ -307,7 +304,6 @@
             gap: 8px;
             margin-top: 10px;
             max-height: 400px;   
-            flex: 1;
             overflow-y: auto;    
             padding-right: 6px;   
         }
@@ -763,22 +759,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (link.getAttribute('href') === currentPath) link.classList.add('active');
     });
 
-    document.querySelectorAll('.inventory-item').forEach(item => {
-        item.addEventListener('click', e => {
-            e.stopPropagation();
-
-            console.log(ToWithdraw)
-
-        });
-    });
-
-
     UpdateTotalValueLabel();
 });
 </script>
 
 </body>
 </html>
+
+
+
 
 
 
