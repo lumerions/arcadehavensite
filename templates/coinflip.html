@@ -195,29 +195,29 @@
         outline: none;
     }
 
-    .inventory-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
-        gap: 10px;
-        max-height: 280px;
-        overflow-y: auto;
-        margin-top: 4px;
-        background: #0f172a;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #333;
-    }
-
-    .inventory-item {
-        background: #1e293b;
-        border-radius: 6px;
-        padding: 8px;
-        text-align: center;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: 0.1s;
-    }
-
+      .inventory-grid {
+                display: grid !important; 
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+                margin-top: 15px;
+                flex: 1;                
+                overflow-y: auto;       
+                min-height: 300px;     
+                padding: 10px;
+                background: rgba(0,0,0,0.2);
+                border-radius: 8px;
+            }
+            
+            .inventory-item {
+                background: #111827 !important;
+                border: 1px solid #334155;
+                padding: 10px;
+                min-height: 140px;     
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
     .inventory-item.selected { border-color: #16a34a; background: #064e3b; }
     .item-val { font-size: 10px; color: #22c55e; font-weight: bold; margin-top: 4px; }
 
