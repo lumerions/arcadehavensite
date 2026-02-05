@@ -4,7 +4,6 @@
 
 {% block content %}
 <style>
-    /* Global & Layout */
     * { box-sizing: border-box; }
 
     body {
@@ -23,7 +22,6 @@
         align-items: center;
     }
 
-    /* Stats & Controls */
     .coinflip-controls {
         display: flex;
         flex-direction: column;
@@ -73,7 +71,6 @@
 
     .create-btn:hover { background: #1d4ed8; }
 
-    /* Match Cards */
     .coinflip-container {
         width: 100%;
         max-height: 900px; 
@@ -144,7 +141,6 @@
 
     .vs-text { font-weight: 700; font-size: 1.2rem; color: #4b5563; }
 
-    /* Modals System */
     .modal {
         position: fixed;
         inset: 0;
@@ -395,7 +391,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Identity Check: Make sure your backend passes 'username' variable
     const currentUsername = "{{ username }}"; 
 
     let globalInventory = [];
@@ -437,7 +432,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('joinCoinflipModal').classList.add('open');
     };
 
-    // Global Modal Close Handler
     document.querySelectorAll('.close, [data-close]').forEach(btn => {
         btn.addEventListener('click', () => {
             const target = btn.getAttribute('data-close') || btn.closest('.modal').id;
@@ -452,7 +446,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById("createCoinflipModal").classList.add("open");
     });
 
-    // POST Request to Join
     document.getElementById('confirmJoinBtn')?.addEventListener('click', async function() {
         if (joinSelection.length === 0) return alert("Please select items to join.");
         const btn = this;
@@ -479,7 +472,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // View Modal Logic with Accept Button for Creators
     document.querySelector('.coinflip-container')?.addEventListener('click', e => {
         const matchCard = e.target.closest('.match-card');
         if (!matchCard) return;
@@ -538,16 +530,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const actionArea = document.getElementById('viewModalActions');
             actionArea.innerHTML = `<button class="action-btn withdraw" id="viewModalCloseBtn">Close</button>`;
             
-            // Logic for buttons inside the View Modal
             if (isCreator && hasJoiner) {
-                // Creator viewing a match that someone joined -> SHOW ACCEPT
                 const acceptBtn = document.createElement('button');
                 acceptBtn.className = "action-btn deposit";
                 acceptBtn.innerText = "Accept Match";
                 acceptBtn.onclick = () => handleAccept(matchId);
                 actionArea.prepend(acceptBtn);
             } else if (!hasJoiner && !isCreator) {
-                // Random user viewing an empty match -> SHOW JOIN
                 const jBtn = document.createElement('button');
                 jBtn.className = "action-btn deposit";
                 jBtn.innerText = "Join Match";
@@ -558,7 +547,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 actionArea.prepend(jBtn);
             }
 
-            // Fixed Modal Close Logic
             document.getElementById('viewModalCloseBtn').onclick = () => {
                 document.getElementById('viewCoinflipModal').classList.remove('open');
             };
@@ -567,7 +555,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // POST Request to Accept
     async function handleAccept(matchId) {
         try {
             const response = await fetch('/AcceptMatch', {
