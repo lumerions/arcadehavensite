@@ -14,6 +14,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+import secrets
 
 place_id = 97090711812957
 
@@ -216,7 +217,7 @@ def towers(request: Request):
 def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
         return JSONResponse({"error": "SessionId missing"}, status_code=400)
-
+ 
     try:
         conn = getPostgresConnection() 
         with conn.cursor() as cursor:
@@ -228,6 +229,8 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
                 response = templates.TemplateResponse("register.html", {"request": request})
                 response.delete_cookie("SessionId")
                 return response
+            else:
+                 siteusername = result[1]
     
     except Exception as error:
         return templates.TemplateResponse(
@@ -244,7 +247,14 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
 
     Documents = list(Documents)
     if not Documents:
-        return templates.TemplateResponse("coinflip.html", {"request": request, "matches": []})
+        return templates.TemplateResponse(
+            "coinflip.html", 
+            {
+                "request": request, 
+                "matches": [], 
+                "username": siteusername
+            }
+        )
     
     UserIds = ",".join(str(v["UserId"]) for v in Documents if "UserId" in v)
     AssetIdParam = ",".join(str(item["itemid"]) for v in Documents for item in v.get("CoinflipItems", []))
@@ -285,7 +295,7 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
         v["items"] = [{"image": thumbnailsDict.get(int(item["itemid"]), "")} for item in CoinflipItems]
 
     return templates.TemplateResponse(
-        "coinflip.html", {"request": request, "matches": Documents}
+        "coinflip.html", {"request": request, "matches": Documents,"username": siteusername}
     )
 
 
@@ -1567,8 +1577,9 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
 
         if redirect_url:
             UserId = int(redirect_url.split("/")[4])
+            secrets.token_urlsafe(16)
             CoinflipCollection.update_one(
-                {"SessionId": SessionId, "Username": Username,"UserId": UserId,"Side":Side},
+                {"SessionId": SessionId, "Username": Username,"UserId": UserId,"Side":Side,"MatchId":Side},
                 { "$push": { "CoinflipItems": { "$each": coinflipData } } },
                 upsert=True 
             )
@@ -1636,6 +1647,142 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
             return JSONResponse({"success": True}, status_code=200)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
+
+
+@app.post("/AcceptMatch",response_class =  HTMLResponse)
+@limiter.limit("50/minute")
+async def AcceptMatch(request: Request, SessionId: str = Cookie(None)):
+    if not SessionId:
+        return {"error": "No cookie provided"}
+    
+    data = await request.json()
+    itemdata = data.get("itemdata")
+
+    try:
+        conn = getPostgresConnection() 
+
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
+
+            if result is None:
+                return {"error": "Invalid session"}
+
+            sitename = result[0]
+
+    except Exception as error:
+        return {"error": error}
+
+    SiteItemsCollection = getSiteItemsMongo()["collection"]
+
+    try:
+        document = SiteItemsCollection.find_one({"SessionId": SessionId})
+        if not document:
+            return JSONResponse({"error": "Unknown error"}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+    
+    itemsData = document["items"]
+    ItemsVerifiedCount = 0
+
+    for item_name, serials in itemdata.items():
+        for serial in serials:
+            for i,v in enumerate(itemsData):
+                if str(v["itemname"]) == str(item_name) and int(serial.replace("#","")) == int(v["serial"]):
+                    ItemsVerifiedCount += 1
+                    break
+
+    if ItemsVerifiedCount != len(itemdata):
+        return JSONResponse({"error": "Item verification failed!"}, status_code=400)
+    
+    print(itemdata)
+
+    launch_data = {
+        "sitename": str(sitename),
+        "sessionid": SessionId,
+        "items": itemdata,
+        "itemdeposit" : False
+    }
+
+    json_data = json.dumps(launch_data)
+    b64_data = base64.b64encode(json_data.encode()).decode()
+
+    roblox_url = (
+        f"https://www.roblox.com/games/start"
+        f"?placeId={place_id}"
+        f"&launchData={urllib.parse.quote(b64_data)}"
+    )
+
+    return JSONResponse({"redirect": roblox_url})
+
+
+
+@app.post("/JoinMatch",response_class =  HTMLResponse)
+@limiter.limit("50/minute")
+async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
+    if not SessionId:
+        return {"error": "No cookie provided"}
+    
+    data = await request.json()
+    itemdata = data.get("itemdata")
+
+    try:
+        conn = getPostgresConnection() 
+
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+            result = cursor.fetchone()  
+
+            if result is None:
+                return {"error": "Invalid session"}
+
+            sitename = result[0]
+
+    except Exception as error:
+        return {"error": error}
+
+    SiteItemsCollection = getSiteItemsMongo()["collection"]
+
+    try:
+        document = SiteItemsCollection.find_one({"SessionId": SessionId})
+        if not document:
+            return JSONResponse({"error": "Unknown error"}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"error": "Unknown error"}, status_code=400)
+    
+    itemsData = document["items"]
+    ItemsVerifiedCount = 0
+
+    for item_name, serials in itemdata.items():
+        for serial in serials:
+            for i,v in enumerate(itemsData):
+                if str(v["itemname"]) == str(item_name) and int(serial.replace("#","")) == int(v["serial"]):
+                    ItemsVerifiedCount += 1
+                    break
+
+    if ItemsVerifiedCount != len(itemdata):
+        return JSONResponse({"error": "Item verification failed!"}, status_code=400)
+    
+    print(itemdata)
+
+    launch_data = {
+        "sitename": str(sitename),
+        "sessionid": SessionId,
+        "items": itemdata,
+        "itemdeposit" : False
+    }
+
+    json_data = json.dumps(launch_data)
+    b64_data = base64.b64encode(json_data.encode()).decode()
+
+    roblox_url = (
+        f"https://www.roblox.com/games/start"
+        f"?placeId={place_id}"
+        f"&launchData={urllib.parse.quote(b64_data)}"
+    )
+
+    return JSONResponse({"redirect": roblox_url})
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True)
