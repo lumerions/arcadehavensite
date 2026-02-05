@@ -506,6 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalValueLabel = document.querySelector('#totalValue strong');
     const searchInput = document.getElementById('inventorySearch');
     let TotalValue = 0;
+    let ToWithdraw = {};
 
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.toLowerCase();
@@ -603,77 +604,63 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalValueLabel) totalValueLabel.textContent = `$${formatted}`;
     }
 
-    openInventoryBtn?.addEventListener('click', e => {
-        e.stopPropagation();
-        modal?.classList.remove('open');
-        inventoryModal?.classList.add('open');
-        TotalValue = 0
-        UpdateTotalValueLabel();
-        const grid = document.querySelector('.inventory-grid');
-        grid.replaceChildren(); 
-        async function FillGrid() {
-            try {
-                const response = await fetch('/GetInventory');
-                const data = await response.json(); 
+openInventoryBtn?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    modal?.classList.remove('open');
+    inventoryModal?.classList.add('open');
+    
+    TotalValue = 0;
+    ToWithdraw = {}; 
+    UpdateTotalValueLabel();
+    
+    const grid = document.querySelector('.inventory-grid');
+    grid.innerHTML = ''; 
 
-                data.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'inventory-item';
+    try {
+        const response = await fetch('/GetInventory');
+        const data = await response.json();
 
-                    div.innerHTML = `
-                        <div class="select-box"></div>
-                        <img src="${item.ImageUrl}">
-                        <span class="serial">#${item.serial}</span>
-                        <span class="name">${item.itemname}</span>
-                        <span class="value">${item.Value}</span>
-                    `;
-
-                    div.addEventListener('click', () => {
-                        const valueEl = div.querySelector('.value');
-                        const itemNameEl = div.querySelector('.name');
-                        const serialEl = div.querySelector('.serial');
-
-                        if (!valueEl || !itemNameEl || !serialEl) return;
-
-                        const itemName = itemNameEl.textContent;
-                        const serial = serialEl.textContent;
-
-                        const CleanedValue = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
-
-                        const isSelected = div.classList.contains('selected');
-
-                        div.classList.toggle('selected');
+        data.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'inventory-item';
             
-                        if (isSelected) {
-                            TotalValue -= CleanedValue;
-                            if (ToWithdraw[itemName]) {
-                                delete ToWithdraw[itemName][serial];
-                                if (Object.keys(ToWithdraw[itemName]).length === 0) {
-                                    delete ToWithdraw[itemName];
-                                }
-                            }
+            div.innerHTML = `
+                <div class="select-box"></div>
+                <img src="${item.ImageUrl}" alt="${item.itemname}">
+                <span class="serial">#${item.serial}</span>
+                <span class="name">${item.itemname}</span>
+                <span class="value">$${item.Value}</span>
+            `;
 
-                        } else {
-                            TotalValue += CleanedValue;
-                            if (!ToWithdraw[itemName]) ToWithdraw[itemName] = {};
-                            ToWithdraw[itemName][serial] = true;
+            div.addEventListener('click', () => {
+                const CleanedValue = parseFloat(item.Value) || 0;
+                const isSelected = div.classList.contains('selected');
+                
+                div.classList.toggle('selected');
+
+                if (isSelected) {
+                    TotalValue -= CleanedValue;
+                    if (ToWithdraw[item.itemname]) {
+                        delete ToWithdraw[item.itemname][item.serial];
+                        if (Object.keys(ToWithdraw[item.itemname]).length === 0) {
+                            delete ToWithdraw[item.itemname];
                         }
+                    }
+                } else {
+                    TotalValue += CleanedValue;
+                    if (!ToWithdraw[item.itemname]) ToWithdraw[item.itemname] = {};
+                    ToWithdraw[item.itemname][item.serial] = true;
+                }
+                UpdateTotalValueLabel();
+            });
 
-                        UpdateTotalValueLabel();
-                    });
-                    
-                    grid.appendChild(div);
-                });
-
-            } catch (error) {
-                console.error('Error fetching', error);
-            }
-        }
-
-        FillGrid();
-    });
-
-    ToWithdraw = {}
+            grid.appendChild(div);
+        });
+    } catch (error) {
+        console.error('Error fetching inventory:', error);
+        grid.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">Failed to load items.</p>';
+    }
+});
 
     inventoryActionBtn?.addEventListener('click', async e => {
         if (inventoryActionBtn.textContent === 'Initiate Deposit') {
@@ -764,16 +751,6 @@ document.addEventListener('DOMContentLoaded', () => {
         link.classList.remove('active');
         if (link.getAttribute('href') === currentPath) link.classList.add('active');
     });
-
-    document.querySelectorAll('.inventory-item').forEach(item => {
-        item.addEventListener('click', e => {
-            e.stopPropagation();
-
-            console.log(ToWithdraw)
-
-        });
-    });
-
 
     UpdateTotalValueLabel();
 });
