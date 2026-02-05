@@ -394,13 +394,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentUsername = "{{ username }}"; 
 
     let globalInventory = [];
-    let createSelection = [];
-    let joinSelection = [];
+    let createSelection = []; // Stores strings like "ItemName#Serial"
+    let joinSelection = [];   // Stores strings like "ItemName#Serial"
     let activeMatchId = null;
+
+    // Helper to find item object by formatted ID
+    const getItemFromId = (formattedId) => {
+        const [name, serial] = formattedId.split('#');
+        return globalInventory.find(i => String(i.itemname) === name && String(i.serial) === serial);
+    };
 
     const updateStats = (prefix, selection) => {
         const totalItems = selection.length;
-        const totalValue = selection.reduce((sum, item) => sum + (parseFloat(item.Value) || 0), 0);
+        const totalValue = selection.reduce((sum, id) => {
+            const item = getItemFromId(id);
+            return sum + (item ? parseFloat(item.Value) : 0);
+        }, 0);
+        
         document.getElementById(`${prefix}TotalItems`).textContent = totalItems;
         document.getElementById(`${prefix}TotalValue`).textContent = `$${totalValue.toFixed(2)}`;
     };
@@ -410,13 +420,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!grid) return;
         grid.innerHTML = '';
         globalInventory.forEach(item => {
+            const itemIdentifier = `${item.itemname}#${item.serial}`;
             const div = document.createElement('div');
-            div.className = `inventory-item ${selectionArr.some(i => i.itemid === item.itemid) ? 'selected' : ''}`;
-            div.innerHTML = `<img src="${item.ImageUrl}" style="width:40px;height:40px;object-fit:contain;"><div style="font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.itemname}</div><div class="item-val">$${item.Value}</div>`;
+            div.className = `inventory-item ${selectionArr.includes(itemIdentifier) ? 'selected' : ''}`;
+            div.innerHTML = `
+                <img src="${item.ImageUrl}" style="width:40px;height:40px;object-fit:contain;">
+                <div style="font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.itemname}</div>
+                <div class="item-val">$${item.Value}</div>
+            `;
+            
             div.onclick = () => {
-                const index = selectionArr.findIndex(i => i.itemid === item.itemid);
+                const index = selectionArr.indexOf(itemIdentifier);
                 if(index > -1) selectionArr.splice(index, 1);
-                else selectionArr.push(item);
+                else selectionArr.push(itemIdentifier);
+                
                 div.classList.toggle('selected');
                 updateStats(prefix, selectionArr);
             };
@@ -432,6 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('joinCoinflipModal').classList.add('open');
     };
 
+    // Close Modals
     document.querySelectorAll('.close, [data-close]').forEach(btn => {
         btn.addEventListener('click', () => {
             const target = btn.getAttribute('data-close') || btn.closest('.modal').id;
@@ -439,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Create Match Button Click
     document.getElementById("createMatchBtn")?.addEventListener("click", () => {
         createSelection = [];
         updateStats('create', createSelection);
@@ -446,6 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById("createCoinflipModal").classList.add("open");
     });
 
+    // Confirm Join Button Click
     document.getElementById('confirmJoinBtn')?.addEventListener('click', async function() {
         if (joinSelection.length === 0) return alert("Please select items to join.");
         const btn = this;
@@ -458,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     matchId: activeMatchId,
-                    items: joinSelection.map(i => i.itemid)
+                    items: joinSelection // Sends array of "ItemName#Serial"
                 })
             });
             const result = await response.json();
@@ -472,6 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Match Card Interactions (Join/View)
     document.querySelector('.coinflip-container')?.addEventListener('click', e => {
         const matchCard = e.target.closest('.match-card');
         if (!matchCard) return;
