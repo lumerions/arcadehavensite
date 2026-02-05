@@ -361,14 +361,16 @@
 
     <div class="coinflip-container">
         {% for match in matches %}
-        <div class="match-card" data-id="{{ match.id }}" data-side="{{ match.side }}">
+        <div class="match-card" data-id="{{ match.id }}" data-side="{{ match.side }}" data-total-value="{{ match.total_value|round(2) }}">
             <div class="players">
-                <div class="player">
+                <div class="player" data-username="{{ match.player1.username }}">
                     <div class="side-badge">{{ "🪙" if match.side == "Heads" else "💰" }}</div>
                     <img class="player-avatar" src="{{ match.player1.avatar }}">
                 </div>
+                
                 <div class="vs-text">VS</div>
-                <div class="player">
+                
+                <div class="player" data-username="{{ match.player2.username }}">
                     {% if match.player2.username != "" %}
                         <div class="side-badge">{{ "💰" if match.side == "Heads" else "🪙" }}</div>
                         <img class="player-avatar" src="{{ match.player2.avatar }}">
@@ -393,6 +395,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Identity Check: Make sure your backend passes 'username' variable
+    const currentUsername = "{{ username }}"; 
+
     let globalInventory = [];
     let createSelection = [];
     let joinSelection = [];
@@ -432,11 +437,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('joinCoinflipModal').classList.add('open');
     };
 
-    // Close logic for all modals
+    // Global Modal Close Handler
     document.querySelectorAll('.close, [data-close]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const modalId = btn.getAttribute('data-close') || btn.closest('.modal').id;
-            document.getElementById(modalId).classList.remove('open');
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-close') || btn.closest('.modal').id;
+            document.getElementById(target).classList.remove('open');
         });
     });
 
@@ -447,10 +452,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById("createCoinflipModal").classList.add("open");
     });
 
-    // Confirm Join Logic (POST Request)
+    // POST Request to Join
     document.getElementById('confirmJoinBtn')?.addEventListener('click', async function() {
         if (joinSelection.length === 0) return alert("Please select items to join.");
-        
         const btn = this;
         btn.disabled = true;
         btn.innerText = "Joining...";
@@ -464,15 +468,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     items: joinSelection.map(i => i.itemid)
                 })
             });
-
             const result = await response.json();
-            if (result.success) {
-                location.reload();
-            } else {
-                alert(result.error || "Failed to join match.");
-            }
+            if (result.success) location.reload();
+            else alert(result.error || "Failed to join match.");
         } catch (e) {
-            console.error(e);
             alert("An error occurred.");
         } finally {
             btn.disabled = false;
@@ -480,6 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // View Modal Logic with Accept Button for Creators
     document.querySelector('.coinflip-container')?.addEventListener('click', e => {
         const matchCard = e.target.closest('.match-card');
         if (!matchCard) return;
@@ -489,48 +489,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (e.target.classList.contains('view-btn')) {
+            const matchId = matchCard.dataset.id;
             const p1Side = matchCard.dataset.side;
-            const players = matchCard.querySelectorAll('.player');
-            const items = matchCard.querySelectorAll('.preview-item img');
-            const hasP2 = !matchCard.querySelector('.empty-avatar-placeholder');
+            const totalVal = matchCard.dataset.totalValue;
             
-            let html = `<div style="display:flex;justify-content:center;align-items:center;gap:25px;margin-bottom:20px;">`;
-            players.forEach((p, idx) => {
-                const avatar = p.querySelector('.player-avatar');
+            const p1Node = matchCard.querySelector('.player:first-child');
+            const p2Node = matchCard.querySelector('.player:last-child');
+            
+            const p1User = p1Node.getAttribute('data-username');
+            const p2User = p2Node.getAttribute('data-username');
+            
+            const isCreator = (p1User === currentUsername);
+            const hasJoiner = (p2User && p2User !== "");
+            
+            let html = `
+                <div style="text-align:center; margin-bottom: 15px; color: #22c55e; font-weight: bold;">
+                    Match Value: $${totalVal}
+                </div>
+                <div style="display:flex;justify-content:center;align-items:center;gap:25px;margin-bottom:20px;">
+            `;
+
+            [p1Node, p2Node].forEach((p, idx) => {
+                const avatar = p.querySelector('.player-avatar')?.src;
                 const isEmpty = p.querySelector('.empty-avatar-placeholder');
+                const username = p.getAttribute('data-username') || "Waiting...";
                 const sideIcon = (idx === 0) ? (p1Side === "Heads" ? "🪙" : "💰") : (p1Side === "Heads" ? "💰" : "🪙");
+                
                 if (isEmpty) {
-                    html += `<div class="player"><div class="empty-avatar-placeholder" style="width:70px;height:70px;"></div></div>`;
+                    html += `<div class="player"><div class="empty-avatar-placeholder" style="width:70px;height:70px;"></div><div style="font-size: 0.7rem; margin-top:5px; color:#666;">Waiting...</div></div>`;
                 } else {
-                    html += `<div class="player">
-                                <div class="side-badge" style="width:24px;height:24px;font-size:0.7rem;">${sideIcon}</div>
-                                <img src="${avatar.src}" class="player-avatar" style="width:70px;height:70px;">
-                             </div>`;
+                    html += `
+                        <div class="player">
+                            <div class="side-badge" style="width:24px;height:24px;font-size:0.7rem;">${sideIcon}</div>
+                            <img src="${avatar}" class="player-avatar" style="width:70px;height:70px;">
+                            <div style="font-size: 0.75rem; margin-top: 5px; color: #94a3b8;">${username}</div>
+                        </div>`;
                 }
                 if(idx === 0) html += `<div class="vs-text" style="font-size:1rem;">VS</div>`;
             });
+            
             html += `</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;border-top:1px solid #333;padding-top:20px;">`;
-            items.forEach(img => html += `<div class="preview-item" style="width:45px;height:45px;"><img src="${img.src}"></div>`);
+            matchCard.querySelectorAll('.preview-item img').forEach(img => {
+                html += `<div class="preview-item" style="width:45px;height:45px;"><img src="${img.src}"></div>`;
+            });
             html += `</div>`;
 
             document.getElementById('viewCoinflipContent').innerHTML = html;
-            
             const actionArea = document.getElementById('viewModalActions');
-            // Explicitly set up buttons for View Modal
             actionArea.innerHTML = `<button class="action-btn withdraw" id="viewModalCloseBtn">Close</button>`;
             
-            if (!hasP2) {
+            // Logic for buttons inside the View Modal
+            if (isCreator && hasJoiner) {
+                // Creator viewing a match that someone joined -> SHOW ACCEPT
+                const acceptBtn = document.createElement('button');
+                acceptBtn.className = "action-btn deposit";
+                acceptBtn.innerText = "Accept Match";
+                acceptBtn.onclick = () => handleAccept(matchId);
+                actionArea.prepend(acceptBtn);
+            } else if (!hasJoiner && !isCreator) {
+                // Random user viewing an empty match -> SHOW JOIN
                 const jBtn = document.createElement('button');
                 jBtn.className = "action-btn deposit";
                 jBtn.innerText = "Join Match";
                 jBtn.onclick = () => {
                     document.getElementById('viewCoinflipModal').classList.remove('open');
-                    openJoinModal(matchCard.dataset.id);
+                    openJoinModal(matchId);
                 };
                 actionArea.prepend(jBtn);
             }
 
-            // Fixed View Modal Close Button
+            // Fixed Modal Close Logic
             document.getElementById('viewModalCloseBtn').onclick = () => {
                 document.getElementById('viewCoinflipModal').classList.remove('open');
             };
@@ -539,15 +567,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // POST Request to Accept
+    async function handleAccept(matchId) {
+        try {
+            const response = await fetch('/AcceptMatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchId: matchId })
+            });
+            const result = await response.json();
+            if (result.success) location.reload();
+            else alert(result.error || "Failed to accept match.");
+        } catch (e) {
+            alert("An error occurred.");
+        }
+    }
+
     async function fetchInventory() {
         try {
             const res = await fetch('/GetInventory');
             globalInventory = await res.json();
         } catch (e) {
-            globalInventory = [
-                { itemid: "1", itemname: "Knife | Doppler", Value: "450.00", ImageUrl: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJf1f_BYi5G09-5lZKKm_L1I7fUqWdY781lxL2R99uk0VHt_0VvMT30I9SccVNoYV_T_ge6lL3o1oj84sqfV9fHrg/360fx360f" },
-                { itemid: "2", itemname: "AK-47 | Vulcan", Value: "120.00", ImageUrl: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5gZKKk_L1I7fUqWdY781lxL3Co9SgjAew_0pqYmGhcY_BclA6ZAnY_VW5l-m6h5S6vJ_NynM3u3Y8pSGKEnpAunM/360fx360f" }
-            ];
+            globalInventory = [];
         }
     }
     fetchInventory();
