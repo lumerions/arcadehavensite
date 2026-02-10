@@ -1378,35 +1378,35 @@ def buycurrency(request: Request):
                 mainMongo = getMainMongo()
                 mainCollection = mainMongo["collection"]
                 OrderId = payload.get("order_id",None)
-                Split = "_;"
-                splitData = str(OrderId).split("_;")
-                SiteUserName = str(splitData[1])
-
-                try:
-                    conn = getPostgresConnection() 
-
-                    with conn.cursor() as cursor:
-                        cursor.execute("SELECT sessionid FROM accounts WHERE username = %s", (SiteUserName,))
-
-                        result = cursor.fetchone()  
-
-                        if not result:
-                            return {"status": "ok"}
-
-                        CurrentSessionId = str(result[0])
-
-                except Exception as error:
-                    print("Error:", error)
-
-                newDocument = mainCollection.find_one_and_update(
-                    {"username": SiteUserName, "sessionid": CurrentSessionId},
-                    {"$inc": {"balance": int(CurrencyAmount)}},
-                    return_document = ReturnDocument.AFTER,
-                    upsert=True
-                )
-
-                newBalance = int(newDocument["balance"])
-                redis.set(CurrentSessionId,newBalance,ex = 2628000)
+                if OrderId:
+                    splitData = str(OrderId).split("_;")
+                    SiteUserName = str(splitData[1])
+    
+                    try:
+                        conn = getPostgresConnection() 
+    
+                        with conn.cursor() as cursor:
+                            cursor.execute("SELECT sessionid FROM accounts WHERE username = %s", (SiteUserName,))
+    
+                            result = cursor.fetchone()  
+    
+                            if not result:
+                                return {"status": "ok"}
+    
+                            CurrentSessionId = str(result[0])
+    
+                    except Exception as error:
+                        print("Error:", error)
+    
+                    newDocument = mainCollection.find_one_and_update(
+                        {"username": SiteUserName, "sessionid": CurrentSessionId},
+                        {"$inc": {"balance": int(CurrencyAmount)}},
+                        return_document = ReturnDocument.AFTER,
+                        upsert=True
+                    )
+    
+                    newBalance = int(newDocument["balance"])
+                    redis.set(CurrentSessionId,newBalance,ex = 2628000)
             else:
                 print(f"Payment too small: ${amount_usd}, not credited.")
     except Exception as e:
