@@ -1371,8 +1371,7 @@ def buycurrency(request: Request):
             user_id = payload.get("order_id")  
             amount_received = float(payload.get("pay_amount", 0))  
             amount_usd = float(payload.get("price_amount", 0))    
-
-            CurrencyAmount  = math.floor(amount_usd / 2.25)
+            CurrencyAmount  = math.floor(amount_usd) * 29000000
 
             if amount_usd >= 1:
 
