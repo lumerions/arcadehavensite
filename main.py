@@ -659,7 +659,7 @@ def depositearnings(request : Request,data: DepositItems):
     collection = database["cp"]
 
     if data.Deposit:
-        getInventoryUrl =  "https://express-js-on-vercel-blue-sigma.vercel.app/GetInventory?id=" + str(data.userid)
+        getInventoryUrl =  "" + str(data.userid)
         Response = requests.get(getInventoryUrl)
         decodedResponse = Response.json()
         DataGet = decodedResponse.get("data")
