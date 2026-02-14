@@ -1793,56 +1793,58 @@ async def AcceptMatch(request: Request, SessionId: str = Cookie(None)):
 @app.post("/JoinMatch",response_class =  HTMLResponse)
 @limiter.limit("500/minute")
 async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
-    if not SessionId:
-        return {"error": "No cookie provided"}
-    
-    data = await request.json()
-    print(data)
-
-    itemdata = data.get("items", [])
-
-    if not itemdata:
-        return JSONResponse({"error": "No items provided"}, status_code=400)
-
     try:
-        conn = getPostgresConnection() 
+        if not SessionId:
+            return {"error": "No cookie provided"}
+        
+        data = await request.json()
+        print(data)
 
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
-            result = cursor.fetchone()  
+        itemdata = data.get("items", [])
 
-            if result is None:
-                return {"error": "Invalid session"}
+        if not itemdata:
+            return JSONResponse({"error": "No items provided"}, status_code=400)
 
-            sitename = result[0]
+        try:
+            conn = getPostgresConnection() 
 
-    except Exception as error:
-        return {"error": error}
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username FROM accounts WHERE sessionid = %s", (SessionId,))
+                result = cursor.fetchone()  
 
-    SiteItemsCollection = getSiteItemsMongo()["collection"]
+                if result is None:
+                    return {"error": "Invalid session"}
 
-    try:
-        document = SiteItemsCollection.find_one({"SessionId": SessionId})
-        if not document:
+                sitename = result[0]
+
+        except Exception as error:
+            return {"error": error}
+
+        SiteItemsCollection = getSiteItemsMongo()["collection"]
+
+        try:
+            document = SiteItemsCollection.find_one({"SessionId": SessionId})
+            if not document:
+                return JSONResponse({"error": "Unknown error"}, status_code=400)
+        except Exception as e:
             return JSONResponse({"error": "Unknown error"}, status_code=400)
+        
+        itemsData = document["items"]
+        ItemsVerifiedCount = 0
+
+        for item_name, serials in itemdata.items():
+            for serial in serials:
+                for i,v in enumerate(itemsData):
+                    if str(v["itemname"]) == str(item_name) and int(serial.replace("#","")) == int(v["serial"]):
+                        ItemsVerifiedCount += 1
+                        break
+
+        if ItemsVerifiedCount != len(itemdata):
+            return JSONResponse({"error": "Item verification failed!"}, status_code=400)
+        
+        print(itemdata)
     except Exception as e:
-        return JSONResponse({"error": "Unknown error"}, status_code=400)
-    
-    itemsData = document["items"]
-    ItemsVerifiedCount = 0
-
-    for item_name, serials in itemdata.items():
-        for serial in serials:
-            for i,v in enumerate(itemsData):
-                if str(v["itemname"]) == str(item_name) and int(serial.replace("#","")) == int(v["serial"]):
-                    ItemsVerifiedCount += 1
-                    break
-
-    if ItemsVerifiedCount != len(itemdata):
-        return JSONResponse({"error": "Item verification failed!"}, status_code=400)
-    
-    print(itemdata)
-
+        return JSONResponse({"error" : str(e)})
 
     return JSONResponse({"success": True})
 
