@@ -1723,7 +1723,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 
 @app.post("/AcceptMatch",response_class =  HTMLResponse)
-@limiter.limit("50/minute")
+@limiter.limit("500/minute")
 async def AcceptMatch(request: Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
@@ -1791,7 +1791,7 @@ async def AcceptMatch(request: Request, SessionId: str = Cookie(None)):
 
 
 @app.post("/JoinMatch",response_class =  HTMLResponse)
-@limiter.limit("50/minute")
+@limiter.limit("500/minute")
 async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
