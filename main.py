@@ -1798,7 +1798,7 @@ async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
     
     data = await request.json()
     print(data)
-    itemdata = data.get("itemdata")
+    itemdata = data.get("items")
 
     try:
         conn = getPostgresConnection() 
