@@ -1804,6 +1804,11 @@ async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
 
         if not itemdata:
             return JSONResponse({"error": "No items provided"}, status_code=400)
+                
+        for item in itemdata:
+            if "#" in item:
+                name, serial = item.split("#")
+                itemdata[name] = [serial]
 
         try:
             conn = getPostgresConnection() 
@@ -1835,7 +1840,7 @@ async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
         for item_name, serials in itemdata.items():
             for serial in serials:
                 for i,v in enumerate(itemsData):
-                    if str(v["itemname"]) == str(item_name) and int(serial.replace("#","")) == int(v["serial"]):
+                    if str(v["itemname"]) == str(item_name) and int(serial) == int(v["serial"]):
                         ItemsVerifiedCount += 1
                         break
 
