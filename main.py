@@ -18,7 +18,6 @@ import secrets
 import hashlib
 
 place_id = 97090711812957
-NOWPAYMENTS_WEBHOOK_SECRET = "/adA+ZQs/8aZPVdsW6bNwFl+l+VXEoVJ"
 
 app = FastAPI(
     title="AH Gambling",
@@ -1347,74 +1346,6 @@ def cashout(request: Request,SessionId: str = Cookie(None)):
     return JSONResponse({"success": True, "amount": tocashout,"mines": mines,"betamount":betamount})
 
 
-@app.post("/crypto/buy")
-@limiter.limit("50/minute")
-def buycurrency(request: Request):
-
-    try:
-        body_bytes = request.body()
-        signature = request.headers.get("x-nowpayments-sig", "")
-
-        expected_signature = hmac.new(
-            NOWPAYMENTS_WEBHOOK_SECRET.encode().strip(),
-            body_bytes,
-            hashlib.sha512
-        ).hexdigest()
-
-        if not hmac.compare_digest(signature, expected_signature):
-            return {"status": "ignored", "reason": "invalid signature"}
-
-        payload = json.loads(body_bytes)
-
-
-        if payload.get("payment_status") == "finished":
-            user_id = payload.get("order_id")  
-            amount_received = float(payload.get("pay_amount", 0))  
-            amount_usd = float(payload.get("price_amount", 0))    
-            CurrencyAmount  = math.floor(amount_usd) * 29000000
-
-            if amount_usd >= 1:
-
-                mainMongo = getMainMongo()
-                mainCollection = mainMongo["collection"]
-                OrderId = payload.get("order_id",None)
-                if OrderId:
-                    splitData = str(OrderId).split("_;")
-                    SiteUserName = str(splitData[1])
-    
-                    try:
-                        conn = getPostgresConnection() 
-    
-                        with conn.cursor() as cursor:
-                            cursor.execute("SELECT sessionid FROM accounts WHERE username = %s", (SiteUserName,))
-    
-                            result = cursor.fetchone()  
-    
-                            if not result:
-                                return {"status": "ok"}
-    
-                            CurrentSessionId = str(result[0])
-    
-                    except Exception as error:
-                        print("Error:", error)
-    
-                    newDocument = mainCollection.find_one_and_update(
-                        {"username": SiteUserName, "sessionid": CurrentSessionId},
-                        {"$inc": {"balance": int(CurrencyAmount)}},
-                        return_document = ReturnDocument.AFTER,
-                        upsert=True
-                    )
-    
-                    newBalance = int(newDocument["balance"])
-                    redis.set(CurrentSessionId,newBalance,ex = 2628000)
-            else:
-                print(f"Payment too small: ${amount_usd}, not credited.")
-    except Exception as e:
-        print("Error:", e)
-
-    return {"status": "ok"}
-
-
 
 @app.post("/register", response_class=HTMLResponse)
 @limiter.limit("50/minute")
@@ -1723,7 +1654,7 @@ async def cancelCoinflip(request : Request,SessionId: str = Cookie(None)):
 
 
 @app.post("/AcceptMatch",response_class =  HTMLResponse)
-@limiter.limit("500/minute")
+@limiter.limit("50/minute")
 async def AcceptMatch(request: Request, SessionId: str = Cookie(None)):
     if not SessionId:
         return {"error": "No cookie provided"}
@@ -1791,7 +1722,7 @@ async def AcceptMatch(request: Request, SessionId: str = Cookie(None)):
 
 
 @app.post("/JoinMatch",response_class =  HTMLResponse)
-@limiter.limit("500/minute")
+@limiter.limit("50/minute")
 async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
     try:
         if not SessionId:
