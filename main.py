@@ -1798,7 +1798,11 @@ async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
     
     data = await request.json()
     print(data)
-    itemdata = data.get("items")
+
+    itemdata = data.get("items", [])
+
+    if not itemdata:
+        return JSONResponse({"error": "No items provided"}, status_code=400)
 
     try:
         conn = getPostgresConnection() 
