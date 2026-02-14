@@ -1642,7 +1642,7 @@ async def CreateCoinflip(request : Request,SessionId: str = Cookie(None)):
             return JSONResponse({"error": "Coinflip already exists!"}, status_code=400)
     except Exception as e:
         return JSONResponse({"error": "Unknown error"}, status_code=400)
-#
+
     try:
         url = f"https://www.roblox.com/users/profile?username={RobloxUsername}"
         response = requests.get(url, allow_redirects=False)  
@@ -1797,6 +1797,7 @@ async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
         return {"error": "No cookie provided"}
     
     data = await request.json()
+    print(data)
     itemdata = data.get("itemdata")
 
     try:
@@ -1838,23 +1839,8 @@ async def JoinMatch(request: Request, SessionId: str = Cookie(None)):
     
     print(itemdata)
 
-    launch_data = {
-        "sitename": str(sitename),
-        "sessionid": SessionId,
-        "items": itemdata,
-        "itemdeposit" : False
-    }
 
-    json_data = json.dumps(launch_data)
-    b64_data = base64.b64encode(json_data.encode()).decode()
-
-    roblox_url = (
-        f"https://www.roblox.com/games/start"
-        f"?placeId={place_id}"
-        f"&launchData={urllib.parse.quote(b64_data)}"
-    )
-
-    return JSONResponse({"redirect": roblox_url})
+    return JSONResponse({"success": True})
 
 
 if __name__ == "__main__":
